@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Cake.Tasks.Module</AssemblyName>
+    <RootNamespace>Cake.Tasks.Module</RootNamespace>
+    <DocumentationFile>Properties\$(AssemblyName).xml</DocumentationFile>
+    <Description>Cake tasks module</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cake.Common" Version="0.34.1" />
+    <PackageReference Include="Cake.Core" Version="0.34.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
+  </ItemGroup>
+
+</Project>
