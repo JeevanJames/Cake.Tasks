@@ -1,5 +1,5 @@
-#addin nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.Core&version=1.0.0-build.6&prerelease
-#addin nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.DotNetCore&version=1.0.0-build.6&prerelease
+#addin nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.Core&version=1.0.0-build.7&prerelease
+#addin nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.DotNetCore&version=1.0.0-build.7&prerelease
 
 var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release");
@@ -10,16 +10,16 @@ Setup(ctx =>
    Information("Running tasks...");
 });
 
-Teardown(ctx =>
-{
-   // Executed AFTER the last task.
-   Information("Finished running tasks.");
-});
+// Teardown(ctx =>
+// {
+//    // Executed AFTER the last task.
+//    Information("Finished running tasks.");
+// });
 
-Task("Default")
-.IsDependentOn("Build")
-.Does(() => {
-   Information("Hello Cake!");
-});
+// Task("Default")
+// .IsDependentOn("Build")
+// .Does(() => {
+//    Information("Hello Cake!");
+// });
 
 RunTarget(target);

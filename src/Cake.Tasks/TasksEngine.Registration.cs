@@ -43,7 +43,10 @@ namespace Cake.Tasks.Module
 
         private void RegisterConfiguration()
         {
-            RegisterSetupAction(_ => new TaskConfig());
+            RegisterSetupAction(ctx =>
+            {
+                return new TaskConfig();
+            });
         }
 
         private void FindPluginPackages()
