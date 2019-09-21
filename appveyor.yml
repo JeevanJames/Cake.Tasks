@@ -1,0 +1,16 @@
+version: 1.0.0-build.{build}
+image: Visual Studio 2019
+environment:
+  MYGET_FEED: https://www.myget.org/F/cake-tasks/api/v2/package
+  MYGET_APIKEY:
+    secure: 3tEiaoqZlTJcJkAX+3wWyp3mbCYuJpALEFzTEaum6ACiXbWgsa1kWYGBi3TUFY7c
+  MYGET_SYMBOLS_FEED: https://www.myget.org/F/cake-tasks/symbols/api/v2/package
+  MYGET_SYMBOLS_APIKEY:
+    secure: 3tEiaoqZlTJcJkAX+3wWyp3mbCYuJpALEFzTEaum6ACiXbWgsa1kWYGBi3TUFY7c
+build_script:
+- pwsh: ./.build/build.ps1
+test_script:
+- pwsh: ./.build/test.ps1
+- pwsh: ./.build/cc-codecov.ps1
+deploy_script:
+- pwsh: ./.build/deploy.ps1
