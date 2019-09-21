@@ -22,8 +22,23 @@ namespace Cake.Tasks.Module
             _addinsPath = Path.GetFullPath(Context.Configuration.GetValue("Paths_AddIns"));
             Log.Verbose($"Searching addins path: {_addinsPath}");
 
+            RegisterDefaultTask();
             RegisterConfiguration();
             FindPluginPackages();
+        }
+
+        private void RegisterDefaultTask()
+        {
+            RegisterTask("Default")
+                .Does(context =>
+                {
+                    foreach (ICakeTaskInfo task in Tasks)
+                    {
+                        context.Log.Information(task.Name);
+                        if (!string.IsNullOrWhiteSpace(task.Description))
+                            context.Log.Information($"    {task.Description}");
+                    }
+                });
         }
 
         private void RegisterConfiguration()
@@ -70,18 +85,17 @@ namespace Cake.Tasks.Module
                     {
                         case CoreTaskAttribute attr:
                             Log.Verbose($"[Core Task] {attr.CoreTaskName} ({env})");
-                            var taskAction = (Action<ICakeContext>)method.CreateDelegate(typeof(Action<ICakeContext>));
-                            RegisterTask(attr.CoreTaskName)
-                                .Does(taskAction);
+                            var taskAction = (Action<ICakeContext, TaskConfig>)method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
+                            RegisterTask(attr.CoreTaskName).Does(taskAction);
                             break;
                         case PreTaskAttribute attr:
                             Log.Verbose($"[Pre Task]  {attr.CoreTaskName} - {attr.Name} ({env})");
-                            var preTaskAction = (Action<ICakeContext>)method.CreateDelegate(typeof(Action<ICakeContext>));
+                            var preTaskAction = (Action<ICakeContext, TaskConfig>)method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
                             RegisterTask($"Before{attr.CoreTaskName}_{attr.Name}").Does(preTaskAction);
                             break;
                         case PostTaskAttribute attr:
                             Log.Verbose($"[Post Task] {attr.CoreTaskName} - {attr.Name} ({env})");
-                            var postTaskAction = (Action<ICakeContext>)method.CreateDelegate(typeof(Action<ICakeContext>));
+                            var postTaskAction = (Action<ICakeContext, TaskConfig>)method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
                             RegisterTask($"After{attr.CoreTaskName}_{attr.Name}").Does(postTaskAction);
                             break;
                     }
