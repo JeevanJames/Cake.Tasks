@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Tasks.Core;
 
@@ -19,20 +20,29 @@ namespace Cake.Tasks.Module
             AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
 
             _addinsPath = Path.GetFullPath(Context.Configuration.GetValue("Paths_AddIns"));
-            Log.Information($"Searching addins path: {_addinsPath}");
+            Log.Verbose($"Searching addins path: {_addinsPath}");
 
+            RegisterConfiguration();
+            FindPluginPackages();
+        }
+
+        private void RegisterConfiguration()
+        {
+            RegisterSetupAction(_ => new TaskConfig());
+        }
+
+        private void FindPluginPackages()
+        {
             string[] cakeTasksDirs = Directory.GetDirectories(_addinsPath, "Cake.Tasks.*", SearchOption.TopDirectoryOnly);
             foreach (string cakeTasksDir in cakeTasksDirs)
             {
-                Log.Information($"  Found plugin {Path.GetFileName(cakeTasksDir)}");
+                Log.Verbose($"[Plugin Dir] {Path.GetFileName(cakeTasksDir)}");
 
                 string dllDir = Path.Combine(cakeTasksDir, "lib", "netstandard2.0");
                 string[] dllFiles = Directory.GetFiles(dllDir, "*.dll", SearchOption.TopDirectoryOnly);
 
                 foreach (string dllFile in dllFiles)
-                {
                     FindPlugins(dllFile);
-                }
             }
         }
 
@@ -42,36 +52,63 @@ namespace Cake.Tasks.Module
             IEnumerable<TaskPluginAttribute> taskPlugins = assembly.GetCustomAttributes<TaskPluginAttribute>();
             foreach (TaskPluginAttribute taskPlugin in taskPlugins)
             {
-                Log.Information($"    Found plugin");
                 Type taskPluginType = taskPlugin.PluginType;
-                MethodInfo[] methods = taskPluginType.GetMethods(BindingFlags.Static | BindingFlags.Instance);
+                Log.Verbose($"[Plugin Class] {taskPluginType.FullName}");
+                MethodInfo[] methods = taskPluginType.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public);
                 foreach (MethodInfo method in methods)
                 {
                     TaskAttribute taskAttribute = method.GetCustomAttribute<TaskAttribute>(inherit: true);
                     if (taskAttribute is null)
                         continue;
+                    if (!IsValidPluginMethod(method, taskAttribute))
+                        continue;
+
+                    Log.Verbose($"[Plugin Method] {taskPluginType.FullName}.{method.Name}");
 
                     string env = taskAttribute.Environment ?? "<No Env>";
                     switch (taskAttribute)
                     {
                         case CoreTaskAttribute attr:
-                            Log.Information($"    Core Task {attr.CoreTaskName} ({env})");
+                            Log.Verbose($"[Core Task] {attr.CoreTaskName} ({env})");
+                            var taskAction = (Action<ICakeContext>)method.CreateDelegate(typeof(Action<ICakeContext>));
+                            RegisterTask(attr.CoreTaskName)
+                                .Does(taskAction);
                             break;
                         case PreTaskAttribute attr:
-                            Log.Information($"    Pre Task {attr.CoreTaskName} - {attr.Name} ({env})");
+                            Log.Verbose($"[Pre Task]  {attr.CoreTaskName} - {attr.Name} ({env})");
+                            var preTaskAction = (Action<ICakeContext>)method.CreateDelegate(typeof(Action<ICakeContext>));
+                            RegisterTask($"Before{attr.CoreTaskName}_{attr.Name}").Does(preTaskAction);
                             break;
                         case PostTaskAttribute attr:
-                            Log.Information($"    Post Task {attr.CoreTaskName} - {attr.Name} ({env})");
-                            break;
-                        case SetupAttribute attr:
-                            Log.Information($"    Setup ({env})");
-                            break;
-                        case TearDownAttribute attr:
-                            Log.Information($"    Tear down ({env})");
+                            Log.Verbose($"[Post Task] {attr.CoreTaskName} - {attr.Name} ({env})");
+                            var postTaskAction = (Action<ICakeContext>)method.CreateDelegate(typeof(Action<ICakeContext>));
+                            RegisterTask($"After{attr.CoreTaskName}_{attr.Name}").Does(postTaskAction);
                             break;
                     }
                 }
             }
+        }
+
+        private bool IsValidPluginMethod(MethodInfo method, TaskAttribute attribute)
+        {
+            ParameterInfo[] parameters = method.GetParameters();
+            switch (attribute)
+            {
+                case CoreTaskAttribute _:
+                case PreTaskAttribute _:
+                case PostTaskAttribute _:
+                    if (parameters.Length != 2)
+                        return false;
+                    if (!typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType))
+                        return false;
+                    if (parameters[1].ParameterType != typeof(TaskConfig))
+                        return false;
+                    if (method.ReturnType != typeof(void))
+                        return false;
+                    return true;
+            }
+
+            return true;
         }
 
         private Assembly ResolveAssembly(object sender, ResolveEventArgs args)
@@ -80,7 +117,7 @@ namespace Cake.Tasks.Module
             string assemblyPath = Directory
                 .GetFiles(_addinsPath, $"{assemblyName.Name}.dll", SearchOption.AllDirectories)
                 .FirstOrDefault();
-            Log.Information($"    Looking for {assemblyName.Name}.dll");
+            Log.Verbose($"[Assembly Lookup] {assemblyName.Name}.dll");
             return Assembly.LoadFile(assemblyPath);
         }
     }
