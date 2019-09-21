@@ -42,6 +42,7 @@ namespace Cake.Tasks.Module
             IEnumerable<TaskPluginAttribute> taskPlugins = assembly.GetCustomAttributes<TaskPluginAttribute>();
             foreach (TaskPluginAttribute taskPlugin in taskPlugins)
             {
+                Log.Information($"    Found plugin");
                 Type taskPluginType = taskPlugin.PluginType;
                 MethodInfo[] methods = taskPluginType.GetMethods(BindingFlags.Static | BindingFlags.Instance);
                 foreach (MethodInfo method in methods)
@@ -71,8 +72,6 @@ namespace Cake.Tasks.Module
                     }
                 }
             }
-
-            Log.Information(assembly.FullName);
         }
 
         private Assembly ResolveAssembly(object sender, ResolveEventArgs args)
@@ -81,7 +80,7 @@ namespace Cake.Tasks.Module
             string assemblyPath = Directory
                 .GetFiles(_addinsPath, $"{assemblyName.Name}.dll", SearchOption.AllDirectories)
                 .FirstOrDefault();
-            Log.Information($"Looking for {assemblyName.Name}.dll");
+            Log.Information($"    Looking for {assemblyName.Name}.dll");
             return Assembly.LoadFile(assemblyPath);
         }
     }
