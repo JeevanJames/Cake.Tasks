@@ -9,7 +9,7 @@ namespace Cake.Tasks.DotNetCore
 {
     public static class DotNetCoreTasks
     {
-        [CoreTask(CoreTasks.Build)]
+        [CoreTask(CoreTask.Build)]
         public static void Build(this ICakeContext context, TaskConfig config)
         {
             context.Log.Information(".NET Core build task");

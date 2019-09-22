@@ -1,0 +1,8 @@
+﻿extensions: designer.cs generated.cs
+extensions: .cs .cpp .h
+// Copyright (c) 2019 Jeevan James
+
+extensions:  .xml .config .xsd
+<!--
+Copyright (c) 2019 Jeevan James
+-->

@@ -2,8 +2,8 @@
 {
     public sealed class PreTaskAttribute : PrePostTaskAttribute
     {
-        public PreTaskAttribute(string coreTaskName, string name)
-            : base(coreTaskName, name)
+        public PreTaskAttribute(CoreTask coreTask, string name)
+            : base(coreTask, name)
         {
         }
     }

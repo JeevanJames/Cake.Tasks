@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Tasks.Core;
@@ -32,6 +33,8 @@ namespace Cake.Tasks.Module
             RegisterTask("Default")
                 .Does(context =>
                 {
+                    context.Log.Information("Task List");
+                    context.Log.Information("=========");
                     foreach (ICakeTaskInfo task in Tasks)
                     {
                         context.Log.Information(task.Name);
@@ -67,14 +70,19 @@ namespace Cake.Tasks.Module
         private void FindPlugins(string dllFile)
         {
             Assembly assembly = Assembly.LoadFile(dllFile);
-            IEnumerable<TaskPluginAttribute> taskPlugins = assembly.GetCustomAttributes<TaskPluginAttribute>();
-            foreach (TaskPluginAttribute taskPlugin in taskPlugins)
+
+            // IEnumerable<TaskPluginAttribute> taskPlugins = assembly.GetCustomAttributes<TaskPluginAttribute>();
+            Type[] types = assembly.GetExportedTypes();
+
+            // foreach (TaskPluginAttribute taskPlugin in taskPlugins)
+            foreach (Type taskPluginType in types)
             {
-                Type taskPluginType = taskPlugin.PluginType;
-                Log.Verbose($"[Plugin Class] {taskPluginType.FullName}");
+                //Type taskPluginType = taskPlugin.PluginType;
+                //Log.Verbose($"[Plugin Class] {taskPluginType.FullName}");
                 MethodInfo[] methods = taskPluginType.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public);
                 foreach (MethodInfo method in methods)
                 {
+                    Log.Information($"{method.Name}");
                     TaskAttribute taskAttribute = method.GetCustomAttribute<TaskAttribute>(inherit: true);
                     if (taskAttribute is null)
                         continue;
@@ -87,19 +95,19 @@ namespace Cake.Tasks.Module
                     switch (taskAttribute)
                     {
                         case CoreTaskAttribute attr:
-                            Log.Verbose($"[Core Task] {attr.CoreTaskName} ({env})");
+                            Log.Verbose($"[Core Task] {attr.CoreTask} ({env})");
                             var taskAction = (Action<ICakeContext, TaskConfig>)method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
-                            RegisterTask(attr.CoreTaskName).Does(taskAction);
+                            RegisterTask(attr.CoreTask.ToString()).Does(taskAction);
                             break;
                         case PreTaskAttribute attr:
-                            Log.Verbose($"[Pre Task]  {attr.CoreTaskName} - {attr.Name} ({env})");
+                            Log.Verbose($"[Pre Task]  {attr.CoreTask} - {attr.Name} ({env})");
                             var preTaskAction = (Action<ICakeContext, TaskConfig>)method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
-                            RegisterTask($"Before{attr.CoreTaskName}_{attr.Name}").Does(preTaskAction);
+                            RegisterTask($"Before{attr.CoreTask.ToString()}_{attr.Name}").Does(preTaskAction);
                             break;
                         case PostTaskAttribute attr:
-                            Log.Verbose($"[Post Task] {attr.CoreTaskName} - {attr.Name} ({env})");
+                            Log.Verbose($"[Post Task] {attr.CoreTask} - {attr.Name} ({env})");
                             var postTaskAction = (Action<ICakeContext, TaskConfig>)method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
-                            RegisterTask($"After{attr.CoreTaskName}_{attr.Name}").Does(postTaskAction);
+                            RegisterTask($"After{attr.CoreTask.ToString()}_{attr.Name}").Does(postTaskAction);
                             break;
                     }
                 }
@@ -109,6 +117,12 @@ namespace Cake.Tasks.Module
         private bool IsValidPluginMethod(MethodInfo method, TaskAttribute attribute)
         {
             ParameterInfo[] parameters = method.GetParameters();
+
+            var sb = new StringBuilder(method.Name).AppendLine();
+            foreach (ParameterInfo parameter in parameters)
+                sb.AppendLine($"{parameter.ParameterType.FullName} {parameter.Name}");
+            Log.Information(sb.ToString());
+
             switch (attribute)
             {
                 case CoreTaskAttribute _:

@@ -1,9 +1,11 @@
-﻿namespace Cake.Tasks.Core
+﻿// Copyright (c) 2019 Jeevan James
+
+namespace Cake.Tasks.Core
 {
-    public static class CoreTasks
+    public enum CoreTask
     {
-        public const string Build = "Build";
-        public const string Test = "Test";
-        public const string Deploy = "Deploy";
+        Build,
+        Test,
+        Deploy,
     }
 }
