@@ -12,7 +12,17 @@ namespace Cake.Tasks.DotNetCore
         [CoreTask(CoreTask.Build)]
         public static void Build(this ICakeContext context, TaskConfig config)
         {
-            context.Log.Information(".NET Core build task");
+            string solutionFile = config.Resolve<string>("SolutionFile", null);
+            if (solutionFile is null)
+                context.Log.Information($".NET Core build task (No solution file)");
+            else
+                context.Log.Information($".NET Core build task ({solutionFile})");
+        }
+
+        [Config]
+        public static void Config(this ICakeContext context, TaskConfig config)
+        {
+            config.Data.Add("SolutionFile", "MySolution.sln");
         }
     }
 }
