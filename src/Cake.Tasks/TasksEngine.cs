@@ -20,8 +20,6 @@ namespace Cake.Tasks.Module
             _engine = new CakeEngine(dataService, log);
             Log = log;
             Context = context;
-
-            RegisterPlugins();
         }
 
         public IReadOnlyList<ICakeTaskInfo> Tasks => _engine.Tasks;
@@ -101,6 +99,7 @@ namespace Cake.Tasks.Module
 
         public Task<CakeReport> RunTargetAsync(ICakeContext context, IExecutionStrategy strategy, ExecutionSettings settings)
         {
+            RegisterPlugins();
             return _engine.RunTargetAsync(context, strategy, settings);
         }
     }

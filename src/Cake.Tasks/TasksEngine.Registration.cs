@@ -71,18 +71,15 @@ namespace Cake.Tasks.Module
         {
             Assembly assembly = Assembly.LoadFile(dllFile);
 
-            // IEnumerable<TaskPluginAttribute> taskPlugins = assembly.GetCustomAttributes<TaskPluginAttribute>();
-            Type[] types = assembly.GetExportedTypes();
+            IEnumerable<TaskPluginAttribute> taskPlugins = assembly.GetCustomAttributes<TaskPluginAttribute>();
 
-            // foreach (TaskPluginAttribute taskPlugin in taskPlugins)
-            foreach (Type taskPluginType in types)
+            foreach (TaskPluginAttribute taskPlugin in taskPlugins)
             {
-                //Type taskPluginType = taskPlugin.PluginType;
-                //Log.Verbose($"[Plugin Class] {taskPluginType.FullName}");
+                Type taskPluginType = taskPlugin.PluginType;
+                Log.Verbose($"[Plugin Class] {taskPluginType.FullName}");
                 MethodInfo[] methods = taskPluginType.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public);
                 foreach (MethodInfo method in methods)
                 {
-                    Log.Information($"{method.Name}");
                     TaskAttribute taskAttribute = method.GetCustomAttribute<TaskAttribute>(inherit: true);
                     if (taskAttribute is null)
                         continue;
