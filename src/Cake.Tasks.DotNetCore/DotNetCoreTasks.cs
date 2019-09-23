@@ -1,4 +1,8 @@
-﻿using Cake.Core;
+﻿using System;
+using System.IO;
+using Cake.Common.Tools.DotNetCore;
+using Cake.Common.Tools.DotNetCore.Build;
+using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Tasks.Core;
 using Cake.Tasks.DotNetCore;
@@ -12,17 +16,33 @@ namespace Cake.Tasks.DotNetCore
         [CoreTask(CoreTask.Build)]
         public static void Build(this ICakeContext context, TaskConfig config)
         {
-            string solutionFile = config.Resolve<string>("SolutionFile", null);
-            if (solutionFile is null)
-                context.Log.Information($".NET Core build task (No solution file)");
-            else
-                context.Log.Information($".NET Core build task ({solutionFile})");
+            if (!config.TryResolve("DOTNETCORE_SolutionFiles", out object solutionFiles))
+            {
+                context.Log.Warning("No solution files found to build.");
+                return;
+            }
+
+            if (solutionFiles is string slnFile)
+            {
+                context.DotNetCoreBuild(slnFile);
+            }
         }
 
-        [Config("DotNetCoreConfig")]
+        [Config]
         public static void Config(this ICakeContext context, TaskConfig config)
         {
-            config.Data.Add("SolutionFile", "MySolution.sln");
+            config.Register("DOTNETCORE_SolutionFiles", (Func<object>)(() =>
+            {
+                string workingDirectory = config.Resolve("ENV_WorkingDirectory", Directory.GetCurrentDirectory());
+                string[] slnFiles = Directory.GetFiles(workingDirectory, "*.sln", SearchOption.TopDirectoryOnly);
+                if (slnFiles.Length == 0)
+                    slnFiles = Directory.GetFiles(workingDirectory, "*.sln", SearchOption.AllDirectories);
+                if (slnFiles.Length > 1)
+                    return slnFiles;
+                if (slnFiles.Length == 1)
+                    return slnFiles[0];
+                return null;
+            }));
         }
     }
 }

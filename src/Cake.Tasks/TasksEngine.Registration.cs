@@ -78,8 +78,15 @@ namespace Cake.Tasks.Module
                 config.Register("ENV_WorkingDirectory", ctx.Environment.WorkingDirectory.FullPath);
 
                 IDictionary envVars = Environment.GetEnvironmentVariables();
-                foreach (object envVar in envVars)
-                    config.Register($"ENV_{envVar.ToString()}", envVars[envVar].ToString());
+                foreach (DictionaryEntry envVar in envVars)
+                {
+                    string key = envVar.Key?.ToString();
+                    string value = envVar.Value.ToString() ?? string.Empty;
+
+                    //config.Register($"ENV_{envVar}", envVars[envVar].ToString());
+                    if (!string.IsNullOrWhiteSpace(key))
+                        config.Register($"ENV_{key}", value);
+                }
 
                 return config;
             });
