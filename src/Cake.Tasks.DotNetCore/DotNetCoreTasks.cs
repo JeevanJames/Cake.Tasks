@@ -28,6 +28,21 @@ namespace Cake.Tasks.DotNetCore
             }
         }
 
+        [CoreTask(CoreTask.Test)]
+        public static void Test(this ICakeContext context, TaskConfig config)
+        {
+            if (!config.TryResolve("DOTNETCORE_SolutionFiles", out object solutionFiles))
+            {
+                context.Log.Warning("No solution files found to test.");
+                return;
+            }
+
+            if (solutionFiles is string slnFile)
+            {
+                context.DotNetCoreTest(slnFile);
+            }
+        }
+
         [Config]
         public static void Config(this ICakeContext context, TaskConfig config)
         {
