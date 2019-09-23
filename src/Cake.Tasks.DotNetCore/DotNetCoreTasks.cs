@@ -19,7 +19,7 @@ namespace Cake.Tasks.DotNetCore
                 context.Log.Information($".NET Core build task ({solutionFile})");
         }
 
-        [Config]
+        [Config("DotNetCoreConfig")]
         public static void Config(this ICakeContext context, TaskConfig config)
         {
             config.Data.Add("SolutionFile", "MySolution.sln");

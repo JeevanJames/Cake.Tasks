@@ -1,6 +1,7 @@
 ﻿#pragma warning disable S3885 // "Assembly.Load" should be used
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,8 +15,8 @@ namespace Cake.Tasks.Module
 {
     public sealed partial class TasksEngine
     {
+        private readonly List<RegisteredTask> _registeredTasks = new List<RegisteredTask>();
         private string _addinsPath;
-        private List<RegisteredTask> _registeredTasks = new List<RegisteredTask>();
 
         private void RegisterPlugins()
         {
@@ -24,14 +25,14 @@ namespace Cake.Tasks.Module
             _addinsPath = Path.GetFullPath(Context.Configuration.GetValue("Paths_AddIns"));
             Log.Verbose($"Searching addins path: {_addinsPath}");
 
-            RegisterDefaultTask();
-            RegisterConfiguration();
+            RegisterBuiltInTasks();
+            InitializeConfiguration();
             FindPluginPackages();
-            RegisterTasks();
-            RegisterCiTask();
+            RegisterPluginTasks();
+            CreateCiTasks();
         }
 
-        private void RegisterDefaultTask()
+        private void RegisterBuiltInTasks()
         {
             RegisterTask("Default")
                 .Does(context =>
@@ -45,13 +46,42 @@ namespace Cake.Tasks.Module
                             context.Log.Information($"    {task.Description}");
                     }
                 });
+
+            RegisterTask("List-Envs")
+                .Description("Lists all available environments.")
+                .Does(context =>
+                {
+                    IList<string> environments = _registeredTasks
+                        .Select(task => task.Environment)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(env => env)
+                        .ToList();
+
+                    if (environments.Count > 0)
+                    {
+                        context.Log.Information("Available Environments");
+                        context.Log.Information("======================");
+                        foreach (string env in environments)
+                            context.Log.Information(env);
+                    }
+                    else
+                        context.Log.Information("No environments found!");
+                });
         }
 
-        private void RegisterConfiguration()
+        private void InitializeConfiguration()
         {
             RegisterSetupAction(ctx =>
             {
-                return new TaskConfig();
+                var config = new TaskConfig();
+
+                config.Register("ENV_WorkingDirectory", ctx.Environment.WorkingDirectory.FullPath);
+
+                IDictionary envVars = Environment.GetEnvironmentVariables();
+                foreach (object envVar in envVars)
+                    config.Register($"ENV_{envVar.ToString()}", envVars[envVar].ToString());
+
+                return config;
             });
         }
 
@@ -105,16 +135,17 @@ namespace Cake.Tasks.Module
                             registeredTask.CoreTask = attr.CoreTask;
                             registeredTask.Name = attr.CoreTask.ToString();
                             break;
-                        case PreTaskAttribute attr:
+                        case TaskEventAttribute attr:
                             registeredTask.CoreTask = attr.CoreTask;
-                            registeredTask.Name = $"Before{attr.CoreTask.ToString()}_{attr.Name}";
-                            break;
-                        case PostTaskAttribute attr:
-                            registeredTask.CoreTask = attr.CoreTask;
-                            registeredTask.Name = $"After{attr.CoreTask.ToString()}_{attr.Name}";
+                            registeredTask.EventType = attr.EventType;
+                            string namePrefix = attr.EventType == TaskEventType.BeforeTask ? "Before" : "After";
+                            registeredTask.Name = $"{namePrefix}{attr.CoreTask}_{method.Name}";
                             break;
                         case ConfigAttribute attr:
-                            registeredTask.Name = $"Config_{attr.Environment}";
+                            string uniqueId = Guid.NewGuid().ToString("N");
+                            string envSuffix = attr.Environment is null ? string.Empty : $"_{attr.Environment}";
+                            registeredTask.Name = $"Config_{uniqueId}{envSuffix}";
+                            registeredTask.Order = attr.Order;
                             break;
                     }
                 }
@@ -127,13 +158,12 @@ namespace Cake.Tasks.Module
             switch (attribute)
             {
                 case CoreTaskAttribute _:
-                case PreTaskAttribute _:
-                case PostTaskAttribute _:
-                    if (parameters.Length != 2)
+                case TaskEventAttribute _:
+                    if (parameters.Length < 1 || parameters.Length > 2)
                         return false;
                     if (!typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType))
                         return false;
-                    if (parameters[1].ParameterType != typeof(TaskConfig))
+                    if (parameters.Length > 1 && parameters[1].ParameterType != typeof(TaskConfig))
                         return false;
                     if (method.ReturnType != typeof(void))
                         return false;
@@ -153,51 +183,87 @@ namespace Cake.Tasks.Module
             return Assembly.LoadFile(assemblyPath);
         }
 
-        private void RegisterTasks()
+        private void RegisterPluginTasks()
         {
             foreach (RegisteredTask registeredTask in _registeredTasks)
             {
-                var action = (Action<ICakeContext, TaskConfig>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
-                RegisterTask(registeredTask.Name).Does(action);
+                if (registeredTask.Method.GetParameters().Length == 2)
+                {
+                    var action = (Action<ICakeContext, TaskConfig>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
+                    RegisterTask(registeredTask.Name).Does(action);
+                }
+                else
+                {
+                    var action = (Action<ICakeContext>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext>));
+                    RegisterTask(registeredTask.Name).Does(action);
+                }
             }
         }
 
-        private static readonly List<CoreTask> CoreTasks = new List<CoreTask> { CoreTask.Build, CoreTask.Test, CoreTask.Deploy };
-
-        private void RegisterCiTask()
+        private void CreateCiTasks()
         {
             string env = Context.Arguments.GetArgument("env");
-
-            IEnumerable<RegisteredTask> filteredTasks;
+            IEnumerable<RegisteredTask> envTasks;
             if (string.IsNullOrEmpty(env))
-                filteredTasks = _registeredTasks.Where(rt => rt.Environment is null);
+                envTasks = _registeredTasks.Where(rt => rt.Environment is null);
             else
-                filteredTasks = _registeredTasks.Where(rt => rt.Environment is null || rt.Environment.Equals(env, StringComparison.OrdinalIgnoreCase));
+                envTasks = _registeredTasks.Where(rt => rt.Environment is null || rt.Environment.Equals(env, StringComparison.OrdinalIgnoreCase));
 
-            CakeTaskBuilder builder = RegisterTask("CI");
+            CakeTaskBuilder ciTask = RegisterTask("CI").Description("Performs CI (Build and Test)");
 
-            IEnumerable<RegisteredTask> configTasks = filteredTasks.Where(task => task.AttributeType == typeof(ConfigAttribute));
+            // Config dependencies
+            IEnumerable<RegisteredTask> configTasks = envTasks
+                .Where(task => task.AttributeType == typeof(ConfigAttribute))
+                .OrderBy(task => task.Order);
             foreach (RegisteredTask configTask in configTasks)
-                builder = builder.IsDependentOn(configTask.Name);
+                ciTask = ciTask.IsDependentOn(configTask.Name);
 
-            foreach (CoreTask coreTask in CoreTasks)
+            // Build task
+            RegisteredTask buildTask = envTasks
+                .SingleOrDefault(task => task.AttributeType == typeof(CoreTaskAttribute) && task.CoreTask == CoreTask.Build);
+            BuildTaskChain(ciTask, buildTask, envTasks);
+
+            // Test tasl
+            RegisteredTask testTask = envTasks
+                .SingleOrDefault(task => task.AttributeType == typeof(CoreTaskAttribute) && task.CoreTask == CoreTask.Test);
+            BuildTaskChain(ciTask, testTask, envTasks);
+
+            ciTask.Does(() => { });
+
+            // Deploy task
+            RegisteredTask deployTask = envTasks
+                .SingleOrDefault(task => task.AttributeType == typeof(CoreTaskAttribute) && task.CoreTask == CoreTask.Deploy);
+            if (deployTask != null)
             {
-                RegisteredTask registeredCoreTask = filteredTasks.SingleOrDefault(task => task.AttributeType == typeof(CoreTaskAttribute) && task.CoreTask == coreTask);
-                if (registeredCoreTask is null)
-                    continue;
+                CakeTaskBuilder cicdTask = RegisterTask("CICD")
+                    .Description("Performs CD/CD (Build, test and deploy)")
+                    .IsDependentOn("CI");
 
-                builder = builder.IsDependentOn(registeredCoreTask.Name);
+                BuildTaskChain(cicdTask, deployTask, envTasks);
 
-                IEnumerable<RegisteredTask> preTasks = filteredTasks.Where(task => task.AttributeType == typeof(PreTaskAttribute) && task.CoreTask == coreTask);
-                foreach (RegisteredTask preTask in preTasks)
-                    builder = builder.IsDependentOn(preTask.Name);
-
-                IEnumerable<RegisteredTask> postTasks = filteredTasks.Where(task => task.AttributeType == typeof(PostTaskAttribute) && task.CoreTask == coreTask);
-                foreach (RegisteredTask postTask in postTasks)
-                    builder = builder.IsDependentOn(postTask.Name);
+                cicdTask.Does(() => { });
             }
+        }
 
-            builder.Does(() => { });
+        private void BuildTaskChain(CakeTaskBuilder builder, RegisteredTask coreTask, IEnumerable<RegisteredTask> envTasks)
+        {
+            if (coreTask is null)
+                return;
+
+            // Add before tasks
+            IEnumerable<RegisteredTask> beforeTasks = envTasks
+                .Where(task => task.AttributeType == typeof(TaskEventAttribute) && task.CoreTask == coreTask.CoreTask && task.EventType == TaskEventType.BeforeTask);
+            foreach (RegisteredTask beforeTask in beforeTasks)
+                builder = builder.IsDependentOn(beforeTask.Name);
+
+            // Add core task
+            builder = builder.IsDependentOn(coreTask.Name);
+
+            // Add after tasks
+            IEnumerable<RegisteredTask> afterTasks = envTasks
+                .Where(task => task.AttributeType == typeof(TaskEventAttribute) && task.CoreTask == coreTask.CoreTask && task.EventType == TaskEventType.AfterTask);
+            foreach (RegisteredTask afterTask in afterTasks)
+                builder = builder.IsDependentOn(afterTask.Name);
         }
     }
 
@@ -207,10 +273,16 @@ namespace Cake.Tasks.Module
 
         internal MethodInfo Method { get; set; }
 
-        internal CoreTask? CoreTask { get; set; }
-
         internal string Name { get; set; }
 
         internal string Environment { get; set; }
+
+        // Optional properties - specific to task type
+
+        internal CoreTask? CoreTask { get; set; }
+
+        internal TaskEventType? EventType { get; set; }
+
+        internal int Order { get; set; }
     }
 }

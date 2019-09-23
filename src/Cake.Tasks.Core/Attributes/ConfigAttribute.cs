@@ -6,5 +6,7 @@
         {
             Environment = environment;
         }
+
+        public int Order { get; set; }
     }
 }
