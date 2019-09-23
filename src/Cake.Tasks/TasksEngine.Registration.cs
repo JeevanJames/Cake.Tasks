@@ -25,10 +25,10 @@ namespace Cake.Tasks.Module
             _addinsPath = Path.GetFullPath(Context.Configuration.GetValue("Paths_AddIns"));
             Log.Verbose($"Searching addins path: {_addinsPath}");
 
-            RegisterBuiltInTasks();
             InitializeConfiguration();
             FindPluginPackages();
             RegisterPluginTasks();
+            RegisterBuiltInTasks();
             CreateCiTasks();
         }
 
@@ -38,7 +38,7 @@ namespace Cake.Tasks.Module
                 .Does(context =>
                 {
                     context.Log.Information("Task List");
-                    context.Log.Information("=========");
+                    context.Log.Information("---------");
                     foreach (ICakeTaskInfo task in Tasks)
                     {
                         context.Log.Information(task.Name);
@@ -60,7 +60,7 @@ namespace Cake.Tasks.Module
                     if (environments.Count > 0)
                     {
                         context.Log.Information("Available Environments");
-                        context.Log.Information("======================");
+                        context.Log.Information("----------------------");
                         foreach (string env in environments)
                             context.Log.Information(env);
                     }
@@ -68,17 +68,18 @@ namespace Cake.Tasks.Module
                         context.Log.Information("No environments found!");
                 });
 
-            RegisterTask("List-Configs")
-                .Description("Lists all available configurations.")
-                .Does<TaskConfig>((context, config) =>
-                {
-                    context.Log.Information("Available Configurations");
-                    context.Log.Information("========================");
-                    foreach (KeyValuePair<string, TaskConfigValue> kvp in config.Data)
-                    {
-                        context.Log.Information($"{kvp.Key} = ${kvp.Value?.ToString() ?? "[NULL]"}");
-                    }
-                });
+            CakeTaskBuilder listConfigsTask = RegisterTask("List-Configs")
+                .Description("Lists all available configurations.");
+            IEnumerable<RegisteredTask> configTasks = _registeredTasks.Where(rt => rt.AttributeType == typeof(ConfigAttribute));
+            foreach (RegisteredTask configTask in configTasks)
+                listConfigsTask = listConfigsTask.IsDependentOn(configTask.Name);
+            listConfigsTask.Does<TaskConfig>((context, config) =>
+            {
+                context.Log.Information("Available Configurations");
+                context.Log.Information("------------------------");
+                foreach (KeyValuePair<string, TaskConfigValue> kvp in config.Data.OrderBy(kvp => kvp.Key))
+                    context.Log.Information($"{kvp.Key} = {kvp.Value.Resolve<object>()?.ToString() ?? "[NULL]"}");
+            });
         }
 
         private void InitializeConfiguration()
@@ -206,16 +207,21 @@ namespace Cake.Tasks.Module
         {
             foreach (RegisteredTask registeredTask in _registeredTasks)
             {
+                CakeTaskBuilder builder;
+
                 if (registeredTask.Method.GetParameters().Length == 2)
                 {
                     var action = (Action<ICakeContext, TaskConfig>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
-                    RegisterTask(registeredTask.Name).Does(action);
+                    builder = RegisterTask(registeredTask.Name).Does(action);
                 }
                 else
                 {
                     var action = (Action<ICakeContext>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext>));
-                    RegisterTask(registeredTask.Name).Does(action);
+                    builder = RegisterTask(registeredTask.Name).Does(action);
                 }
+
+                if (registeredTask.AttributeType == typeof(ConfigAttribute))
+                    builder.Description($"Config for {registeredTask.Method.Name} from {registeredTask.Method.DeclaringType.FullName} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})");
             }
         }
 
@@ -242,7 +248,7 @@ namespace Cake.Tasks.Module
                 .SingleOrDefault(task => task.AttributeType == typeof(CoreTaskAttribute) && task.CoreTask == CoreTask.Build);
             BuildTaskChain(ciTask, buildTask, envTasks);
 
-            // Test tasl
+            // Test task
             RegisteredTask testTask = envTasks
                 .SingleOrDefault(task => task.AttributeType == typeof(CoreTaskAttribute) && task.CoreTask == CoreTask.Test);
             BuildTaskChain(ciTask, testTask, envTasks);
