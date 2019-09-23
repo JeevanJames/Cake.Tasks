@@ -67,6 +67,18 @@ namespace Cake.Tasks.Module
                     else
                         context.Log.Information("No environments found!");
                 });
+
+            RegisterTask("List-Configs")
+                .Description("Lists all available configurations.")
+                .Does<TaskConfig>((context, config) =>
+                {
+                    context.Log.Information("Available Configurations");
+                    context.Log.Information("========================");
+                    foreach (KeyValuePair<string, TaskConfigValue> kvp in config.Data)
+                    {
+                        context.Log.Information($"{kvp.Key} = ${kvp.Value?.ToString() ?? "[NULL]"}");
+                    }
+                });
         }
 
         private void InitializeConfiguration()
