@@ -2,17 +2,17 @@
 
 namespace Cake.Tasks.Core
 {
-    public sealed class TaskConfigValue<T>
+    public sealed class FuncOrValue<T>
     {
         private readonly T _value;
         private readonly Func<T> _func;
 
-        public TaskConfigValue(T value)
+        public FuncOrValue(T value)
         {
             _value = value;
         }
 
-        public TaskConfigValue(Func<T> func)
+        public FuncOrValue(Func<T> func)
         {
             if (func is null)
                 throw new ArgumentNullException(nameof(func));

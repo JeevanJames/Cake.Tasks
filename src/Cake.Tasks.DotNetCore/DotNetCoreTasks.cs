@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
+
 using Cake.Common.Tools.DotNetCore;
 using Cake.Core;
 using Cake.Core.Diagnostics;
@@ -76,7 +75,7 @@ namespace Cake.Tasks.DotNetCore
             }
 
             var cfg = config.Load<DotNetCoreConfig>();
-            cfg.BuildProjectFile = new TaskConfigValue<string>(GetProjectFiles);
+            cfg.BuildProjectFile = new FuncOrValue<string>(GetProjectFiles);
         }
     }
 }

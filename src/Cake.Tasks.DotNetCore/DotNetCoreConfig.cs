@@ -9,9 +9,9 @@ namespace Cake.Tasks.DotNetCore
         {
         }
 
-        public TaskConfigValue<string> BuildProjectFile
+        public FuncOrValue<string> BuildProjectFile
         {
-            get => Get<TaskConfigValue<string>>("DotNetCore.BuildProjectFiles");
+            get => Get<FuncOrValue<string>>("DotNetCore.BuildProjectFiles");
             set => Set("DotNetCore.BuildProjectFiles", value);
         }
     }
