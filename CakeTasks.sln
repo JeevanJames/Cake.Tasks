@@ -7,9 +7,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1F25E712-9FA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks", "src\Cake.Tasks\Cake.Tasks.csproj", "{CB96B0C5-1A32-4106-956B-CDE7F43CD7A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Core", "src\Cake.Tasks.Core\Cake.Tasks.Core.csproj", "{CFDA9E45-E030-4D26-A63D-A9AFFB885982}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.Core", "src\Cake.Tasks.Core\Cake.Tasks.Core.csproj", "{CFDA9E45-E030-4D26-A63D-A9AFFB885982}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.DotNetCore", "src\Cake.Tasks.DotNetCore\Cake.Tasks.DotNetCore.csproj", "{39E937AE-44A6-492B-A3DA-F2876CBE2A68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.DotNetCore", "src\Cake.Tasks.DotNetCore\Cake.Tasks.DotNetCore.csproj", "{39E937AE-44A6-492B-A3DA-F2876CBE2A68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Env.Tfs", "src\Cake.Tasks.Env.Tfs\Cake.Tasks.Env.Tfs.csproj", "{D06EC759-C982-46CB-8DD1-C5614F4C04F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,18 @@ Global
 		{39E937AE-44A6-492B-A3DA-F2876CBE2A68}.Release|x64.Build.0 = Release|Any CPU
 		{39E937AE-44A6-492B-A3DA-F2876CBE2A68}.Release|x86.ActiveCfg = Release|Any CPU
 		{39E937AE-44A6-492B-A3DA-F2876CBE2A68}.Release|x86.Build.0 = Release|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Debug|x64.Build.0 = Debug|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Debug|x86.Build.0 = Debug|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Release|x64.ActiveCfg = Release|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Release|x64.Build.0 = Release|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Release|x86.ActiveCfg = Release|Any CPU
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,6 +79,7 @@ Global
 		{CB96B0C5-1A32-4106-956B-CDE7F43CD7A2} = {1F25E712-9FA5-4F2D-B255-BC961FE32C14}
 		{CFDA9E45-E030-4D26-A63D-A9AFFB885982} = {1F25E712-9FA5-4F2D-B255-BC961FE32C14}
 		{39E937AE-44A6-492B-A3DA-F2876CBE2A68} = {1F25E712-9FA5-4F2D-B255-BC961FE32C14}
+		{D06EC759-C982-46CB-8DD1-C5614F4C04F9} = {1F25E712-9FA5-4F2D-B255-BC961FE32C14}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {73A98824-1C6F-4682-918A-19493E5480CD}

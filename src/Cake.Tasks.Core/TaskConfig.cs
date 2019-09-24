@@ -20,6 +20,25 @@ namespace Cake.Tasks.Core
             return value.Resolve<T>();
         }
 
+        public IList<T> ResolveAsList<T>(string name)
+        {
+            if (!Data.TryGetValue(name, out TaskConfigValue tcValue))
+                return Array.Empty<T>();
+
+            object value = tcValue.Resolve<object>();
+
+            if (value is null)
+                return Array.Empty<T>();
+
+            if (value is T item)
+                return new T[] { item };
+
+            if (value is IEnumerable<T> list)
+                return new List<T>(list);
+
+            throw new InvalidCastException($"Cannot cast the config value {name} to {typeof(T).FullName}. The actual type is {value.GetType().FullName}.");
+        }
+
         public bool TryResolve<T>(string name, out T value)
         {
             bool found = Data.TryGetValue(name, out TaskConfigValue tcValue);
