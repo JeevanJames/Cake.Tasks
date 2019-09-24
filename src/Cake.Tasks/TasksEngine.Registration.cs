@@ -101,6 +101,8 @@ namespace Cake.Tasks.Module
                         config.Register($"ENV_{key}", value);
                 }
 
+                TaskConfig.Current = config;
+
                 return config;
             });
         }

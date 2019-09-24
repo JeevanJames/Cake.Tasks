@@ -5,12 +5,19 @@ namespace Cake.Tasks.Core
 {
     public sealed class TaskConfig
     {
+        public static TaskConfig Current { get; set; }
+
         public IDictionary<string, TaskConfigValue> Data { get; } =
             new Dictionary<string, TaskConfigValue>(StringComparer.OrdinalIgnoreCase);
 
         public void Register(string name, TaskConfigValue value)
         {
             Data.Add(name, value);
+        }
+
+        public void Set(string name, TaskConfigValue value)
+        {
+            Data[name] = value;
         }
 
         public T Resolve<T>(string name, T defaultValue = default)
