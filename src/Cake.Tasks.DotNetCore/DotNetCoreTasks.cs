@@ -13,6 +13,20 @@ namespace Cake.Tasks.DotNetCore
 {
     public static class DotNetCoreTasks
     {
+        [TaskEvent(TaskEventType.BeforeTask, CoreTask.Build)]
+        public static void Clean(ICakeContext context, TaskConfig config)
+        {
+            IList<string> cleanProjectFiles = config.ResolveAsList<string>(Config.BuildProjectFiles);
+            if (cleanProjectFiles.Count == 0)
+            {
+                context.Log.Warning("No solution or project files found to clean.");
+                return;
+            }
+
+            foreach (string cleanProjectFile in cleanProjectFiles)
+                context.DotNetCoreClean(cleanProjectFile);
+        }
+
         [CoreTask(CoreTask.Build)]
         public static void Build(this ICakeContext context, TaskConfig config)
         {
@@ -60,6 +74,7 @@ namespace Cake.Tasks.DotNetCore
             }
 
             config.Register(Config.BuildProjectFiles, (Func<object>)GetProjectFiles);
+            config.Register(Config.TestProjectFiles, (Func<object>)GetProjectFiles);
         }
     }
 }
