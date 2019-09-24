@@ -5,7 +5,11 @@ namespace Cake.Tasks.Core
 {
     public sealed class TaskConfig
     {
-        public static TaskConfig Current { get; set; }
+        public static TaskConfig Current { get; } = new TaskConfig();
+
+        private TaskConfig()
+        {
+        }
 
         public IDictionary<string, TaskConfigValue> Data { get; } =
             new Dictionary<string, TaskConfigValue>(StringComparer.OrdinalIgnoreCase);

@@ -86,7 +86,7 @@ namespace Cake.Tasks.Module
         {
             RegisterSetupAction(ctx =>
             {
-                var config = new TaskConfig();
+                var config = TaskConfig.Current;
 
                 config.Register("ENV_WorkingDirectory", ctx.Environment.WorkingDirectory.FullPath);
 
@@ -100,8 +100,6 @@ namespace Cake.Tasks.Module
                     if (!string.IsNullOrWhiteSpace(key))
                         config.Register($"ENV_{key}", value);
                 }
-
-                TaskConfig.Current = config;
 
                 return config;
             });
