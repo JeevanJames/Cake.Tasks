@@ -76,13 +76,17 @@ namespace Cake.Tasks.Module
             IEnumerable<RegisteredTask> configTasks = _registeredTasks.Where(rt => rt.AttributeType == typeof(ConfigAttribute));
             foreach (RegisteredTask configTask in configTasks)
                 listConfigsTask = listConfigsTask.IsDependentOn(configTask.Name);
+            listConfigsTask = listConfigsTask.IsDependentOn("Config_DeferredSetup");
             listConfigsTask.Does<TaskConfig>((context, config) =>
             {
                 context.Log.Information("Available Configurations");
                 context.Log.Information("------------------------");
-                foreach (KeyValuePair<string, TaskConfigValue> kvp in config.Data.OrderBy(kvp => kvp.Key))
-                    context.Log.Information($"{kvp.Key} = {kvp.Value.Resolve<object>()?.ToString() ?? "[NULL]"}");
+                foreach (KeyValuePair<string, object> kvp in config.Data.OrderBy(kvp => kvp.Key))
+                    context.Log.Information($"{kvp.Key} = {kvp.Value?.ToString() ?? "[NULL]"}");
             });
+
+            RegisterTask("Config_DeferredSetup")
+                .Does(() => TaskConfig.Current.PerformDeferredSetup());
         }
 
         private void InitializeConfiguration()
@@ -91,18 +95,8 @@ namespace Cake.Tasks.Module
             {
                 var config = TaskConfig.Current;
 
-                config.Register("ENV_WorkingDirectory", ctx.Environment.WorkingDirectory.FullPath);
-
-                IDictionary envVars = Environment.GetEnvironmentVariables();
-                foreach (DictionaryEntry envVar in envVars)
-                {
-                    string key = envVar.Key?.ToString();
-                    string value = envVar.Value.ToString() ?? string.Empty;
-
-                    //config.Register($"ENV_{envVar}", envVars[envVar].ToString());
-                    if (!string.IsNullOrWhiteSpace(key))
-                        config.Register($"ENV_{key}", value);
-                }
+                var env = config.Load<EnvConfig>();
+                env.WorkingDirectory = ctx.Environment.WorkingDirectory.FullPath;
 
                 return config;
             });
@@ -147,6 +141,8 @@ namespace Cake.Tasks.Module
                 .OrderBy(task => task.Order);
             foreach (RegisteredTask configTask in configTasks)
                 ciTask = ciTask.IsDependentOn(configTask.Name);
+
+            ciTask = ciTask.IsDependentOn("Config_DeferredSetup");
 
             // Build task
             RegisteredTask buildTask = envTasks

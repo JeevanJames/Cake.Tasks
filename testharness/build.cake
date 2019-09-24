@@ -4,12 +4,13 @@
 #r ".\tools\Cake.Tasks.Core.dll"
 #r ".\tools\Cake.Tasks.DotNetCore.dll"
 
+using Cake.Tasks.Core;
 using Cake.Tasks.DotNetCore;
 
 Configuration(tc =>
 {
-    Information(tc.Resolve<object>(Config.BuildProjectFiles) ?? "<No Config Value>");
-    tc.Set(Config.BuildProjectFiles, @".\TestLibrary\TestLibrary.csproj");
+    var dncc = tc.Load<DotNetCoreConfig>();
+    dncc.BuildProjectFile = new TaskConfigValue<string>(@".\TestLibrary\TestLibrary.csproj");
 });
 
 var target = Argument("target", "Default");

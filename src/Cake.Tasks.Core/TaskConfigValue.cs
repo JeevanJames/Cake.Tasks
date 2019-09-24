@@ -2,36 +2,32 @@
 
 namespace Cake.Tasks.Core
 {
-    public sealed class TaskConfigValue
+    public sealed class TaskConfigValue<T>
     {
-        private readonly object _value;
-        private readonly Func<object> _func;
+        private readonly T _value;
+        private readonly Func<T> _func;
 
-        public TaskConfigValue(object value)
+        public TaskConfigValue(T value)
         {
             _value = value;
         }
 
-        public TaskConfigValue(Func<object> func)
+        public TaskConfigValue(Func<T> func)
         {
             if (func is null)
                 throw new ArgumentNullException(nameof(func));
             _func = func;
         }
 
-        public T Resolve<T>()
+        public T Resolve()
         {
-            return _func != null ? (T)_func() : (T)_value;
+            return _func != null ? _func() : _value;
         }
 
-        public static implicit operator TaskConfigValue(Func<object> func) => new TaskConfigValue(func);
-
-        public static implicit operator TaskConfigValue(string value) => new TaskConfigValue(value);
-
-        public static implicit operator TaskConfigValue(int value) => new TaskConfigValue(value);
-
-        public static implicit operator TaskConfigValue(bool value) => new TaskConfigValue(value);
-
-        public static implicit operator TaskConfigValue(Uri value) => new TaskConfigValue(value);
+        public override string ToString()
+        {
+            T value = Resolve();
+            return value?.ToString() ?? "[NULL]";
+        }
     }
 }

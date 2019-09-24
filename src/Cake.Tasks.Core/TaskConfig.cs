@@ -11,51 +11,70 @@ namespace Cake.Tasks.Core
         {
         }
 
-        public IDictionary<string, TaskConfigValue> Data { get; } =
-            new Dictionary<string, TaskConfigValue>(StringComparer.OrdinalIgnoreCase);
+        internal IDictionary<string, object> Data { get; } =
+            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
-        public void Register(string name, TaskConfigValue value)
+        //public IList<T> ResolveAsList<T>(string name)
+        //{
+        //    if (!Data.TryGetValue(name, out TaskConfigValue tcValue))
+        //        return Array.Empty<T>();
+
+        //    object value = tcValue.Resolve<object>();
+
+        //    if (value is null)
+        //        return Array.Empty<T>();
+
+        //    if (value is T item)
+        //        return new T[] { item };
+
+        //    if (value is IEnumerable<T> list)
+        //        return new List<T>(list);
+
+        //    throw new InvalidCastException($"Cannot cast the config value {name} to {typeof(T).FullName}. The actual type is {value.GetType().FullName}.");
+        //}
+
+        public T Load<T>()
+            where T : PluginConfig
         {
-            Data.Add(name, value);
+            var config = (T)Activator.CreateInstance(typeof(T), this);
+            return config;
         }
 
-        public void Set(string name, TaskConfigValue value)
+        private Action<TaskConfig> _setup;
+
+        public void SetDeferredSetup(Action<TaskConfig> setup)
         {
-            if (Data.ContainsKey(name))
-                Data[name] = value;
+            _setup = setup;
         }
 
-        public T Resolve<T>(string name, T defaultValue = default)
+        public void PerformDeferredSetup()
         {
-            if (!Data.TryGetValue(name, out TaskConfigValue value))
-                return defaultValue;
-            return value.Resolve<T>();
+            _setup?.Invoke(this);
+        }
+    }
+
+    public abstract class PluginConfig
+    {
+        private readonly TaskConfig _taskConfig;
+
+        protected PluginConfig(TaskConfig taskConfig)
+        {
+            _taskConfig = taskConfig;
         }
 
-        public IList<T> ResolveAsList<T>(string name)
+        protected T Get<T>(string name)
         {
-            if (!Data.TryGetValue(name, out TaskConfigValue tcValue))
-                return Array.Empty<T>();
-
-            object value = tcValue.Resolve<object>();
-
-            if (value is null)
-                return Array.Empty<T>();
-
-            if (value is T item)
-                return new T[] { item };
-
-            if (value is IEnumerable<T> list)
-                return new List<T>(list);
-
-            throw new InvalidCastException($"Cannot cast the config value {name} to {typeof(T).FullName}. The actual type is {value.GetType().FullName}.");
+            if (!_taskConfig.Data.TryGetValue(name, out object value))
+                return default;
+            return (T)value;
         }
 
-        public bool TryResolve<T>(string name, out T value)
+        protected void Set<T>(string name, T value)
         {
-            bool found = Data.TryGetValue(name, out TaskConfigValue tcValue);
-            value = found ? tcValue.Resolve<T>() : default;
-            return found;
+            if (_taskConfig.Data.ContainsKey(name))
+                _taskConfig.Data[name] = value;
+            else
+                _taskConfig.Data.Add(name, value);
         }
     }
 }

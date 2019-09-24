@@ -15,7 +15,7 @@ namespace Cake.Tasks.Core
             if (setter is null)
                 throw new ArgumentNullException(nameof(setter));
 
-            setter(TaskConfig.Current);
+            TaskConfig.Current.SetDeferredSetup(setter);
         }
     }
 }
