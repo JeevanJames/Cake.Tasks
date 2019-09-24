@@ -21,7 +21,8 @@ namespace Cake.Tasks.Core
 
         public void Set(string name, TaskConfigValue value)
         {
-            Data[name] = value;
+            if (Data.ContainsKey(name))
+                Data[name] = value;
         }
 
         public T Resolve<T>(string name, T defaultValue = default)

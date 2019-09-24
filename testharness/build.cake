@@ -8,7 +8,8 @@ using Cake.Tasks.DotNetCore;
 
 Configuration(tc =>
 {
-    tc.Set(Config.BuildProjectFiles, @".\TestHarness.sln");
+    Information(tc.Resolve<object>(Config.BuildProjectFiles) ?? "<No Config Value>");
+    tc.Set(Config.BuildProjectFiles, @".\TestLibrary\TestLibrary.csproj");
 });
 
 var target = Argument("target", "Default");
