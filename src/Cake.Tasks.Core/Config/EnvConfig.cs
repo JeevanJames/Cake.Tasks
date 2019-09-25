@@ -1,4 +1,4 @@
-﻿namespace Cake.Tasks.Core
+﻿namespace Cake.Tasks.Config
 {
     public sealed class EnvConfig : PluginConfig
     {

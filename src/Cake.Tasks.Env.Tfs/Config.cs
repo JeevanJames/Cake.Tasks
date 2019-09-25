@@ -1,4 +1,4 @@
-﻿namespace Cake.Tasks.Env.Tfs
+﻿namespace Cake.Tasks.Config
 {
     public static class Config
     {

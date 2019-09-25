@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Cake.Tasks.Core
+namespace Cake.Tasks.Config
 {
     public sealed class FuncOrListValue<T>
     {

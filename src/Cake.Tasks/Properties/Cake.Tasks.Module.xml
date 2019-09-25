@@ -4,7 +4,7 @@
         <name>Cake.Tasks.Module</name>
     </assembly>
     <members>
-        <member name="T:Cake.Tasks.Module.PluginLoader">
+        <member name="T:Cake.Tasks.Module.PluginLoaders.PluginLoader">
             <summary>
                 Encapsulates the logic to load Cake.Tasks plugins.
             </summary>

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Cake.Core.Diagnostics;
 
-namespace Cake.Tasks.Module
+namespace Cake.Tasks.Module.PluginLoaders
 {
     public sealed class ProductionPluginLoader : PluginLoader
     {

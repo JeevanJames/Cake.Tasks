@@ -1,6 +1,4 @@
-﻿using Cake.Tasks.Core;
-
-namespace Cake.Tasks.DotNetCore
+﻿namespace Cake.Tasks.Config
 {
     public sealed class DotNetCoreConfig : PluginConfig
     {

@@ -1,4 +1,5 @@
 ﻿using Cake.Core;
+using Cake.Tasks.Config;
 using Cake.Tasks.Core;
 
 namespace Cake.Tasks.Env.Tfs

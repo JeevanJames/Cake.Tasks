@@ -4,9 +4,6 @@
 #r ".\tools\Cake.Tasks.Core.dll"
 #r ".\tools\Cake.Tasks.DotNetCore.dll"
 
-using Cake.Tasks.Core;
-using Cake.Tasks.DotNetCore;
-
 Configuration(tc =>
 {
     var dncc = tc.Load<DotNetCoreConfig>();
@@ -14,7 +11,4 @@ Configuration(tc =>
     dncc.TestProjectFiles = @".\TestLibrary.Tests\TestLibrary.Tests.csproj";
 });
 
-var target = Argument("target", "Default");
-var configuration = Argument("configuration", "Release");
-
-RunTarget(target);
+RunTarget(Argument("target", "Default"));

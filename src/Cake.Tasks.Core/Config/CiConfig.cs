@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Cake.Tasks.Core
+namespace Cake.Tasks.Config
 {
     public sealed class CiConfig : PluginConfig
     {

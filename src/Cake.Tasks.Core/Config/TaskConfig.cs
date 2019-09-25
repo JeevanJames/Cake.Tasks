@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Cake.Tasks.Core
+namespace Cake.Tasks.Config
 {
     public sealed class TaskConfig
     {

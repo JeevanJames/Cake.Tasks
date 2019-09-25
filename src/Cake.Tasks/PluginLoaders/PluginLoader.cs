@@ -6,9 +6,10 @@ using System.Reflection;
 
 using Cake.Core;
 using Cake.Core.Diagnostics;
+using Cake.Tasks.Config;
 using Cake.Tasks.Core;
 
-namespace Cake.Tasks.Module
+namespace Cake.Tasks.Module.PluginLoaders
 {
     /// <summary>
     ///     Encapsulates the logic to load Cake.Tasks plugins.
@@ -29,7 +30,7 @@ namespace Cake.Tasks.Module
 
         internal IEnumerable<RegisteredTask> FindPlugins(string dllFile)
         {
-            Assembly assembly = Assembly.LoadFile(dllFile);
+            var assembly = Assembly.LoadFile(dllFile);
 
             IEnumerable<TaskPluginAttribute> taskPlugins = assembly.GetCustomAttributes<TaskPluginAttribute>();
 
