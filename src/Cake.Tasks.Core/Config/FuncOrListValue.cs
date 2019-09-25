@@ -12,24 +12,24 @@ namespace Cake.Tasks.Core
         private readonly Func<T> _valueFunc;
         private readonly Func<IEnumerable<T>> _listFunc;
 
-        public FuncOrListValue(T value)
+        private FuncOrListValue(T value)
         {
             _value = value;
         }
 
-        public FuncOrListValue(IEnumerable<T> list)
+        private FuncOrListValue(IEnumerable<T> list)
         {
             _list = list;
         }
 
-        public FuncOrListValue(Func<T> valueFunc)
+        private FuncOrListValue(Func<T> valueFunc)
         {
             if (valueFunc is null)
                 throw new ArgumentNullException(nameof(valueFunc));
             _valueFunc = valueFunc;
         }
 
-        public FuncOrListValue(Func<IEnumerable<T>> listFunc)
+        private FuncOrListValue(Func<IEnumerable<T>> listFunc)
         {
             if (listFunc is null)
                 throw new ArgumentNullException(nameof(listFunc));
@@ -49,16 +49,28 @@ namespace Cake.Tasks.Core
         public override string ToString()
         {
             IEnumerable<T> values = Resolve();
-            if (values is null)
+            if (values is null || !values.Any())
                 return "[]";
-            return values.Aggregate(new StringBuilder(),
+            StringBuilder builder = values.Aggregate(new StringBuilder("["),
                 (sb, value) =>
                 {
                     if (sb.Length > 0)
-                        sb.Append(Environment.NewLine);
+                        sb.AppendLine();
                     sb.Append(value?.ToString() ?? "[NULL]");
                     return sb;
-                }).ToString();
+                });
+            builder.AppendLine().Append("]");
+            return builder.ToString();
         }
+
+        public static implicit operator FuncOrListValue<T>(T value) => new FuncOrListValue<T>(value);
+
+        public static implicit operator FuncOrListValue<T>(Func<T> valueFunc) => new FuncOrListValue<T>(valueFunc);
+
+        public static implicit operator FuncOrListValue<T>(T[] list) => new FuncOrListValue<T>(list);
+
+        public static implicit operator FuncOrListValue<T>(List<T> list) => new FuncOrListValue<T>(list);
+
+        public static implicit operator FuncOrListValue<T>(Func<IEnumerable<T>> listFunc) => new FuncOrListValue<T>(listFunc);
     }
 }

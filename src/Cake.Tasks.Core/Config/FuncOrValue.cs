@@ -7,12 +7,12 @@ namespace Cake.Tasks.Core
         private readonly T _value;
         private readonly Func<T> _func;
 
-        public FuncOrValue(T value)
+        private FuncOrValue(T value)
         {
             _value = value;
         }
 
-        public FuncOrValue(Func<T> func)
+        private FuncOrValue(Func<T> func)
         {
             if (func is null)
                 throw new ArgumentNullException(nameof(func));
@@ -29,5 +29,9 @@ namespace Cake.Tasks.Core
             T value = Resolve();
             return value?.ToString() ?? "[NULL]";
         }
+
+        public static implicit operator FuncOrValue<T>(T value) => new FuncOrValue<T>(value);
+
+        public static implicit operator FuncOrValue<T>(Func<T> func) => new FuncOrValue<T>(func);
     }
 }

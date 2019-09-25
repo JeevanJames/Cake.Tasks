@@ -10,7 +10,8 @@ using Cake.Tasks.DotNetCore;
 Configuration(tc =>
 {
     var dncc = tc.Load<DotNetCoreConfig>();
-    dncc.BuildProjectFile = new FuncOrValue<string>(@".\TestLibrary\TestLibrary.csproj");
+    dncc.BuildProjectFiles = new[] { @".\TestLibrary\TestLibrary.csproj", @".\TestLibrary.Tests\TestLibrary.Tests.csproj" };
+    dncc.TestProjectFiles = @".\TestLibrary.Tests\TestLibrary.Tests.csproj";
 });
 
 var target = Argument("target", "Default");

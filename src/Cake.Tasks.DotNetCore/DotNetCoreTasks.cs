@@ -1,6 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 using Cake.Common.Tools.DotNetCore;
+using Cake.Common.Tools.DotNetCore.Build;
 using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Tasks.Core;
@@ -16,48 +20,58 @@ namespace Cake.Tasks.DotNetCore
         public static void Clean(ICakeContext context, TaskConfig config)
         {
             var cfg = config.Load<DotNetCoreConfig>();
-            string cleanProjectFile = cfg.BuildProjectFile.Resolve();
-            if (cleanProjectFile is null)
+            IEnumerable<string> cleanProjectFiles = cfg.BuildProjectFiles.Resolve();
+            if (cleanProjectFiles is null || !cleanProjectFiles.Any())
             {
                 context.Log.Warning("No solution or project files found to clean.");
                 return;
             }
 
-            context.DotNetCoreClean(cleanProjectFile);
+            foreach (string cleanProjectFile in cleanProjectFiles)
+                context.DotNetCoreClean(cleanProjectFile);
         }
 
         [CoreTask(CoreTask.Build)]
         public static void Build(this ICakeContext context, TaskConfig config)
         {
             var cfg = config.Load<DotNetCoreConfig>();
-            string buildProjectFile = cfg.BuildProjectFile.Resolve();
-            if (buildProjectFile is null)
+            var env = config.Load<EnvConfig>();
+
+            IEnumerable<string> buildProjectFiles = cfg.BuildProjectFiles.Resolve();
+            if (buildProjectFiles is null || !buildProjectFiles.Any())
             {
                 context.Log.Warning("No solution or project files found to build.");
                 return;
             }
 
-            context.DotNetCoreBuild(buildProjectFile);
+            foreach (string buildProjectFile in buildProjectFiles)
+            {
+                context.DotNetCoreBuild(buildProjectFile, new DotNetCoreBuildSettings
+                {
+                    Configuration = env.Configuration,
+                });
+            }
         }
 
         [CoreTask(CoreTask.Test)]
         public static void Test(this ICakeContext context, TaskConfig config)
         {
             var cfg = config.Load<DotNetCoreConfig>();
-            string testProjectFile = cfg.BuildProjectFile.Resolve();
-            if (testProjectFile is null)
+            IEnumerable<string> testProjectFiles = cfg.TestProjectFiles.Resolve();
+            if (testProjectFiles is null || !testProjectFiles.Any())
             {
                 context.Log.Warning("No solution or project files found to test.");
                 return;
             }
 
-            context.DotNetCoreTest(testProjectFile);
+            foreach (string testProjectFile in testProjectFiles)
+                context.DotNetCoreTest(testProjectFile);
         }
 
         [Config]
-        public static void Configuration(this ICakeContext context, TaskConfig config)
+        public static void ConfigureDotNetCore(this ICakeContext context, TaskConfig config)
         {
-            string GetProjectFiles()
+            string[] GetProjectFiles()
             {
                 var env = config.Load<EnvConfig>();
                 string workingDirectory = env.WorkingDirectory ?? Directory.GetCurrentDirectory();
@@ -68,14 +82,15 @@ namespace Cake.Tasks.DotNetCore
                 if (projectFiles.Length == 0)
                     projectFiles = Directory.GetFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories);
                 if (projectFiles.Length > 1)
-                    return projectFiles[0];
+                    return projectFiles;
                 if (projectFiles.Length == 1)
-                    return projectFiles[0];
-                return null;
+                    return new[] { projectFiles[0] };
+                return Array.Empty<string>();
             }
 
             var cfg = config.Load<DotNetCoreConfig>();
-            cfg.BuildProjectFile = new FuncOrValue<string>(GetProjectFiles);
+            cfg.BuildProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
+            cfg.TestProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
         }
     }
 }
