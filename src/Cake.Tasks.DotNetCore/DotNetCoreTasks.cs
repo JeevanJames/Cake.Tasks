@@ -33,7 +33,7 @@ namespace Cake.Tasks.DotNetCore
         }
 
         [CoreTask(CoreTask.Build)]
-        public static void Build(this ICakeContext context, TaskConfig config)
+        public static void Build(ICakeContext context, TaskConfig config)
         {
             var cfg = config.Load<DotNetCoreConfig>();
             var env = config.Load<EnvConfig>();
@@ -55,9 +55,15 @@ namespace Cake.Tasks.DotNetCore
         }
 
         [CoreTask(CoreTask.Test)]
-        public static void Test(this ICakeContext context, TaskConfig config)
+        public static void Test(ICakeContext context, TaskConfig config)
         {
             var cfg = config.Load<DotNetCoreConfig>();
+            if (cfg.SkipTests)
+            {
+                context.Log.Information("Skipping tests.");
+                return;
+            }
+
             IEnumerable<string> testProjectFiles = cfg.TestProjectFiles.Resolve();
             if (testProjectFiles is null || !testProjectFiles.Any())
             {
@@ -70,7 +76,7 @@ namespace Cake.Tasks.DotNetCore
         }
 
         [Config]
-        public static void ConfigureDotNetCore(this ICakeContext context, TaskConfig config)
+        public static void ConfigureDotNetCore(ICakeContext context, TaskConfig config)
         {
             string[] GetProjectFiles()
             {
@@ -90,6 +96,7 @@ namespace Cake.Tasks.DotNetCore
             }
 
             var cfg = config.Load<DotNetCoreConfig>();
+            cfg.SkipTests = false;
             cfg.BuildProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
             cfg.TestProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
         }

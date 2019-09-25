@@ -33,5 +33,7 @@ namespace Cake.Tasks.Config
         public static implicit operator FuncOrValue<T>(T value) => new FuncOrValue<T>(value);
 
         public static implicit operator FuncOrValue<T>(Func<T> func) => new FuncOrValue<T>(func);
+
+        public static implicit operator T(FuncOrValue<T> instance) => instance.Resolve();
     }
 }

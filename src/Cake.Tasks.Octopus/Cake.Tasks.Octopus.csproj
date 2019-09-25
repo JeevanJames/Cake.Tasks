@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Cake.Tasks.Octopus</AssemblyName>
+    <RootNamespace>Cake.Tasks.Octopus</RootNamespace>
+    <DocumentationFile>Properties\$(AssemblyName).xml</DocumentationFile>
+    <Description>Cake Octopus Deploy tasks</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cake.Common" Version="0.34.1" />
+    <PackageReference Include="Cake.Core" Version="0.34.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
+  </ItemGroup>
+  
+</Project>

@@ -23,12 +23,12 @@ namespace Cake.Tasks.Config
 
         private Action<TaskConfig> _setup;
 
-        public void SetDeferredSetup(Action<TaskConfig> setup)
+        internal void SetDeferredSetup(Action<TaskConfig> setup)
         {
             _setup = setup;
         }
 
-        public void PerformDeferredSetup()
+        internal void PerformDeferredSetup()
         {
             _setup?.Invoke(this);
         }

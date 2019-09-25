@@ -7,6 +7,12 @@
         {
         }
 
+        public FuncOrValue<bool> SkipTests
+        {
+            get => Get<FuncOrValue<bool>>(Keys.SkipTests);
+            set => Set(Keys.SkipTests, value);
+        }
+
         public FuncOrListValue<string> BuildProjectFiles
         {
             get => Get<FuncOrListValue<string>>(Keys.BuildProjectFiles);
@@ -23,6 +29,7 @@
         {
             public const string BuildProjectFiles = "DotNetCore.BuildProjectFiles";
             public const string TestProjectFiles = "DotNetCore.TestProjectFiles";
+            public const string SkipTests = "DotNetCore.SkipTests";
         }
     }
 }
