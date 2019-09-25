@@ -99,7 +99,7 @@ namespace Cake.Tasks.Module
 
         public Task<CakeReport> RunTargetAsync(ICakeContext context, IExecutionStrategy strategy, ExecutionSettings settings)
         {
-            RegisterPlugins();
+            InitializeCakeTasksSystem();
             return _engine.RunTargetAsync(context, strategy, settings);
         }
     }

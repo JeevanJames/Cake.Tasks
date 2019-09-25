@@ -15,6 +15,10 @@ namespace Cake.Tasks.Core
             if (setter is null)
                 throw new ArgumentNullException(nameof(setter));
 
+            // Don't run this setter now. Wait for all the config tasks to be called to initialize
+            // the configs, and then call this to override custom values.
+            // The setter is actually called by calling TaskConfig.Current.PerformDeferredSetup at
+            // various places in the TasksEngine.
             TaskConfig.Current.SetDeferredSetup(setter);
         }
     }

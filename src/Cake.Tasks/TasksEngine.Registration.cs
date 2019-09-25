@@ -1,7 +1,6 @@
 ﻿#pragma warning disable S3885 // "Assembly.Load" should be used
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,22 +16,73 @@ namespace Cake.Tasks.Module
     {
         private List<RegisteredTask> _registeredTasks;
 
-        private void RegisterPlugins()
+        private void InitializeCakeTasksSystem()
         {
             InitializeConfiguration();
+            DiscoverPluginTasks();
+            RegisterPluginTasks();
+            RegisterBuiltInTasks();
+            RegisterCiTasks();
+        }
 
+        private void InitializeConfiguration()
+        {
+            RegisterSetupAction(ctx =>
+            {
+                Log.Information("Initializing Cake.Tasks configuration.");
+
+                var config = TaskConfig.Current;
+
+                var env = config.Load<EnvConfig>();
+                env.Configuration = ctx.Arguments.GetArgument("Configuration") ?? "Release";
+                env.IsCi = false;
+                env.WorkingDirectory = ctx.Environment.WorkingDirectory.FullPath;
+
+                var ci = config.Load<CiConfig>();
+                ci.ArtifactsDirectory = Path.Combine(env.WorkingDirectory, "artifacts");
+                ci.BuildNumber = 1;
+                ci.Version = "0.1.0";
+
+                return config;
+            });
+        }
+
+        private void DiscoverPluginTasks()
+        {
+            // Figure out the plugins root directory
             string pluginsDirKey = Context.Configuration.GetValue("CakeTasks_PluginsDirKey") ?? "Paths_Addins";
             string pluginsDir = Path.GetFullPath(Context.Configuration.GetValue(pluginsDirKey));
+
+            // Figure out the plugin loader type and create an instance
             string pluginLoaderClassName = Context.Configuration.GetValue("CakeTasks_PluginLoader") ?? "ProductionPluginLoader";
             Type pluginLoaderType = Assembly.GetExecutingAssembly().GetExportedTypes()
                 .SingleOrDefault(type => type.Name.Equals(pluginLoaderClassName, StringComparison.OrdinalIgnoreCase));
             var pluginLoader = (PluginLoader)Activator.CreateInstance(pluginLoaderType, pluginsDir, Log);
-            pluginLoader.LoadPlugins();
-            _registeredTasks = pluginLoader.RegisteredTasks;
 
-            RegisterPluginTasks();
-            RegisterBuiltInTasks();
-            CreateCiTasks();
+            // Discover plugins from the plugins loader
+            _registeredTasks = pluginLoader.LoadPlugins().ToList();
+        }
+
+        private void RegisterPluginTasks()
+        {
+            foreach (RegisteredTask registeredTask in _registeredTasks)
+            {
+                CakeTaskBuilder builder;
+
+                if (registeredTask.Method.GetParameters().Length == 2)
+                {
+                    var action = (Action<ICakeContext, TaskConfig>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
+                    builder = RegisterTask(registeredTask.Name).Does(action);
+                }
+                else
+                {
+                    var action = (Action<ICakeContext>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext>));
+                    builder = RegisterTask(registeredTask.Name).Does(action);
+                }
+
+                if (registeredTask.AttributeType == typeof(ConfigAttribute))
+                    builder.Description($"Config for {registeredTask.Method.Name} from {registeredTask.Method.DeclaringType.FullName} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})");
+            }
         }
 
         private void RegisterBuiltInTasks()
@@ -89,42 +139,7 @@ namespace Cake.Tasks.Module
                 .Does(() => TaskConfig.Current.PerformDeferredSetup());
         }
 
-        private void InitializeConfiguration()
-        {
-            RegisterSetupAction(ctx =>
-            {
-                var config = TaskConfig.Current;
-
-                var env = config.Load<EnvConfig>();
-                env.WorkingDirectory = ctx.Environment.WorkingDirectory.FullPath;
-
-                return config;
-            });
-        }
-
-        private void RegisterPluginTasks()
-        {
-            foreach (RegisteredTask registeredTask in _registeredTasks)
-            {
-                CakeTaskBuilder builder;
-
-                if (registeredTask.Method.GetParameters().Length == 2)
-                {
-                    var action = (Action<ICakeContext, TaskConfig>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
-                    builder = RegisterTask(registeredTask.Name).Does(action);
-                }
-                else
-                {
-                    var action = (Action<ICakeContext>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext>));
-                    builder = RegisterTask(registeredTask.Name).Does(action);
-                }
-
-                if (registeredTask.AttributeType == typeof(ConfigAttribute))
-                    builder.Description($"Config for {registeredTask.Method.Name} from {registeredTask.Method.DeclaringType.FullName} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})");
-            }
-        }
-
-        private void CreateCiTasks()
+        private void RegisterCiTasks()
         {
             string env = Context.Arguments.GetArgument("env");
             IEnumerable<RegisteredTask> envTasks;
@@ -133,7 +148,7 @@ namespace Cake.Tasks.Module
             else
                 envTasks = _registeredTasks.Where(rt => rt.Environment is null || rt.Environment.Equals(env, StringComparison.OrdinalIgnoreCase));
 
-            CakeTaskBuilder ciTask = RegisterTask("CI").Description("Performs CI (Build and Test)");
+            CakeTaskBuilder ciTask = RegisterTask("CI").Description("Performs CI (Build and test)");
 
             // Config dependencies
             IEnumerable<RegisteredTask> configTasks = envTasks
@@ -191,24 +206,5 @@ namespace Cake.Tasks.Module
             foreach (RegisteredTask afterTask in afterTasks)
                 builder = builder.IsDependentOn(afterTask.Name);
         }
-    }
-
-    internal sealed class RegisteredTask
-    {
-        internal Type AttributeType { get; set; }
-
-        internal MethodInfo Method { get; set; }
-
-        internal string Name { get; set; }
-
-        internal string Environment { get; set; }
-
-        // Optional properties - specific to task type
-
-        internal CoreTask? CoreTask { get; set; }
-
-        internal TaskEventType? EventType { get; set; }
-
-        internal int Order { get; set; }
     }
 }

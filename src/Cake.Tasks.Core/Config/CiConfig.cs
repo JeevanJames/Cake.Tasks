@@ -27,18 +27,11 @@ namespace Cake.Tasks.Core
             set => Set(Keys.ArtifactsDirectory, value);
         }
 
-        public string Configuration
-        {
-            get => Get<string>(Keys.Configuration);
-            set => Set(Keys.Configuration, value);
-        }
-
         public static class Keys
         {
             public const string BuildNumber = "CI.BuildNumber";
             public const string Version = "CI.Version";
             public const string ArtifactsDirectory = "CI.ArtifactsDirectory";
-            public const string Configuration = "CI.Configuration";
         }
     }
 }

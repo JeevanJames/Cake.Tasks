@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 
 using Cake.Core;
@@ -12,6 +10,9 @@ using Cake.Tasks.Core;
 
 namespace Cake.Tasks.Module
 {
+    /// <summary>
+    ///     Encapsulates the logic to load Cake.Tasks plugins.
+    /// </summary>
     public abstract class PluginLoader
     {
         protected PluginLoader(string pluginsDir, ICakeLog log)
@@ -20,15 +21,13 @@ namespace Cake.Tasks.Module
             Log = log;
         }
 
-        internal List<RegisteredTask> RegisteredTasks { get; } = new List<RegisteredTask>();
-
-        public abstract void LoadPlugins();
+        internal abstract IEnumerable<RegisteredTask> LoadPlugins();
 
         protected string PluginsDir { get; }
 
         protected ICakeLog Log { get; }
 
-        protected void FindPlugins(string dllFile)
+        internal IEnumerable<RegisteredTask> FindPlugins(string dllFile)
         {
             Assembly assembly = Assembly.LoadFile(dllFile);
 
@@ -55,7 +54,6 @@ namespace Cake.Tasks.Module
                         Method = method,
                         Environment = taskAttribute.Environment,
                     };
-                    RegisteredTasks.Add(registeredTask);
 
                     switch (taskAttribute)
                     {
@@ -76,6 +74,8 @@ namespace Cake.Tasks.Module
                             registeredTask.Order = attr.Order;
                             break;
                     }
+
+                    yield return registeredTask;
                 }
             }
         }
@@ -102,67 +102,5 @@ namespace Cake.Tasks.Module
         }
 
         protected abstract Assembly ResolveAssembly(object sender, ResolveEventArgs args);
-    }
-
-    public sealed class ProductionPluginLoader : PluginLoader
-    {
-        public ProductionPluginLoader(string pluginsDir, ICakeLog log)
-            : base(pluginsDir, log)
-        {
-        }
-
-        public override void LoadPlugins()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
-
-            string[] cakeTasksDirs = Directory.GetDirectories(PluginsDir, "Cake.Tasks.*", SearchOption.TopDirectoryOnly);
-            foreach (string cakeTasksDir in cakeTasksDirs)
-            {
-                string dllDir = Path.Combine(cakeTasksDir, "lib", "netstandard2.0");
-                if (!Directory.Exists(dllDir))
-                    continue;
-
-                string[] dllFiles = Directory.GetFiles(dllDir, "*.dll", SearchOption.TopDirectoryOnly);
-
-                foreach (string dllFile in dllFiles)
-                    FindPlugins(dllFile);
-            }
-        }
-
-        protected override Assembly ResolveAssembly(object sender, ResolveEventArgs args)
-        {
-            var assemblyName = new AssemblyName(args.Name);
-            string assemblyPath = Directory
-                .GetFiles(PluginsDir, $"{assemblyName.Name}.dll", SearchOption.AllDirectories)
-                .FirstOrDefault();
-            Log.Verbose($"[Assembly Lookup] {assemblyName.Name}.dll");
-            return Assembly.LoadFile(assemblyPath);
-        }
-    }
-
-    public sealed class DebugPluginLoader : PluginLoader
-    {
-        public DebugPluginLoader(string pluginsDir, ICakeLog log)
-            : base(pluginsDir, log)
-        {
-        }
-
-        public override void LoadPlugins()
-        {
-            string[] dllFiles = Directory.GetFiles(PluginsDir, "Cake.Tasks.*.dll", SearchOption.TopDirectoryOnly);
-
-            foreach (string dllFile in dllFiles)
-                FindPlugins(dllFile);
-        }
-
-        protected override Assembly ResolveAssembly(object sender, ResolveEventArgs args)
-        {
-            var assemblyName = new AssemblyName(args.Name);
-            string assemblyPath = Directory
-                .GetFiles(PluginsDir, $"{assemblyName.Name}.dll", SearchOption.TopDirectoryOnly)
-                .FirstOrDefault();
-            Log.Verbose($"[Assembly Lookup] {assemblyName.Name}.dll");
-            return Assembly.LoadFile(assemblyPath);
-        }
     }
 }

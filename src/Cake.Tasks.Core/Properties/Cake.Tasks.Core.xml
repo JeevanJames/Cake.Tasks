@@ -4,5 +4,15 @@
         <name>Cake.Tasks.Core</name>
     </assembly>
     <members>
+        <member name="P:Cake.Tasks.Core.EnvConfig.IsCi">
+            <summary>
+                Gets or sets a value indicating whether Cake is running in a CI environment.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Core.EnvConfig.WorkingDirectory">
+            <summary>
+                Gets or sets the working directory.
+            </summary>
+        </member>
     </members>
 </doc>
