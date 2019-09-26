@@ -10,6 +10,7 @@
 
 #r ".\tools\Cake.Tasks.Core.dll"
 #r ".\tools\Cake.Tasks.DotNetCore.dll"
+#r ".\tools\Cake.Tasks.Local.dll"
 #r ".\tools\Cake.Tasks.Octopus.dll"
 // #r ".\tools\Cake.Tasks.Sonar.dll"
 

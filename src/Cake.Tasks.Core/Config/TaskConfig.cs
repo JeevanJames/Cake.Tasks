@@ -39,31 +39,4 @@ namespace Cake.Tasks.Config
             }
         }
     }
-
-    public abstract class PluginConfig
-    {
-        private readonly TaskConfig _taskConfig;
-
-        protected PluginConfig(TaskConfig taskConfig)
-        {
-            _taskConfig = taskConfig;
-        }
-
-        protected T Get<T>(string name)
-        {
-            if (!_taskConfig.Data.TryGetValue(name, out object value))
-                return default;
-            if (value is null)
-                return default;
-            return (T)value;
-        }
-
-        protected void Set<T>(string name, T value)
-        {
-            if (_taskConfig.Data.ContainsKey(name))
-                _taskConfig.Data[name] = value;
-            else
-                _taskConfig.Data.Add(name, value);
-        }
-    }
 }

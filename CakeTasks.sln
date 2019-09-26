@@ -13,9 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.DotNetCore", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.Env.Tfs", "src\Cake.Tasks.Env.Tfs\Cake.Tasks.Env.Tfs.csproj", "{D06EC759-C982-46CB-8DD1-C5614F4C04F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Sonar", "src\Cake.Tasks.Sonar\Cake.Tasks.Sonar.csproj", "{4434ED51-7745-4FDD-AAB6-131C8B5A3213}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.Sonar", "src\Cake.Tasks.Sonar\Cake.Tasks.Sonar.csproj", "{4434ED51-7745-4FDD-AAB6-131C8B5A3213}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Octopus", "src\Cake.Tasks.Octopus\Cake.Tasks.Octopus.csproj", "{089AAD00-5D2F-417C-83FC-B5E79A9A5157}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.Octopus", "src\Cake.Tasks.Octopus\Cake.Tasks.Octopus.csproj", "{089AAD00-5D2F-417C-83FC-B5E79A9A5157}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Local", "src\Cake.Tasks.Local\Cake.Tasks.Local.csproj", "{38688A8B-3EC4-48AC-A4B9-C811449C7B75}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +101,18 @@ Global
 		{089AAD00-5D2F-417C-83FC-B5E79A9A5157}.Release|x64.Build.0 = Release|Any CPU
 		{089AAD00-5D2F-417C-83FC-B5E79A9A5157}.Release|x86.ActiveCfg = Release|Any CPU
 		{089AAD00-5D2F-417C-83FC-B5E79A9A5157}.Release|x86.Build.0 = Release|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Debug|x64.Build.0 = Debug|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Debug|x86.Build.0 = Debug|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Release|x64.ActiveCfg = Release|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Release|x64.Build.0 = Release|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Release|x86.ActiveCfg = Release|Any CPU
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,6 +124,7 @@ Global
 		{D06EC759-C982-46CB-8DD1-C5614F4C04F9} = {1F25E712-9FA5-4F2D-B255-BC961FE32C14}
 		{4434ED51-7745-4FDD-AAB6-131C8B5A3213} = {1F25E712-9FA5-4F2D-B255-BC961FE32C14}
 		{089AAD00-5D2F-417C-83FC-B5E79A9A5157} = {1F25E712-9FA5-4F2D-B255-BC961FE32C14}
+		{38688A8B-3EC4-48AC-A4B9-C811449C7B75} = {1F25E712-9FA5-4F2D-B255-BC961FE32C14}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {73A98824-1C6F-4682-918A-19493E5480CD}

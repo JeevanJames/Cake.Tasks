@@ -2,6 +2,7 @@
 using System.Linq;
 using Cake.Common.Tools.OctopusDeploy;
 using Cake.Core;
+using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
@@ -21,6 +22,8 @@ namespace Cake.Tasks.Octopus
             if (string.IsNullOrWhiteSpace(octopus.PackageId))
                 throw new TaskConfigException("Configure a package ID for the Octopus deployment.");
 
+            ctx.Log.Information("Creating Octopus package");
+
             var settings = new OctopusPackSettings
             {
                 BasePath = octopus.Pack.BasePath.Resolve(),
@@ -32,10 +35,16 @@ namespace Cake.Tasks.Octopus
 
             ctx.OctoPack(octopus.PackageId, settings);
 
+            ctx.Log.Information("Pushing Octopus package");
+
             string packageFile = System.IO.Directory.GetFiles(octopus.Pack.OutFolder, $"{octopus.PackageId}*.zip").FirstOrDefault();
+            ctx.Log.Information($"API Key: {octopus.ApiKey}");
             ctx.OctoPush(octopus.Server, octopus.ApiKey, new FilePath(packageFile), new OctopusPushSettings
             {
+                ApiKey = octopus.ApiKey,
             });
+
+            ctx.Log.Information("Creating Octopus release");
 
             var releaseSettings = new CreateReleaseSettings
             {
