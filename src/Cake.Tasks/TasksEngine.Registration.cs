@@ -82,6 +82,7 @@ namespace Cake.Tasks.Module
                     builder = RegisterTask(registeredTask.Name).Does(action);
                 }
 
+                // For config tasks, add a description
                 if (registeredTask.AttributeType == typeof(ConfigAttribute))
                     builder.Description($"Config for {registeredTask.Method.Name} from {registeredTask.Method.DeclaringType.FullName} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})");
             }
@@ -89,56 +90,85 @@ namespace Cake.Tasks.Module
 
         private void RegisterBuiltInTasks()
         {
-            RegisterTask("Default")
-                .Does(context =>
-                {
-                    context.Log.Information("Task List");
-                    context.Log.Information("---------");
-                    foreach (ICakeTaskInfo task in Tasks)
-                    {
-                        context.Log.Information(task.Name);
-                        if (!string.IsNullOrWhiteSpace(task.Description))
-                            context.Log.Information($"    {task.Description}");
-                    }
-                });
-
-            RegisterTask("List-Envs")
-                .Description("Lists all available environments.")
-                .Does(context =>
-                {
-                    IList<string> environments = _registeredTasks
-                        .Select(task => task.Environment)
-                        .Distinct(StringComparer.OrdinalIgnoreCase)
-                        .OrderBy(env => env)
-                        .ToList();
-
-                    if (environments.Count > 0)
-                    {
-                        context.Log.Information("Available Environments");
-                        context.Log.Information("----------------------");
-                        foreach (string env in environments)
-                            context.Log.Information(env);
-                    }
-                    else
-                        context.Log.Information("No environments found!");
-                });
-
-            CakeTaskBuilder listConfigsTask = RegisterTask("List-Configs")
-                .Description("Lists all available configurations.");
-            IEnumerable<RegisteredTask> configTasks = _registeredTasks.Where(rt => rt.AttributeType == typeof(ConfigAttribute));
-            foreach (RegisteredTask configTask in configTasks)
-                listConfigsTask = listConfigsTask.IsDependentOn(configTask.Name);
-            listConfigsTask = listConfigsTask.IsDependentOn("Config_DeferredSetup");
-            listConfigsTask.Does<TaskConfig>((context, config) =>
+            void RegisterDefaultTask()
             {
-                context.Log.Information("Available Configurations");
-                context.Log.Information("------------------------");
-                foreach (KeyValuePair<string, object> kvp in config.Data.OrderBy(kvp => kvp.Key))
-                    context.Log.Information($"{kvp.Key} = {kvp.Value?.ToString() ?? "[NULL]"}");
-            });
+                RegisterTask("Default")
+                    .Does(context =>
+                    {
+                        context.Log.Information("Task List");
+                        context.Log.Information("---------");
+                        foreach (ICakeTaskInfo task in Tasks)
+                        {
+                            context.Log.Information(task.Name);
+                            if (!string.IsNullOrWhiteSpace(task.Description))
+                                context.Log.Information($"    {task.Description}");
+                        }
+                    });
+            }
 
-            RegisterTask("Config_DeferredSetup")
-                .Does(() => TaskConfig.Current.PerformDeferredSetup());
+            void RegisterListEnvsTask()
+            {
+                RegisterTask("List-Envs")
+                    .Description("Lists all available environments.")
+                    .Does(context =>
+                    {
+                        IList<string> environments = _registeredTasks
+                            .Select(task => task.Environment)
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .OrderBy(env => env)
+                            .ToList();
+
+                        if (environments.Count > 0)
+                        {
+                            context.Log.Information("Available Environments");
+                            context.Log.Information("----------------------");
+                            foreach (string env in environments)
+                                context.Log.Information(env);
+                        }
+                        else
+                            context.Log.Information("No environments found!");
+                    });
+            }
+
+            void RegisterListConfigsTask()
+            {
+                CakeTaskBuilder listConfigsTask = RegisterTask("List-Configs")
+                    .Description("Lists all available configurations.");
+                IEnumerable<RegisteredTask> configTasks = _registeredTasks.Where(rt => rt.AttributeType == typeof(ConfigAttribute));
+                foreach (RegisteredTask configTask in configTasks)
+                    listConfigsTask = listConfigsTask.IsDependentOn(configTask.Name);
+                listConfigsTask = listConfigsTask.IsDependentOn("Config-Finalize");
+                listConfigsTask.Does<TaskConfig>((context, config) =>
+                {
+                    context.Log.Information("Available Configurations");
+                    context.Log.Information("------------------------");
+                    foreach (KeyValuePair<string, object> kvp in config.Data.OrderBy(kvp => kvp.Key))
+                        context.Log.Information($"{kvp.Key} = {kvp.Value?.ToString() ?? "[NULL]"}");
+                });
+            }
+
+            void RegisterDeferredSetupTask()
+            {
+                RegisterTask("Config-Finalize")
+                    .Does(ctx =>
+                    {
+                        TaskConfig config = TaskConfig.Current;
+
+                        config.PerformDeferredSetup();
+
+                        IDictionary<string, string> envVars = ctx.Environment.GetEnvironmentVariables();
+                        foreach (var envVar in envVars)
+                        {
+                            if (config.Data.ContainsKey(envVar.Key))
+                                config.Data[envVar.Key] = envVar.Value;
+                        }
+                    });
+            }
+
+            RegisterDefaultTask();
+            RegisterListEnvsTask();
+            RegisterListConfigsTask();
+            RegisterDeferredSetupTask();
         }
 
         private void RegisterCiTasks()
@@ -159,7 +189,7 @@ namespace Cake.Tasks.Module
             foreach (RegisteredTask configTask in configTasks)
                 ciTask = ciTask.IsDependentOn(configTask.Name);
 
-            ciTask = ciTask.IsDependentOn("Config_DeferredSetup");
+            ciTask = ciTask.IsDependentOn("Config-Finalize");
 
             // Build task
             RegisteredTask buildTask = envTasks

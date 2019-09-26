@@ -2,7 +2,7 @@
 
 namespace Cake.Tasks.Config
 {
-    public sealed class FuncOrValue<T>
+    public sealed class FuncOrValue<T> : IStringConvertibleType
     {
         private readonly T _value;
         private readonly Func<T> _func;
@@ -35,5 +35,9 @@ namespace Cake.Tasks.Config
         public static implicit operator FuncOrValue<T>(Func<T> func) => new FuncOrValue<T>(func);
 
         public static implicit operator T(FuncOrValue<T> instance) => instance.Resolve();
+    }
+
+    public interface IStringConvertibleType
+    {
     }
 }

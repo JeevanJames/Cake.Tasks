@@ -11,9 +11,6 @@ namespace Cake.Tasks.Config
         {
         }
 
-        internal IDictionary<string, object> Data { get; } =
-            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-
         public T Load<T>()
             where T : PluginConfig
         {
@@ -21,16 +18,25 @@ namespace Cake.Tasks.Config
             return config;
         }
 
-        private Action<TaskConfig> _setup;
+        internal IDictionary<string, object> Data { get; } =
+            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+        private List<Action<TaskConfig>> _deferredSetups;
 
         internal void SetDeferredSetup(Action<TaskConfig> setup)
         {
-            _setup = setup;
+            if (_deferredSetups is null)
+                _deferredSetups = new List<Action<TaskConfig>>();
+            _deferredSetups.Add(setup);
         }
 
         internal void PerformDeferredSetup()
         {
-            _setup?.Invoke(this);
+            if (_deferredSetups != null)
+            {
+                foreach (Action<TaskConfig> deferredSetup in _deferredSetups)
+                    deferredSetup(this);
+            }
         }
     }
 

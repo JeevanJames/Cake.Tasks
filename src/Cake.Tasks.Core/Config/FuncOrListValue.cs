@@ -72,5 +72,7 @@ namespace Cake.Tasks.Config
         public static implicit operator FuncOrListValue<T>(List<T> list) => new FuncOrListValue<T>(list);
 
         public static implicit operator FuncOrListValue<T>(Func<IEnumerable<T>> listFunc) => new FuncOrListValue<T>(listFunc);
+
+        public static implicit operator List<T>(FuncOrListValue<T> instance) => instance.Resolve().ToList();
     }
 }

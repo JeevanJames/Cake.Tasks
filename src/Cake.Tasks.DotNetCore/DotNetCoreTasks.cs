@@ -5,6 +5,8 @@ using System.Linq;
 
 using Cake.Common.Tools.DotNetCore;
 using Cake.Common.Tools.DotNetCore.Build;
+using Cake.Common.Tools.DotNetCore.Clean;
+using Cake.Common.Tools.DotNetCore.Test;
 using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Tasks.Config;
@@ -18,10 +20,12 @@ namespace Cake.Tasks.DotNetCore
     public static class DotNetCoreTasks
     {
         [TaskEvent(TaskEventType.BeforeTask, CoreTask.Build)]
-        public static void Clean(ICakeContext context, TaskConfig config)
+        public static void BeforeDotNetCoreBuild(ICakeContext context, TaskConfig config)
         {
+            context.DotNetCoreBuildServerShutdown();
+
             var cfg = config.Load<DotNetCoreConfig>();
-            IEnumerable<string> cleanProjectFiles = cfg.BuildProjectFiles.Resolve();
+            IEnumerable<string> cleanProjectFiles = cfg.Build.ProjectFiles.Resolve();
             if (cleanProjectFiles is null || !cleanProjectFiles.Any())
             {
                 context.Log.Warning("No solution or project files found to clean.");
@@ -29,16 +33,21 @@ namespace Cake.Tasks.DotNetCore
             }
 
             foreach (string cleanProjectFile in cleanProjectFiles)
-                context.DotNetCoreClean(cleanProjectFile);
+            {
+                context.DotNetCoreClean(cleanProjectFile, new DotNetCoreCleanSettings
+                {
+                    Verbosity = context.Log.Verbosity.ToVerbosity(),
+                });
+            }
         }
 
         [CoreTask(CoreTask.Build)]
         public static void Build(ICakeContext context, TaskConfig config)
         {
-            var cfg = config.Load<DotNetCoreConfig>();
+            var build = config.Load<DotNetCoreConfig>().Build;
             var env = config.Load<EnvConfig>();
 
-            IEnumerable<string> buildProjectFiles = cfg.BuildProjectFiles.Resolve();
+            List<string> buildProjectFiles = build.ProjectFiles;
             if (buildProjectFiles is null || !buildProjectFiles.Any())
             {
                 context.Log.Warning("No solution or project files found to build.");
@@ -50,6 +59,8 @@ namespace Cake.Tasks.DotNetCore
                 context.DotNetCoreBuild(buildProjectFile, new DotNetCoreBuildSettings
                 {
                     Configuration = env.Configuration,
+                    NoRestore = build.NoRestore,
+                    Verbosity = context.Log.Verbosity.ToVerbosity(),
                 });
             }
         }
@@ -57,14 +68,17 @@ namespace Cake.Tasks.DotNetCore
         [CoreTask(CoreTask.Test)]
         public static void Test(ICakeContext context, TaskConfig config)
         {
-            var cfg = config.Load<DotNetCoreConfig>();
-            if (cfg.SkipTests)
+            var test = config.Load<DotNetCoreConfig>().Test;
+
+            if (test.Skip)
             {
                 context.Log.Information("Skipping tests.");
                 return;
             }
 
-            IEnumerable<string> testProjectFiles = cfg.TestProjectFiles.Resolve();
+            var env = config.Load<EnvConfig>();
+
+            List<string> testProjectFiles = test.ProjectFiles;
             if (testProjectFiles is null || !testProjectFiles.Any())
             {
                 context.Log.Warning("No solution or project files found to test.");
@@ -72,7 +86,21 @@ namespace Cake.Tasks.DotNetCore
             }
 
             foreach (string testProjectFile in testProjectFiles)
-                context.DotNetCoreTest(testProjectFile);
+            {
+                context.DotNetCoreTest(testProjectFile, new DotNetCoreTestSettings
+                {
+                    Configuration = env.Configuration,
+                    NoBuild = test.NoBuild,
+                    NoRestore = test.NoRestore,
+                    Verbosity = context.Log.Verbosity.ToVerbosity(),
+                });
+            }
+        }
+
+        [TaskEvent(TaskEventType.AfterTask, CoreTask.Test)]
+        public static void AfterDotNetCoreTest(ICakeContext ctx, TaskConfig cfg)
+        {
+            ctx.DotNetCoreBuildServerShutdown();
         }
 
         [Config]
@@ -96,9 +124,27 @@ namespace Cake.Tasks.DotNetCore
             }
 
             var cfg = config.Load<DotNetCoreConfig>();
-            cfg.SkipTests = false;
-            cfg.BuildProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
-            cfg.TestProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
+
+            cfg.Build.ProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
+            cfg.Build.NoRestore = false;
+
+            cfg.Test.Skip = false;
+            cfg.Test.ProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
+            cfg.Test.NoRestore = false;
+            cfg.Test.NoBuild = false;
+        }
+
+        private static DotNetCoreVerbosity ToVerbosity(this Verbosity verbosity)
+        {
+            return verbosity switch
+            {
+                Verbosity.Diagnostic => DotNetCoreVerbosity.Diagnostic,
+                Verbosity.Minimal => DotNetCoreVerbosity.Minimal,
+                Verbosity.Normal => DotNetCoreVerbosity.Normal,
+                Verbosity.Quiet => DotNetCoreVerbosity.Quiet,
+                Verbosity.Verbose => DotNetCoreVerbosity.Detailed,
+                _ => DotNetCoreVerbosity.Normal
+            };
         }
     }
 }

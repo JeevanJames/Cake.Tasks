@@ -9,7 +9,7 @@ namespace Cake.Tasks.Config
     {
         [CakeMethodAlias]
         [CakeNamespaceImport("Cake.Tasks.Config")]
-        public static void Configuration(this ICakeContext ctx, Action<TaskConfig> setter)
+        public static void ConfigureTasks(this ICakeContext ctx, Action<TaskConfig> setter)
         {
             if (ctx is null)
                 throw new ArgumentNullException(nameof(ctx));
@@ -21,6 +21,21 @@ namespace Cake.Tasks.Config
             // The setter is actually called by calling TaskConfig.Current.PerformDeferredSetup at
             // various places in the TasksEngine.
             TaskConfig.Current.SetDeferredSetup(setter);
+        }
+
+        [CakeMethodAlias]
+        [CakeNamespaceImport("Cake.Tasks.Config")]
+        public static void ConfigureTask<TConfig>(this ICakeContext ctx, Action<TConfig> setter)
+            where TConfig : PluginConfig
+        {
+            if (setter is null)
+                throw new ArgumentNullException(nameof(setter));
+
+            ConfigureTasks(ctx, config =>
+            {
+                var cfg = config.Load<TConfig>();
+                setter(cfg);
+            });
         }
     }
 }

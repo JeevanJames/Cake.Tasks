@@ -66,12 +66,12 @@ namespace Cake.Tasks.Module.PluginLoaders
                             registeredTask.CoreTask = attr.CoreTask;
                             registeredTask.EventType = attr.EventType;
                             string namePrefix = attr.EventType == TaskEventType.BeforeTask ? "Before" : "After";
-                            registeredTask.Name = $"{namePrefix}{attr.CoreTask}_{method.Name}";
+                            registeredTask.Name = $"{namePrefix}{attr.CoreTask}-{method.Name}";
                             break;
                         case ConfigAttribute attr:
                             string uniqueId = Guid.NewGuid().ToString("N");
-                            string envSuffix = attr.Environment is null ? string.Empty : $"_{attr.Environment}";
-                            registeredTask.Name = $"Config_{uniqueId}{envSuffix}";
+                            string envSuffix = attr.Environment is null ? string.Empty : $"-{attr.Environment}";
+                            registeredTask.Name = $"Config-{uniqueId}{envSuffix}";
                             registeredTask.Order = attr.Order;
                             break;
                     }
