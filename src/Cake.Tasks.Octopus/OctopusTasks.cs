@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using Cake.Common.Tools.OctopusDeploy;
 using Cake.Core;
+using Cake.Core.IO;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
 using Cake.Tasks.Octopus;
@@ -30,7 +32,18 @@ namespace Cake.Tasks.Octopus
 
             ctx.OctoPack(octopus.PackageId, settings);
 
-            //ctx.OctoPush("Octopus_Url", "Octopus_ApiKey");
+            string packageFile = System.IO.Directory.GetFiles(octopus.Pack.OutFolder, $"{octopus.PackageId}*.zip").FirstOrDefault();
+            ctx.OctoPush(octopus.Server, octopus.ApiKey, new FilePath(packageFile), new OctopusPushSettings
+            {
+            });
+
+            var releaseSettings = new CreateReleaseSettings
+            {
+                ApiKey = octopus.ApiKey,
+                Server = octopus.Server,
+                DeployTo = octopus.Release.DeployTo,
+            };
+            ctx.OctoCreateRelease(octopus.Release.ProjectName, releaseSettings);
         }
 
         [Config]
@@ -40,11 +53,16 @@ namespace Cake.Tasks.Octopus
             var env = cfg.Load<EnvConfig>();
             var ci = cfg.Load<CiConfig>();
 
+            octopus.Server = "http://localhost";
+            octopus.ApiKey = null;
             octopus.PackageId = null;
 
             octopus.Pack.BasePath = env.WorkingDirectory;
             octopus.Pack.OutFolder = ci.ArtifactsDirectory;
             octopus.Pack.Version = null;
+
+            octopus.Release.ProjectName = null;
+            octopus.Release.DeployTo = null;
         }
     }
 }

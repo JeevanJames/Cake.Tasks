@@ -1,8 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Cake.Tasks.Config
 {
-    public sealed class FuncOrValue<T> : IStringConvertibleType
+    public sealed class FuncOrValue<T> : IStringParsable
     {
         private readonly T _value;
         private readonly Func<T> _func;
@@ -30,6 +31,14 @@ namespace Cake.Tasks.Config
             return value?.ToString() ?? "[NULL]";
         }
 
+        public object FromString(string str)
+        {
+            TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
+            if (!converter.CanConvertFrom(typeof(string)))
+                return default;
+            return converter.ConvertFromString(str);
+        }
+
         public static implicit operator FuncOrValue<T>(T value) => new FuncOrValue<T>(value);
 
         public static implicit operator FuncOrValue<T>(Func<T> func) => new FuncOrValue<T>(func);
@@ -40,7 +49,8 @@ namespace Cake.Tasks.Config
         }
     }
 
-    public interface IStringConvertibleType
+    public interface IStringParsable
     {
+        object FromString(string str);
     }
 }

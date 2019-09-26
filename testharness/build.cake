@@ -18,22 +18,16 @@ using Cake.Common.Tools.DotNetCore.Test;
 ConfigureTask<DotNetCoreConfig>(cfg =>
 {
     cfg.Test.ProjectFiles = @".\TestLibrary.Tests\TestLibrary.Tests.csproj";
-    cfg.Test.Settings = new DotNetCoreTestSettings
-    {
-        NoBuild = true
-    };
     cfg.Publish.ProjectFile = @".\TestLibrary\TestLibrary.csproj";
 });
 
 ConfigureTask<OctopusConfig>((octo, cfg) =>
 {
+    octo.Server = "http://localhost";
     octo.PackageId = "MyPackage";
     octo.Pack.BasePath = @".\TestLibrary\bin\Release\netstandard2.0\publish";
-    octo.Pack.Version = (Func<string>)(() =>
-    {
-        var ci = cfg.Load<CiConfig>();
-        return $"1.0.0-build.{ci.BuildNumber}";
-    });
+    octo.Release.ProjectName = "CakeTest";
+    octo.Release.DeployTo = "Development";
 });
 
 RunTarget(Argument("target", "Default"));
