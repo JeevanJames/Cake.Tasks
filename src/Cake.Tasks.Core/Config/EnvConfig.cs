@@ -33,9 +33,9 @@
 
         public static class Keys
         {
-            public const string Configuration = "Env.Configuration";
-            public const string IsCi = "Env.IsCi";
-            public const string WorkingDirectory = "Env.WorkingDirectory";
+            public const string Configuration = "Env_Configuration";
+            public const string IsCi = "Env_IsCi";
+            public const string WorkingDirectory = "Env_WorkingDirectory";
         }
     }
 }

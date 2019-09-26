@@ -10,11 +10,14 @@ namespace Cake.Tasks.Config
         {
             Build = new BuildConfig(taskConfig);
             Test = new TestConfig(taskConfig);
+            Publish = new PublishConfig(taskConfig);
         }
 
         public BuildConfig Build { get; }
 
         public TestConfig Test { get; }
+
+        public PublishConfig Publish { get; }
 
         public sealed class BuildConfig : PluginConfig
         {
@@ -80,6 +83,20 @@ namespace Cake.Tasks.Config
             }
         }
 
+        public sealed class PublishConfig : PluginConfig
+        {
+            public PublishConfig(TaskConfig taskConfig)
+                : base(taskConfig)
+            {
+            }
+
+            public FuncOrValue<string> ProjectFile
+            {
+                get => Get<FuncOrValue<string>>(Keys.PublishProjectFile);
+                set => Set(Keys.PublishProjectFile, value);
+            }
+        }
+
         public static class Keys
         {
             public const string BuildProjectFiles = "DotNetCore_Build_ProjectFiles";
@@ -91,6 +108,8 @@ namespace Cake.Tasks.Config
             public const string TestNoRestore = "DotNetCore_Test_NoRestore";
             public const string TestNoBuild = "DotNetCore_Test_NoBuild";
             public const string TestSettings = "DotNetCore_Test_Settings";
+
+            public const string PublishProjectFile = "DotNetCore_Deploy_ProjectFile";
         }
     }
 }

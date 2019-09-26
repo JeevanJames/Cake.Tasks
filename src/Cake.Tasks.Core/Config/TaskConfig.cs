@@ -53,6 +53,8 @@ namespace Cake.Tasks.Config
         {
             if (!_taskConfig.Data.TryGetValue(name, out object value))
                 return default;
+            if (value is null)
+                return default;
             return (T)value;
         }
 

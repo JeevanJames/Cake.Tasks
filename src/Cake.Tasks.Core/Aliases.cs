@@ -37,5 +37,20 @@ namespace Cake.Tasks.Config
                 setter(cfg);
             });
         }
+
+        [CakeMethodAlias]
+        [CakeNamespaceImport("Cake.Tasks.Config")]
+        public static void ConfigureTask<TConfig>(this ICakeContext ctx, Action<TConfig, TaskConfig> setter)
+            where TConfig : PluginConfig
+        {
+            if (setter is null)
+                throw new ArgumentNullException(nameof(setter));
+
+            ConfigureTasks(ctx, config =>
+            {
+                var cfg = config.Load<TConfig>();
+                setter(cfg, config);
+            });
+        }
     }
 }

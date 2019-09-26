@@ -6,6 +6,7 @@ using System.Linq;
 using Cake.Common.Tools.DotNetCore;
 using Cake.Common.Tools.DotNetCore.Build;
 using Cake.Common.Tools.DotNetCore.Clean;
+using Cake.Common.Tools.DotNetCore.Publish;
 using Cake.Common.Tools.DotNetCore.Test;
 using Cake.Core;
 using Cake.Core.Diagnostics;
@@ -103,6 +104,19 @@ namespace Cake.Tasks.DotNetCore
             ctx.DotNetCoreBuildServerShutdown();
         }
 
+        [TaskEvent(TaskEventType.BeforeTask, CoreTask.Deploy)]
+        public static void PublishDotNet(ICakeContext ctx, TaskConfig config)
+        {
+            var cfg = config.Load<DotNetCoreConfig>().Publish;
+            var env = config.Load<EnvConfig>();
+
+            ctx.DotNetCorePublish(cfg.ProjectFile, new DotNetCorePublishSettings
+            {
+                Configuration = env.Configuration,
+                Verbosity = ctx.Log.Verbosity.ToVerbosity(),
+            });
+        }
+
         [Config]
         public static void ConfigureDotNetCore(ICakeContext context, TaskConfig config)
         {
@@ -132,19 +146,27 @@ namespace Cake.Tasks.DotNetCore
             cfg.Test.ProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
             cfg.Test.NoRestore = false;
             cfg.Test.NoBuild = false;
+
+            cfg.Publish.ProjectFile = (Func<string>)(() =>
+            {
+                string[] projectFiles = GetProjectFiles();
+                if (projectFiles != null && projectFiles.Length > 0)
+                    return projectFiles[0];
+                return null;
+            });
         }
 
         private static DotNetCoreVerbosity ToVerbosity(this Verbosity verbosity)
         {
-            return verbosity switch
+            switch (verbosity)
             {
-                Verbosity.Diagnostic => DotNetCoreVerbosity.Diagnostic,
-                Verbosity.Minimal => DotNetCoreVerbosity.Minimal,
-                Verbosity.Normal => DotNetCoreVerbosity.Normal,
-                Verbosity.Quiet => DotNetCoreVerbosity.Quiet,
-                Verbosity.Verbose => DotNetCoreVerbosity.Detailed,
-                _ => DotNetCoreVerbosity.Normal
-            };
+                case Verbosity.Diagnostic: return DotNetCoreVerbosity.Diagnostic;
+                case Verbosity.Minimal: return DotNetCoreVerbosity.Minimal;
+                case Verbosity.Normal: return DotNetCoreVerbosity.Normal;
+                case Verbosity.Quiet: return DotNetCoreVerbosity.Quiet;
+                case Verbosity.Verbose: return DotNetCoreVerbosity.Detailed;
+                default: return DotNetCoreVerbosity.Normal;
+            }
         }
     }
 }

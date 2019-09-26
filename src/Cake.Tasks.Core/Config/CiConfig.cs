@@ -29,9 +29,9 @@ namespace Cake.Tasks.Config
 
         public static class Keys
         {
-            public const string BuildNumber = "CI.BuildNumber";
-            public const string Version = "CI.Version";
-            public const string ArtifactsDirectory = "CI.ArtifactsDirectory";
+            public const string BuildNumber = "CI_BuildNumber";
+            public const string Version = "CI_Version";
+            public const string ArtifactsDirectory = "CI_ArtifactsDirectory";
         }
     }
 }
