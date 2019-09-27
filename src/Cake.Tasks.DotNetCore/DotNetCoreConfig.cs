@@ -1,7 +1,4 @@
-﻿using Cake.Common.Tools.DotNetCore.Build;
-using Cake.Common.Tools.DotNetCore.Test;
-
-namespace Cake.Tasks.Config
+﻿namespace Cake.Tasks.Config
 {
     public sealed class DotNetCoreConfig : PluginConfig
     {
@@ -26,22 +23,10 @@ namespace Cake.Tasks.Config
             {
             }
 
-            public FuncOrListValue<string> ProjectFiles
+            public FuncOrValue<string> ProjectFile
             {
-                get => Get<FuncOrListValue<string>>(Keys.BuildProjectFiles);
-                set => Set(Keys.BuildProjectFiles, value);
-            }
-
-            public FuncOrValue<bool> NoRestore
-            {
-                get => Get<FuncOrValue<bool>>(Keys.BuildNoRestore);
-                set => Set(Keys.BuildNoRestore, value);
-            }
-
-            public FuncOrValue<DotNetCoreBuildSettings> Settings
-            {
-                get => Get<FuncOrValue<DotNetCoreBuildSettings>>(Keys.BuildSettings);
-                set => Set(Keys.BuildSettings, value);
+                get => Get<FuncOrValue<string>>(Keys.BuildProjectFile);
+                set => Set(Keys.BuildProjectFile, value);
             }
         }
 
@@ -58,28 +43,16 @@ namespace Cake.Tasks.Config
                 set => Set(Keys.TestSkip, value);
             }
 
-            public FuncOrListValue<string> ProjectFiles
+            public FuncOrValue<string> ProjectFile
             {
-                get => Get<FuncOrListValue<string>>(Keys.TestProjectFiles);
-                set => Set(Keys.TestProjectFiles, value);
+                get => Get<FuncOrValue<string>>(Keys.TestProjectFile);
+                set => Set(Keys.TestProjectFile, value);
             }
 
-            public FuncOrValue<bool> NoRestore
+            public FuncOrValue<string> Filter
             {
-                get => Get<FuncOrValue<bool>>(Keys.TestNoRestore);
-                set => Set(Keys.TestNoRestore, value);
-            }
-
-            public FuncOrValue<bool> NoBuild
-            {
-                get => Get<FuncOrValue<bool>>(Keys.TestNoBuild);
-                set => Set(Keys.TestNoBuild, value);
-            }
-
-            public FuncOrValue<DotNetCoreTestSettings> Settings
-            {
-                get => Get<FuncOrValue<DotNetCoreTestSettings>>(Keys.TestSettings);
-                set => Set(Keys.TestSettings, value);
+                get => Get<FuncOrValue<string>>(Keys.TestFilter);
+                set => Set(Keys.TestFilter, value);
             }
         }
 
@@ -99,17 +72,13 @@ namespace Cake.Tasks.Config
 
         public static class Keys
         {
-            public const string BuildProjectFiles = "DotNetCore_Build_ProjectFiles";
-            public const string BuildNoRestore = "DotNetCore_Build_NoRestore";
-            public const string BuildSettings = "DotNetCore_Build_Settings";
+            public const string BuildProjectFile = "DotNetCore_Build_ProjectFile";
 
             public const string TestSkip = "DotNetCore_Test_Skip";
-            public const string TestProjectFiles = "DotNetCore_Test_ProjectFiles";
-            public const string TestNoRestore = "DotNetCore_Test_NoRestore";
-            public const string TestNoBuild = "DotNetCore_Test_NoBuild";
-            public const string TestSettings = "DotNetCore_Test_Settings";
+            public const string TestProjectFile = "DotNetCore_Test_ProjectFile";
+            public const string TestFilter = "DotNetCore_Test_Filter";
 
-            public const string PublishProjectFile = "DotNetCore_Deploy_ProjectFile";
+            public const string PublishProjectFile = "DotNetCore_Publish_ProjectFile";
         }
     }
 }

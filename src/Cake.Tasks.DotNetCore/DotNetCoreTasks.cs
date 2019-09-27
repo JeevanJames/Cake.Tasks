@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -26,20 +25,14 @@ namespace Cake.Tasks.DotNetCore
             context.DotNetCoreBuildServerShutdown();
 
             var cfg = config.Load<DotNetCoreConfig>();
-            IEnumerable<string> cleanProjectFiles = cfg.Build.ProjectFiles.Resolve();
-            if (cleanProjectFiles is null || !cleanProjectFiles.Any())
-            {
-                context.Log.Warning("No solution or project files found to clean.");
-                return;
-            }
+            string cleanProjectFile = cfg.Build.ProjectFile.Resolve();
+            if (cleanProjectFile is null)
+                throw new TaskConfigException("Build solution or project file not specified.");
 
-            foreach (string cleanProjectFile in cleanProjectFiles)
+            context.DotNetCoreClean(cleanProjectFile, new DotNetCoreCleanSettings
             {
-                context.DotNetCoreClean(cleanProjectFile, new DotNetCoreCleanSettings
-                {
-                    Verbosity = context.Log.Verbosity.ToVerbosity(),
-                });
-            }
+                Verbosity = context.Log.Verbosity.ToVerbosity(),
+            });
         }
 
         [CoreTask(CoreTask.Build)]
@@ -48,22 +41,15 @@ namespace Cake.Tasks.DotNetCore
             var build = config.Load<DotNetCoreConfig>().Build;
             var env = config.Load<EnvConfig>();
 
-            List<string> buildProjectFiles = build.ProjectFiles;
-            if (buildProjectFiles is null || !buildProjectFiles.Any())
-            {
-                context.Log.Warning("No solution or project files found to build.");
-                return;
-            }
+            string buildProjectFile = build.ProjectFile;
+            if (buildProjectFile is null)
+                throw new TaskConfigException("Build solution or project file not specified.");
 
-            foreach (string buildProjectFile in buildProjectFiles)
+            context.DotNetCoreBuild(buildProjectFile, new DotNetCoreBuildSettings
             {
-                context.DotNetCoreBuild(buildProjectFile, new DotNetCoreBuildSettings
-                {
-                    Configuration = env.Configuration,
-                    NoRestore = build.NoRestore,
-                    Verbosity = context.Log.Verbosity.ToVerbosity(),
-                });
-            }
+                Configuration = env.Configuration,
+                Verbosity = context.Log.Verbosity.ToVerbosity(),
+            });
         }
 
         [CoreTask(CoreTask.Test)]
@@ -79,23 +65,27 @@ namespace Cake.Tasks.DotNetCore
 
             var env = config.Load<EnvConfig>();
 
-            List<string> testProjectFiles = test.ProjectFiles;
-            if (testProjectFiles is null || !testProjectFiles.Any())
-            {
-                context.Log.Warning("No solution or project files found to test.");
-                return;
-            }
+            string testProjectFile = test.ProjectFile;
+            if (testProjectFile is null)
+                throw new TaskConfigException("Build solution or project file not specified.");
 
-            foreach (string testProjectFile in testProjectFiles)
+            var settings = new DotNetCoreTestSettings
             {
-                context.DotNetCoreTest(testProjectFile, new DotNetCoreTestSettings
-                {
-                    Configuration = env.Configuration,
-                    NoBuild = test.NoBuild,
-                    NoRestore = test.NoRestore,
-                    Verbosity = context.Log.Verbosity.ToVerbosity(),
-                });
-            }
+                Configuration = env.Configuration,
+                Logger = "trx",
+                NoBuild = true,
+                NoRestore = true,
+                Verbosity = context.Log.Verbosity.ToVerbosity(),
+                ArgumentCustomization = pab => pab
+                    .Append("/p:CollectCoverage=true")
+                    .Append("/p:CoverletOutputFormat=opencover")
+                    .Append("/p:Exclude=[xunit.*]*"),
+            };
+            string filter = test.Filter;
+            if (!string.IsNullOrWhiteSpace(filter))
+                settings.Filter = filter;
+
+            context.DotNetCoreTest(testProjectFile, settings);
         }
 
         [TaskEvent(TaskEventType.AfterTask, CoreTask.Test)]
@@ -120,40 +110,24 @@ namespace Cake.Tasks.DotNetCore
         [Config]
         public static void ConfigureDotNetCore(ICakeContext context, TaskConfig config)
         {
-            string[] GetProjectFiles()
-            {
-                var env = config.Load<EnvConfig>();
-                string workingDirectory = env.WorkingDirectory ?? Directory.GetCurrentDirectory();
-
-                string[] projectFiles = Directory.GetFiles(workingDirectory, "*.sln", SearchOption.TopDirectoryOnly);
-                if (projectFiles.Length == 0)
-                    projectFiles = Directory.GetFiles(workingDirectory, "*.sln", SearchOption.AllDirectories);
-                if (projectFiles.Length == 0)
-                    projectFiles = Directory.GetFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories);
-                if (projectFiles.Length > 1)
-                    return projectFiles;
-                if (projectFiles.Length == 1)
-                    return new[] { projectFiles[0] };
-                return Array.Empty<string>();
-            }
-
             var cfg = config.Load<DotNetCoreConfig>();
 
-            cfg.Build.ProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
-            cfg.Build.NoRestore = false;
+            var env = config.Load<EnvConfig>();
+            string workingDirectory = env.WorkingDirectory ?? Directory.GetCurrentDirectory();
+
+            string GetBuildProjectFile()
+            {
+                return Directory
+                    .GetFiles(workingDirectory, "*.sln", SearchOption.TopDirectoryOnly)
+                    .FirstOrDefault();
+            }
+
+            cfg.Build.ProjectFile = (Func<string>)GetBuildProjectFile;
 
             cfg.Test.Skip = false;
-            cfg.Test.ProjectFiles = (Func<IEnumerable<string>>)GetProjectFiles;
-            cfg.Test.NoRestore = false;
-            cfg.Test.NoBuild = false;
+            cfg.Test.ProjectFile = (Func<string>)GetBuildProjectFile;
 
-            cfg.Publish.ProjectFile = (Func<string>)(() =>
-            {
-                string[] projectFiles = GetProjectFiles();
-                if (projectFiles != null && projectFiles.Length > 0)
-                    return projectFiles[0];
-                return null;
-            });
+            cfg.Publish.ProjectFile = (Func<string>)GetBuildProjectFile;
         }
 
         private static DotNetCoreVerbosity ToVerbosity(this Verbosity verbosity)

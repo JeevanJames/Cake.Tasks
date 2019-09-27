@@ -9,4 +9,5 @@ Copy-Item -Path ..\src\Cake.Tasks.Core\bin\Debug\netstandard2.0\Cake.Tasks.Core.
 Copy-Item -Path ..\src\Cake.Tasks.DotNetCore\bin\Debug\netstandard2.0\Cake.Tasks.DotNetCore.dll -Destination .\tools\
 Copy-Item -Path ..\src\Cake.Tasks.Local\bin\Debug\netstandard2.0\Cake.Tasks.Local.dll -Destination .\tools\
 Copy-Item -Path ..\src\Cake.Tasks.Octopus\bin\Debug\netstandard2.0\Cake.Tasks.Octopus.dll -Destination .\tools\
+Copy-Item -Path ..\src\Cake.Tasks.Env.Tfs\bin\Debug\netstandard2.0\Cake.Tasks.Env.Tfs.dll -Destination .\tools\
 # Copy-Item -Path ..\src\Cake.Tasks.Sonar\bin\Debug\netstandard2.0\Cake.Tasks.Sonar.dll -Destination .\tools\

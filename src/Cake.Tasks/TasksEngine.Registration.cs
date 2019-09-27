@@ -42,6 +42,7 @@ namespace Cake.Tasks.Module
 
                 var ci = config.Load<CiConfig>();
                 ci.ArtifactsDirectory = Path.Combine(env.WorkingDirectory, "artifacts");
+                ci.BinaryArtifactsDirectory = ci.ArtifactsDirectory;
                 ci.BuildNumber = 1;
                 ci.Version = "0.1.0";
 
@@ -161,6 +162,13 @@ namespace Cake.Tasks.Module
                         {
                             if (config.Data.ContainsKey(envVar.Key))
                                 config.Data[envVar.Key] = envVar.Value;
+                        }
+
+                        ctx.Log.Information("Final Configurations");
+                        ctx.Log.Information("--------------------");
+                        foreach (var data in config.Data.OrderBy(kvp => kvp.Key))
+                        {
+                            ctx.Log.Information($"{data.Key} = {data.Value?.ToString() ?? "[NULL]"}");
                         }
                     });
             }

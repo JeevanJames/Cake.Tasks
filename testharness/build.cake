@@ -12,13 +12,14 @@
 #r ".\tools\Cake.Tasks.DotNetCore.dll"
 #r ".\tools\Cake.Tasks.Local.dll"
 #r ".\tools\Cake.Tasks.Octopus.dll"
+#r ".\tools\Cake.Tasks.Env.Tfs.dll"
 // #r ".\tools\Cake.Tasks.Sonar.dll"
 
 using Cake.Common.Tools.DotNetCore.Test;
 
 ConfigureTask<DotNetCoreConfig>(cfg =>
 {
-    cfg.Test.ProjectFiles = @".\TestLibrary.Tests\TestLibrary.Tests.csproj";
+    cfg.Test.ProjectFile = @".\TestLibrary.Tests\TestLibrary.Tests.csproj";
     cfg.Publish.ProjectFile = @".\TestLibrary\TestLibrary.csproj";
 });
 
