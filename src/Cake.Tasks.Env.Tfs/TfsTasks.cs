@@ -46,7 +46,7 @@ namespace Cake.Tasks.Env.Tfs
 
             var ci = cfg.Load<CiConfig>();
             IEnumerable<Path> testResultFiles = ctx.Globber.Match(
-                System.IO.Path.Combine(ci.ArtifactsDirectory, "*.trx"));
+                System.IO.Path.Combine(ci.TestOutputDirectory, "*.trx"));
 
             var data = new TFBuildPublishTestResultsData
             {
