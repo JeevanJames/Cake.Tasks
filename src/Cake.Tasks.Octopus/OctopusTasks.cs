@@ -24,7 +24,7 @@ namespace Cake.Tasks.Octopus
             if (string.IsNullOrWhiteSpace(octopus.PackageId))
                 throw new TaskConfigException("Configure a package ID for the Octopus deployment.");
 
-            ctx.Log.Information("Creating Octopus package");
+            ctx.Log.Information("Creating Octopus package.");
 
             var settings = new OctopusPackSettings
             {
