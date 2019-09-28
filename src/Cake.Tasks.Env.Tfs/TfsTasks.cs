@@ -45,14 +45,16 @@ namespace Cake.Tasks.Env.Tfs
                 return;
 
             var ci = cfg.Load<CiConfig>();
-            IEnumerable<Path> testResultFiles = ctx.Globber.Match(
-                System.IO.Path.Combine(ci.TestOutputDirectory, "*.trx"));
+            List<FilePath> trxFiles = ctx.Globber.Match(
+                    System.IO.Path.Combine(ci.TestOutputDirectory, "*.trx"))
+                .OfType<FilePath>()
+                .ToList();
 
             var data = new TFBuildPublishTestResultsData
             {
                 MergeTestResults = true,
                 TestRunner = TFTestRunnerType.VSTest,
-                TestResultsFiles = testResultFiles.OfType<FilePath>().ToList(),
+                TestResultsFiles = trxFiles,
                 TestRunTitle = "Cake.Tasks Test Results",
             };
             tfs.Commands.PublishTestResults(data);
