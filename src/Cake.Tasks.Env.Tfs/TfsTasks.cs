@@ -34,7 +34,7 @@ namespace Cake.Tasks.Env.Tfs
 
             ci.ArtifactsDirectory = tfs.Environment.Build.ArtifactStagingDirectory.FullPath;
             ci.BuildOutputDirectory = tfs.Environment.Build.BinariesDirectory.FullPath;
-            ci.TestOutputDirectory = tfs.Environment.Build.TestResultsDirectory.FullPath;
+            ci.TestOutputDirectory = System.IO.Path.Combine(tfs.Environment.Build.SourcesDirectory.FullPath, "TestResults");
         }
 
         [TaskEvent(TaskEventType.AfterTask, CoreTask.Test, Environment = "tfs")]

@@ -78,13 +78,13 @@ namespace Cake.Tasks.DotNetCore
                 Configuration = env.Configuration,
                 OutputDirectory = ci.BuildOutputDirectory,
                 Logger = "trx",
-                ResultsDirectory = ci.ArtifactsDirectory,
+                ResultsDirectory = ci.TestOutputDirectory,
                 NoBuild = true,
                 NoRestore = true,
                 Verbosity = context.Log.Verbosity.ToVerbosity(),
                 ArgumentCustomization = pab => pab
                     .Append("/p:CollectCoverage=true")
-                    .Append($"/p:CoverletOutput={Path.Combine(ci.ArtifactsDirectory, "coverage")}")
+                    .Append($"/p:CoverletOutput={Path.Combine(ci.TestOutputDirectory, "coverage")}")
                     .Append("/p:CoverletOutputFormat=cobertura")
                     .Append("/p:Exclude=[xunit.*]*"),
             };
