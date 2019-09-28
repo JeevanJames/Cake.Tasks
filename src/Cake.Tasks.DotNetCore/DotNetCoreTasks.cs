@@ -107,11 +107,14 @@ namespace Cake.Tasks.DotNetCore
         {
             var cfg = config.Load<DotNetCoreConfig>().Publish;
             var env = config.Load<EnvConfig>();
+            var ci = config.Load<CiConfig>();
 
             ctx.DotNetCorePublish(cfg.ProjectFile, new DotNetCorePublishSettings
             {
                 Configuration = env.Configuration,
+                OutputDirectory = Path.Combine(ci.BuildOutputDirectory, "publish"),
                 Verbosity = ctx.Log.Verbosity.ToVerbosity(),
+                ArgumentCustomization = arg => arg.Append($"/p:Version={ci.Version}"),
             });
         }
 
