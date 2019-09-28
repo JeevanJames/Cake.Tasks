@@ -18,16 +18,16 @@ namespace Cake.Tasks.Env.Tfs
         {
             ITFBuildProvider tfs = ctx.TFBuild();
             if (!tfs.IsRunningOnAzurePipelines)
-                return;
+                throw new TaskConfigException("The CI/CD process is not running in TFS or Azure Pipelines");
 
             var env = cfg.Load<EnvConfig>();
             env.IsCi = true;
 
             var ci = cfg.Load<CiConfig>();
-            ci.Version = tfs.Environment.Build.Number;
-
-            string buildNum = ci.Version.Split('.').LastOrDefault() ?? ci.Version;
-            ci.BuildNumber = int.TryParse(buildNum, out int bn) ? bn : 1;
+            ci.BuildNumber = int.TryParse(tfs.Environment.Build.Number, out int buildNum)
+                ? buildNum
+                : tfs.Environment.Build.Id;
+            ci.Version = $"1.0.0-rev.{ci.BuildNumber}";
 
             ci.ArtifactsDirectory = tfs.Environment.Build.ArtifactStagingDirectory.FullPath;
             ci.BuildOutputDirectory = tfs.Environment.Build.BinariesDirectory.FullPath;
