@@ -76,6 +76,7 @@ namespace Cake.Tasks.DotNetCore
             var settings = new DotNetCoreTestSettings
             {
                 Configuration = env.Configuration,
+                OutputDirectory = ci.BuildOutputDirectory,
                 Logger = $"trx;LogFileName={Path.Combine(ci.TestOutputDirectory, "TestResults.trx")}",
                 NoBuild = true,
                 NoRestore = true,
