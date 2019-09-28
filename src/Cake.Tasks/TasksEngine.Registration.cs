@@ -170,8 +170,10 @@ namespace Cake.Tasks.Module
                         }
 
                         // Override configurations from command line arguments
-                        foreach (string key in config.Data.Keys)
+                        List<string> keys = config.Data.Keys.ToList();
+                        for (int i = 0; i < keys.Count; i++)
                         {
+                            string key = keys[i];
                             if (ctx.Arguments.HasArgument(key))
                                 config.Data[key] = ctx.Arguments.GetArgument(key);
                         }
@@ -182,11 +184,20 @@ namespace Cake.Tasks.Module
                         foreach (var data in config.Data.OrderBy(kvp => kvp.Key))
                             ctx.Log.Information($"{data.Key} = {data.Value?.ToString() ?? "[NULL]"}");
 
-                        // Clean out output directories
+                        // Clean out output directories or create them
                         var ci = config.Load<CiConfig>();
-                        ctx.CleanDirectory(ci.ArtifactsDirectory);
-                        ctx.CleanDirectory(ci.BuildOutputDirectory);
-                        ctx.CleanDirectory(ci.TestOutputDirectory);
+                        if (ctx.DirectoryExists(ci.ArtifactsDirectory))
+                            ctx.CleanDirectory(ci.ArtifactsDirectory);
+                        else
+                            ctx.CreateDirectory(ci.ArtifactsDirectory);
+                        if (ctx.DirectoryExists(ci.BuildOutputDirectory))
+                            ctx.CleanDirectory(ci.BuildOutputDirectory);
+                        else
+                            ctx.CreateDirectory(ci.BuildOutputDirectory);
+                        if (ctx.DirectoryExists(ci.TestOutputDirectory))
+                            ctx.CleanDirectory(ci.TestOutputDirectory);
+                        else
+                            ctx.CreateDirectory(ci.TestOutputDirectory);
                     });
             }
 
