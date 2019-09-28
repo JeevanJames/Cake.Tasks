@@ -84,7 +84,7 @@ namespace Cake.Tasks.DotNetCore
                 Verbosity = context.Log.Verbosity.ToVerbosity(),
                 ArgumentCustomization = pab => pab
                     .Append("/p:CollectCoverage=true")
-                    .Append($"/p:CoverletOutput={ci.ArtifactsDirectory}")
+                    .Append($"/p:CoverletOutput={Path.Combine(ci.ArtifactsDirectory, "coverage")}")
                     .Append("/p:CoverletOutputFormat=cobertura")
                     .Append("/p:Exclude=[xunit.*]*"),
             };
