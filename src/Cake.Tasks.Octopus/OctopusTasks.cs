@@ -39,14 +39,14 @@ namespace Cake.Tasks.Octopus
 
             ctx.OctoPack(octopus.PackageId, settings);
 
-            //ctx.Log.Information("Pushing Octopus package");
+            ctx.Log.Information("Pushing Octopus package");
 
-            //string packageFile = System.IO.Directory.GetFiles(octopus.Pack.OutFolder, $"{octopus.PackageId}*.zip").FirstOrDefault();
-            //ctx.Log.Information($"API Key: {octopus.ApiKey}");
-            //ctx.OctoPush(octopus.Server, octopus.ApiKey, new FilePath(packageFile), new OctopusPushSettings
-            //{
-            //    ApiKey = octopus.ApiKey,
-            //});
+            string packageFileName = $"{octopus.PackageId}.{ci.Version}.zip";
+            string packageFile = Path.Combine(octopus.Pack.OutFolder, packageFileName);
+            ctx.OctoPush(octopus.Server, octopus.ApiKey, new FilePath(packageFile), new OctopusPushSettings
+            {
+                ApiKey = octopus.ApiKey,
+            });
 
             //ctx.Log.Information("Creating Octopus release");
 
