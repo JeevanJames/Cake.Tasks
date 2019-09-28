@@ -66,8 +66,8 @@ namespace Cake.Tasks.Octopus
             octopus.ApiKey = null;
             octopus.PackageId = null;
 
-            octopus.Pack.BasePath = env.WorkingDirectory;
-            octopus.Pack.OutFolder = ci.ArtifactsDirectory;
+            octopus.Pack.BasePath = (Func<string>)(() => env.WorkingDirectory);
+            octopus.Pack.OutFolder = (Func<string>)(() => ci.ArtifactsDirectory);
             octopus.Pack.Version = null;
 
             octopus.Release.ProjectName = null;
