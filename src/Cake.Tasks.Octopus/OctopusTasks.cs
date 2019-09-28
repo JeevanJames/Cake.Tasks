@@ -7,6 +7,7 @@ using Cake.Core.IO;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
 using Cake.Tasks.Octopus;
+using Path = System.IO.Path;
 
 [assembly: TaskPlugin(typeof(OctopusTasks))]
 
@@ -18,6 +19,7 @@ namespace Cake.Tasks.Octopus
         public static void Deploy(ICakeContext ctx, TaskConfig cfg)
         {
             var octopus = cfg.Load<OctopusConfig>();
+            var ci = cfg.Load<CiConfig>();
 
             if (string.IsNullOrWhiteSpace(octopus.PackageId))
                 throw new TaskConfigException("Configure a package ID for the Octopus deployment.");
@@ -26,33 +28,35 @@ namespace Cake.Tasks.Octopus
 
             var settings = new OctopusPackSettings
             {
-                BasePath = octopus.Pack.BasePath.Resolve(),
+                BasePath = Path.Combine(ci.BuildOutputDirectory, "publish"),
                 Format = OctopusPackFormat.Zip,
-                OutFolder = octopus.Pack.OutFolder.Resolve(),
+                OutFolder = Path.Combine(ci.ArtifactsDirectory),
             };
             if (octopus.Pack.Version != null)
                 settings.Version = octopus.Pack.Version;
+            else
+                settings.Version = ci.Version;
 
             ctx.OctoPack(octopus.PackageId, settings);
 
-            ctx.Log.Information("Pushing Octopus package");
+            //ctx.Log.Information("Pushing Octopus package");
 
-            string packageFile = System.IO.Directory.GetFiles(octopus.Pack.OutFolder, $"{octopus.PackageId}*.zip").FirstOrDefault();
-            ctx.Log.Information($"API Key: {octopus.ApiKey}");
-            ctx.OctoPush(octopus.Server, octopus.ApiKey, new FilePath(packageFile), new OctopusPushSettings
-            {
-                ApiKey = octopus.ApiKey,
-            });
+            //string packageFile = System.IO.Directory.GetFiles(octopus.Pack.OutFolder, $"{octopus.PackageId}*.zip").FirstOrDefault();
+            //ctx.Log.Information($"API Key: {octopus.ApiKey}");
+            //ctx.OctoPush(octopus.Server, octopus.ApiKey, new FilePath(packageFile), new OctopusPushSettings
+            //{
+            //    ApiKey = octopus.ApiKey,
+            //});
 
-            ctx.Log.Information("Creating Octopus release");
+            //ctx.Log.Information("Creating Octopus release");
 
-            var releaseSettings = new CreateReleaseSettings
-            {
-                ApiKey = octopus.ApiKey,
-                Server = octopus.Server,
-                DeployTo = octopus.Release.DeployTo,
-            };
-            ctx.OctoCreateRelease(octopus.Release.ProjectName, releaseSettings);
+            //var releaseSettings = new CreateReleaseSettings
+            //{
+            //    ApiKey = octopus.ApiKey,
+            //    Server = octopus.Server,
+            //    DeployTo = octopus.Release.DeployTo,
+            //};
+            //ctx.OctoCreateRelease(octopus.Release.ProjectName, releaseSettings);
         }
 
         [Config]
