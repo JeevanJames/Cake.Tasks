@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+using Cake.Common.IO;
 using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Tasks.Config;
@@ -41,8 +42,10 @@ namespace Cake.Tasks.Module
                 env.WorkingDirectory = ctx.Environment.WorkingDirectory.FullPath;
 
                 var ci = config.Load<CiConfig>();
-                ci.ArtifactsDirectory = Path.Combine(env.WorkingDirectory, "artifacts");
-                ci.BinaryArtifactsDirectory = ci.ArtifactsDirectory;
+                string outputDirectory = Path.Combine(env.WorkingDirectory, "__output");
+                ci.ArtifactsDirectory = Path.Combine(outputDirectory, "artifacts");
+                ci.BuildOutputDirectory = Path.Combine(outputDirectory, "build");
+                ci.TestOutputDirectory = Path.Combine(outputDirectory, "testresults");
                 ci.BuildNumber = 1;
                 ci.Version = "0.1.0";
 
@@ -155,8 +158,10 @@ namespace Cake.Tasks.Module
                     {
                         TaskConfig config = TaskConfig.Current;
 
+                        // Run configurations specified in the build.cake file
                         config.PerformDeferredSetup();
 
+                        // Override configurations from environment variables
                         IDictionary<string, string> envVars = ctx.Environment.GetEnvironmentVariables();
                         foreach (var envVar in envVars)
                         {
@@ -164,12 +169,24 @@ namespace Cake.Tasks.Module
                                 config.Data[envVar.Key] = envVar.Value;
                         }
 
+                        // Override configurations from command line arguments
+                        foreach (string key in config.Data.Keys)
+                        {
+                            if (ctx.Arguments.HasArgument(key))
+                                config.Data[key] = ctx.Arguments.GetArgument(key);
+                        }
+
+                        // Display the final configuration values
                         ctx.Log.Information("Final Configurations");
                         ctx.Log.Information("--------------------");
                         foreach (var data in config.Data.OrderBy(kvp => kvp.Key))
-                        {
                             ctx.Log.Information($"{data.Key} = {data.Value?.ToString() ?? "[NULL]"}");
-                        }
+
+                        // Clean out output directories
+                        var ci = config.Load<CiConfig>();
+                        ctx.CleanDirectory(ci.ArtifactsDirectory);
+                        ctx.CleanDirectory(ci.BuildOutputDirectory);
+                        ctx.CleanDirectory(ci.TestOutputDirectory);
                     });
             }
 
@@ -182,11 +199,9 @@ namespace Cake.Tasks.Module
         private void RegisterCiTasks()
         {
             string env = Context.Arguments.GetArgument("env");
-            IEnumerable<RegisteredTask> envTasks;
-            if (string.IsNullOrEmpty(env))
-                envTasks = _registeredTasks.Where(rt => rt.Environment is null);
-            else
-                envTasks = _registeredTasks.Where(rt => rt.Environment is null || rt.Environment.Equals(env, StringComparison.OrdinalIgnoreCase));
+            IList<RegisteredTask> envTasks = string.IsNullOrEmpty(env)
+                ? _registeredTasks.Where(rt => rt.Environment is null).ToList()
+                : _registeredTasks.Where(rt => rt.Environment is null || rt.Environment.Equals(env, StringComparison.OrdinalIgnoreCase)).ToList();
 
             CakeTaskBuilder ciTask = RegisterTask("CI").Description("Performs CI (Build and test)");
 
@@ -226,7 +241,7 @@ namespace Cake.Tasks.Module
             }
         }
 
-        private void BuildTaskChain(CakeTaskBuilder builder, RegisteredTask coreTask, IEnumerable<RegisteredTask> envTasks)
+        private void BuildTaskChain(CakeTaskBuilder builder, RegisteredTask coreTask, IList<RegisteredTask> envTasks)
         {
             if (coreTask is null)
                 return;

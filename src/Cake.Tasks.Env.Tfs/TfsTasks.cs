@@ -1,6 +1,11 @@
-﻿using System.Linq;
-using Cake.Common;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using Cake.Common.Build;
+using Cake.Common.Build.TFBuild;
+using Cake.Common.Build.TFBuild.Data;
 using Cake.Core;
+using Cake.Core.IO;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
 using Cake.Tasks.Env.Tfs;
@@ -12,21 +17,45 @@ namespace Cake.Tasks.Env.Tfs
     public static class TfsTasks
     {
         [Config(Environment = "tfs", Order = 1)]
-        public static void CleanBuildArtifacts(ICakeContext ctx, TaskConfig cfg)
+        public static void ConfigureTfsEnvironment(ICakeContext ctx, TaskConfig cfg)
         {
-            var ci = cfg.Load<CiConfig>();
-            ci.Version = ctx.EnvironmentVariable("BUILD_BUILDNUMBER", "1");
+            ITFBuildProvider tfs = ctx.TFBuild();
+            if (!tfs.IsRunningOnAzurePipelines)
+                return;
 
-            string buildNum = ci.Version.Split('.').LastOrDefault() ?? "1";
+            var env = cfg.Load<EnvConfig>();
+            env.IsCi = true;
+
+            var ci = cfg.Load<CiConfig>();
+            ci.Version = tfs.Environment.Build.Number;
+
+            string buildNum = ci.Version.Split('.').LastOrDefault() ?? ci.Version;
             ci.BuildNumber = int.TryParse(buildNum, out int bn) ? bn : 1;
 
-            string artifactsDir = ctx.EnvironmentVariable("BUILD_ARTIFACTSTAGINGDIRECTORY");
-            if (!string.IsNullOrWhiteSpace(artifactsDir))
-                ci.ArtifactsDirectory = artifactsDir;
+            ci.ArtifactsDirectory = tfs.Environment.Build.ArtifactStagingDirectory.FullPath;
+            ci.BuildOutputDirectory = tfs.Environment.Build.BinariesDirectory.FullPath;
+            ci.TestOutputDirectory = tfs.Environment.Build.TestResultsDirectory.FullPath;
+        }
 
-            string binaryArtifactsDir = ctx.EnvironmentVariable("BUILD_BINARIESDIRECTORY");
-            if (!string.IsNullOrWhiteSpace(binaryArtifactsDir))
-                ci.ArtifactsDirectory = binaryArtifactsDir;
+        [TaskEvent(TaskEventType.AfterTask, CoreTask.Test, Environment = "tfs")]
+        public static void PublishTestResults(ICakeContext ctx, TaskConfig cfg)
+        {
+            ITFBuildProvider tfs = ctx.TFBuild();
+            if (!tfs.IsRunningOnAzurePipelines)
+                return;
+
+            var ci = cfg.Load<CiConfig>();
+            IEnumerable<Path> testResultFiles = ctx.Globber.Match(
+                System.IO.Path.Combine(ci.TestOutputDirectory, "**", "*.trx"));
+
+            var data = new TFBuildPublishTestResultsData
+            {
+                MergeTestResults = true,
+                TestRunner = TFTestRunnerType.VSTest,
+                TestResultsFiles = testResultFiles.OfType<FilePath>().ToList(),
+                TestRunTitle = "Cake.Tasks Test Results",
+            };
+            tfs.Commands.PublishTestResults(data);
         }
     }
 }

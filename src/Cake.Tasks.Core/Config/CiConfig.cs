@@ -27,10 +27,16 @@ namespace Cake.Tasks.Config
             set => Set(Keys.ArtifactsDirectory, value);
         }
 
-        public string BinaryArtifactsDirectory
+        public string BuildOutputDirectory
         {
-            get => Get<string>(Keys.BinaryArtifactsDirectory);
-            set => Set(Keys.BinaryArtifactsDirectory, value);
+            get => Get<string>(Keys.BuildOutputDirectory);
+            set => Set(Keys.BuildOutputDirectory, value);
+        }
+
+        public string TestOutputDirectory
+        {
+            get => Get<string>(Keys.TestOutputDirectory);
+            set => Set(Keys.TestOutputDirectory, value);
         }
 
         public static class Keys
@@ -38,7 +44,8 @@ namespace Cake.Tasks.Config
             public const string BuildNumber = "CI_BuildNumber";
             public const string Version = "CI_Version";
             public const string ArtifactsDirectory = "CI_ArtifactsDirectory";
-            public const string BinaryArtifactsDirectory = "CI_BinaryArtifactsDirectory";
+            public const string BuildOutputDirectory = "CI_BuildOutputDirectory";
+            public const string TestOutputDirectory = "CI_TestOutputDirectory";
         }
     }
 }

@@ -39,14 +39,17 @@ namespace Cake.Tasks.DotNetCore
         public static void Build(ICakeContext context, TaskConfig config)
         {
             var build = config.Load<DotNetCoreConfig>().Build;
-            var env = config.Load<EnvConfig>();
 
             string buildProjectFile = build.ProjectFile;
             if (buildProjectFile is null)
                 throw new TaskConfigException("Build solution or project file not specified.");
 
+            var env = config.Load<EnvConfig>();
+            var ci = config.Load<CiConfig>();
+
             context.DotNetCoreBuild(buildProjectFile, new DotNetCoreBuildSettings
             {
+                OutputDirectory = ci.BuildOutputDirectory,
                 Configuration = env.Configuration,
                 Verbosity = context.Log.Verbosity.ToVerbosity(),
             });
@@ -64,6 +67,7 @@ namespace Cake.Tasks.DotNetCore
             }
 
             var env = config.Load<EnvConfig>();
+            var ci = config.Load<CiConfig>();
 
             string testProjectFile = test.ProjectFile;
             if (testProjectFile is null)
@@ -72,7 +76,7 @@ namespace Cake.Tasks.DotNetCore
             var settings = new DotNetCoreTestSettings
             {
                 Configuration = env.Configuration,
-                Logger = "trx",
+                Logger = $"trx;LogFileName={Path.Combine(ci.TestOutputDirectory, "TestResults.trx")}",
                 NoBuild = true,
                 NoRestore = true,
                 Verbosity = context.Log.Verbosity.ToVerbosity(),
