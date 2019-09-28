@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
 using Cake.Common.Build;
 using Cake.Common.Build.TFBuild;
-using Cake.Common.Build.TFBuild.Data;
 using Cake.Core;
-using Cake.Core.IO;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
 using Cake.Tasks.Env.Tfs;
@@ -37,27 +34,27 @@ namespace Cake.Tasks.Env.Tfs
             ci.TestOutputDirectory = System.IO.Path.Combine(tfs.Environment.Build.SourcesDirectory.FullPath, "TestResults");
         }
 
-        [TaskEvent(TaskEventType.AfterTask, CoreTask.Test, Environment = "tfs")]
-        public static void PublishTestResults(ICakeContext ctx, TaskConfig cfg)
-        {
-            ITFBuildProvider tfs = ctx.TFBuild();
-            if (!tfs.IsRunningOnAzurePipelines)
-                return;
+        //[TaskEvent(TaskEventType.AfterTask, CoreTask.Test, Environment = "tfs")]
+        //public static void PublishTestResults(ICakeContext ctx, TaskConfig cfg)
+        //{
+        //    ITFBuildProvider tfs = ctx.TFBuild();
+        //    if (!tfs.IsRunningOnAzurePipelines)
+        //        return;
 
-            var ci = cfg.Load<CiConfig>();
-            List<FilePath> trxFiles = ctx.Globber.Match(
-                    System.IO.Path.Combine(ci.TestOutputDirectory, "*.trx"))
-                .OfType<FilePath>()
-                .ToList();
+        //    var ci = cfg.Load<CiConfig>();
+        //    List<FilePath> trxFiles = ctx.Globber.Match(
+        //            System.IO.Path.Combine(ci.TestOutputDirectory, "*.trx"))
+        //        .OfType<FilePath>()
+        //        .ToList();
 
-            var data = new TFBuildPublishTestResultsData
-            {
-                MergeTestResults = true,
-                TestRunner = TFTestRunnerType.VSTest,
-                TestResultsFiles = trxFiles,
-                TestRunTitle = "Cake.Tasks Test Results",
-            };
-            tfs.Commands.PublishTestResults(data);
-        }
+        //    var data = new TFBuildPublishTestResultsData
+        //    {
+        //        MergeTestResults = true,
+        //        TestRunner = TFTestRunnerType.VSTest,
+        //        TestResultsFiles = trxFiles,
+        //        TestRunTitle = "Cake.Tasks Test Results",
+        //    };
+        //    tfs.Commands.PublishTestResults(data);
+        //}
     }
 }

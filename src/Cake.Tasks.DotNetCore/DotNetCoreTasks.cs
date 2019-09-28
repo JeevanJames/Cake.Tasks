@@ -86,6 +86,7 @@ namespace Cake.Tasks.DotNetCore
                     .Append("/p:CollectCoverage=true")
                     .Append($"/p:CoverletOutput={Path.Combine(ci.TestOutputDirectory, "coverage")}")
                     .Append("/p:CoverletOutputFormat=cobertura")
+                    .Append("/p:CoverletOutputFormat=opencover")
                     .Append("/p:Exclude=[xunit.*]*"),
             };
             string filter = test.Filter;
