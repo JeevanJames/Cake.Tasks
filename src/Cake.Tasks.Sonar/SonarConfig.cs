@@ -39,11 +39,11 @@
 
         public static class Keys
         {
-            public const string Key = "Sonar.Key";
-            public const string Login = "Sonar.Login";
-            public const string OpenCoverReportsPath = "Sonar.OpenCoverReportsPath";
-            public const string TestReportPaths = "Sonar.TestReportPaths";
-            public const string Url = "Sonar.Url";
+            public const string Key = "Sonar_Key";
+            public const string Login = "Sonar_Login";
+            public const string OpenCoverReportsPath = "Sonar_OpenCoverReportsPath";
+            public const string TestReportPaths = "Sonar_TestReportPaths";
+            public const string Url = "Sonar_Url";
         }
     }
 }
