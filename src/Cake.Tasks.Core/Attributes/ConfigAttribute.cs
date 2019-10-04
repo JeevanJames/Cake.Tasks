@@ -1,6 +1,9 @@
 ﻿namespace Cake.Tasks.Core
 {
-    public sealed class ConfigAttribute : TaskAttribute
+    /// <summary>
+    ///     Marks a method as a configuration task.
+    /// </summary>
+    public sealed class ConfigAttribute : BaseTaskAttribute
     {
         public ConfigAttribute(string environment = null)
         {

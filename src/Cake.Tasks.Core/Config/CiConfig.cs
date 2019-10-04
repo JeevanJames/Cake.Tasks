@@ -15,7 +15,7 @@ namespace Cake.Tasks.Config
             set => Set(Keys.BuildNumber, value);
         }
 
-        public string Version
+        public FuncOrValue<string> Version
         {
             get => Get<string>(Keys.Version);
             set => Set(Keys.Version, value);

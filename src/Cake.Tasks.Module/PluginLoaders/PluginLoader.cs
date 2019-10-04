@@ -41,7 +41,7 @@ namespace Cake.Tasks.Module.PluginLoaders
                 MethodInfo[] methods = taskPluginType.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public);
                 foreach (MethodInfo method in methods)
                 {
-                    TaskAttribute taskAttribute = method.GetCustomAttribute<TaskAttribute>(inherit: true);
+                    BaseTaskAttribute taskAttribute = method.GetCustomAttribute<BaseTaskAttribute>(inherit: true);
                     if (taskAttribute is null)
                         continue;
                     if (!IsValidPluginMethod(method, taskAttribute))
@@ -81,7 +81,7 @@ namespace Cake.Tasks.Module.PluginLoaders
             }
         }
 
-        protected bool IsValidPluginMethod(MethodInfo method, TaskAttribute attribute)
+        protected bool IsValidPluginMethod(MethodInfo method, BaseTaskAttribute attribute)
         {
             ParameterInfo[] parameters = method.GetParameters();
             switch (attribute)

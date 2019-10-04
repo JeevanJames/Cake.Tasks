@@ -32,7 +32,7 @@ namespace Cake.Tasks.Module
         {
             RegisterSetupAction(ctx =>
             {
-                Log.Information("Initializing Cake.Tasks configuration.");
+                Log.Verbose("Initializing Cake.Tasks configuration.");
 
                 var config = TaskConfig.Current;
 
@@ -47,7 +47,7 @@ namespace Cake.Tasks.Module
                 ci.BuildOutputDirectory = Path.Combine(outputDirectory, "build");
                 ci.TestOutputDirectory = Path.Combine(outputDirectory, "testresults");
                 ci.BuildNumber = 1;
-                ci.Version = "0.1.0";
+                ci.Version = (Func<string>)(() => $"0.{ci.BuildNumber}.0");
 
                 return config;
             });

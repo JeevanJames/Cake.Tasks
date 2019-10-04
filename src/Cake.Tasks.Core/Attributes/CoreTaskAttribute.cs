@@ -1,6 +1,6 @@
 ﻿namespace Cake.Tasks.Core
 {
-    public sealed class CoreTaskAttribute : TaskAttribute
+    public sealed class CoreTaskAttribute : BaseTaskAttribute
     {
         public CoreTaskAttribute(CoreTask coreTask)
         {

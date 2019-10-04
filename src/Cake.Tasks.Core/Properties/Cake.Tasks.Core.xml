@@ -14,5 +14,18 @@
                 Gets or sets the working directory.
             </summary>
         </member>
+        <member name="P:Cake.Tasks.Core.BaseTaskAttribute.Environment">
+            <summary>
+                Gets or sets the name of the environment in which this task can be executed (TFS,
+                AppVeyor, etc.).
+                <para/>
+                If not specified, this task will always be executed.
+            </summary>
+        </member>
+        <member name="T:Cake.Tasks.Core.ConfigAttribute">
+            <summary>
+                Marks a method as a configuration task.
+            </summary>
+        </member>
     </members>
 </doc>
