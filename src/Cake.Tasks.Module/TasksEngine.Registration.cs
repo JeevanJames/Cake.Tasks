@@ -25,6 +25,7 @@ namespace Cake.Tasks.Module
             DiscoverPluginTasks();
             RegisterPluginTasks();
             RegisterBuiltInTasks();
+            RegisterPipelineTasks();
             RegisterCiTasks();
         }
 
@@ -103,6 +104,9 @@ namespace Cake.Tasks.Module
                         context.Log.Information("---------");
                         foreach (ICakeTaskInfo task in Tasks)
                         {
+                            //if (task.Name.StartsWith("_"))
+                            //    continue;
+
                             context.Log.Information(task.Name);
                             if (!string.IsNullOrWhiteSpace(task.Description))
                                 context.Log.Information($"    {task.Description}");
@@ -112,7 +116,7 @@ namespace Cake.Tasks.Module
 
             void RegisterListEnvsTask()
             {
-                RegisterTask("List-Envs")
+                RegisterTask(TaskNames.ListEnvs)
                     .Description("Lists all available environments.")
                     .Does(context =>
                     {
@@ -136,12 +140,12 @@ namespace Cake.Tasks.Module
 
             void RegisterListConfigsTask()
             {
-                CakeTaskBuilder listConfigsTask = RegisterTask("List-Configs")
+                CakeTaskBuilder listConfigsTask = RegisterTask(TaskNames.ListConfigs)
                     .Description("Lists all available configurations.");
                 IEnumerable<RegisteredTask> configTasks = _registeredTasks.Where(rt => rt.AttributeType == typeof(ConfigAttribute));
                 foreach (RegisteredTask configTask in configTasks)
                     listConfigsTask = listConfigsTask.IsDependentOn(configTask.Name);
-                listConfigsTask = listConfigsTask.IsDependentOn("Config-Finalize");
+                listConfigsTask = listConfigsTask.IsDependentOn(TaskNames.ConfigFinalize);
                 listConfigsTask.Does<TaskConfig>((context, config) =>
                 {
                     context.Log.Information("Available Configurations");
@@ -153,7 +157,7 @@ namespace Cake.Tasks.Module
 
             void RegisterDeferredSetupTask()
             {
-                RegisterTask("Config-Finalize")
+                RegisterTask(TaskNames.ConfigFinalize)
                     .Does(ctx =>
                     {
                         TaskConfig config = TaskConfig.Current;
@@ -207,6 +211,72 @@ namespace Cake.Tasks.Module
             RegisterDeferredSetupTask();
         }
 
+        private void RegisterPipelineTasks()
+        {
+            string env = Context.Arguments.GetArgument("env");
+            List<RegisteredTask> envTasks = string.IsNullOrEmpty(env)
+                ? _registeredTasks.Where(rt => rt.Environment is null).ToList()
+                : _registeredTasks.Where(rt => rt.Environment is null || rt.Environment.Equals(env, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            RegisterConfigTask(envTasks);
+            RegisterBuildTask(envTasks);
+            RegisterTestTask(envTasks);
+        }
+
+        private void RegisterConfigTask(IReadOnlyList<RegisteredTask> envTasks)
+        {
+            CakeTaskBuilder task = RegisterTask(TaskNames.Config);
+
+            IEnumerable<RegisteredTask> configTasks = envTasks
+                .Where(t => t.AttributeType == typeof(ConfigAttribute))
+                .OrderBy(t => t.Order);
+
+            foreach (RegisteredTask configTask in configTasks)
+                task.IsDependentOn(configTask.Name);
+
+            task.IsDependentOn(TaskNames.ConfigFinalize);
+        }
+
+        private void RegisterBuildTask(IReadOnlyList<RegisteredTask> envTasks)
+        {
+            CakeTaskBuilder task = RegisterTask(TaskNames.Build).IsDependentOn(TaskNames.Config);
+
+            IEnumerable<RegisteredTask> preBuildTasks = envTasks
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Build && t.EventType == TaskEventType.BeforeTask);
+            foreach (RegisteredTask preBuildTask in preBuildTasks)
+                task.IsDependentOn(preBuildTask.Name);
+
+            IEnumerable<RegisteredTask> buildTasks = envTasks
+                .Where(t => t.AttributeType == typeof(CoreTaskAttribute) && t.CoreTask == CoreTask.Build);
+            foreach (RegisteredTask buildTask in buildTasks)
+                task.IsDependentOn(buildTask.Name);
+
+            IEnumerable<RegisteredTask> postBuildTasks = envTasks
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Build && t.EventType == TaskEventType.AfterTask);
+            foreach (RegisteredTask postBuildTask in postBuildTasks)
+                task.IsDependentOn(postBuildTask.Name);
+        }
+
+        private void RegisterTestTask(IReadOnlyList<RegisteredTask> envTasks)
+        {
+            CakeTaskBuilder task = RegisterTask(TaskNames.Test).IsDependentOn(TaskNames.Build);
+
+            IEnumerable<RegisteredTask> preTestTasks = envTasks
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Test && t.EventType == TaskEventType.BeforeTask);
+            foreach (RegisteredTask preTestTask in preTestTasks)
+                task.IsDependentOn(preTestTask.Name);
+
+            IEnumerable<RegisteredTask> testTasks = envTasks
+                .Where(t => t.AttributeType == typeof(CoreTaskAttribute) && t.CoreTask == CoreTask.Test);
+            foreach (RegisteredTask testTask in testTasks)
+                task.IsDependentOn(testTask.Name);
+
+            IEnumerable<RegisteredTask> postTestTasks = envTasks
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Test && t.EventType == TaskEventType.AfterTask);
+            foreach (RegisteredTask postTestTask in postTestTasks)
+                task.IsDependentOn(postTestTask.Name);
+        }
+
         private void RegisterCiTasks()
         {
             string env = Context.Arguments.GetArgument("env");
@@ -223,7 +293,7 @@ namespace Cake.Tasks.Module
             foreach (RegisteredTask configTask in configTasks)
                 ciTask = ciTask.IsDependentOn(configTask.Name);
 
-            ciTask = ciTask.IsDependentOn("Config-Finalize");
+            ciTask = ciTask.IsDependentOn(TaskNames.ConfigFinalize);
 
             // Build task
             RegisteredTask buildTask = envTasks
@@ -271,6 +341,19 @@ namespace Cake.Tasks.Module
                 .Where(task => task.AttributeType == typeof(TaskEventAttribute) && task.CoreTask == coreTask.CoreTask && task.EventType == TaskEventType.AfterTask);
             foreach (RegisteredTask afterTask in afterTasks)
                 builder = builder.IsDependentOn(afterTask.Name);
+        }
+
+        internal static class TaskNames
+        {
+            internal const string Config = "_Config";
+            internal const string ConfigFinalize = "_Config-Finalize";
+            internal const string ListConfigs = "List-Configs";
+            internal const string ListEnvs = "List-Envs";
+
+            internal const string Build = "Build";
+            internal const string Test = "Test";
+            internal const string Ci = "CI";
+            internal const string CiCd = "CICD";
         }
     }
 }

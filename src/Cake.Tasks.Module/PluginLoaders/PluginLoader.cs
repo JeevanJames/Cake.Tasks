@@ -45,7 +45,10 @@ namespace Cake.Tasks.Module.PluginLoaders
                     if (taskAttribute is null)
                         continue;
                     if (!IsValidPluginMethod(method, taskAttribute))
+                    {
+                        Log.Warning($"Method {taskPluginType.FullName}.{method.Name} is decorated with a task attribute ({taskAttribute.GetType().Name}), but does not have the correct signature, so it will not be considered. A valid task method should be a static or instance method that returns void and accepts a first parameter of type {typeof(ICakeContext).FullName} and an optional second parameter of type {typeof(TaskConfig).FullName}.");
                         continue;
+                    }
 
                     Log.Verbose($"[Plugin Method] {taskPluginType.FullName}.{method.Name}");
 
@@ -59,19 +62,20 @@ namespace Cake.Tasks.Module.PluginLoaders
                     switch (taskAttribute)
                     {
                         case CoreTaskAttribute attr:
+                            string uniqueTaskId = Guid.NewGuid().ToString("N");
                             registeredTask.CoreTask = attr.CoreTask;
-                            registeredTask.Name = attr.CoreTask.ToString();
+                            registeredTask.Name = $"_{attr.CoreTask}-{uniqueTaskId}";
                             break;
                         case TaskEventAttribute attr:
                             registeredTask.CoreTask = attr.CoreTask;
                             registeredTask.EventType = attr.EventType;
                             string namePrefix = attr.EventType == TaskEventType.BeforeTask ? "Before" : "After";
-                            registeredTask.Name = $"{namePrefix}{attr.CoreTask}-{method.Name}";
+                            registeredTask.Name = $"_{namePrefix}{attr.CoreTask}-{method.Name}";
                             break;
                         case ConfigAttribute attr:
-                            string uniqueId = Guid.NewGuid().ToString("N");
+                            string uniqueConfigId = Guid.NewGuid().ToString("N");
                             string envSuffix = attr.Environment is null ? string.Empty : $"-{attr.Environment}";
-                            registeredTask.Name = $"Config-{uniqueId}{envSuffix}";
+                            registeredTask.Name = $"_Config-{uniqueConfigId}{envSuffix}";
                             registeredTask.Order = attr.Order;
                             break;
                     }
