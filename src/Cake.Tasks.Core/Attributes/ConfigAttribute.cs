@@ -3,11 +3,11 @@
     /// <summary>
     ///     Marks a method as a configuration task.
     /// </summary>
-    public sealed class ConfigAttribute : BaseTaskAttribute
+    public sealed class ConfigAttribute : BasePipelineTaskAttribute
     {
         public ConfigAttribute(string environment = null)
         {
-            Environment = environment;
+            CiSystem = environment;
         }
 
         public int Order { get; set; }

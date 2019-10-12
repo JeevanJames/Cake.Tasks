@@ -11,9 +11,9 @@ namespace Cake.Tasks.Module
     {
         private readonly ICakeEngine _engine;
 
-        public ICakeLog Log { get; }
+        private ICakeLog Log { get; }
 
-        public ICakeContext Context { get; }
+        private ICakeContext Context { get; }
 
         public TasksEngine(ICakeDataService dataService, ICakeLog log, ICakeContext context)
         {

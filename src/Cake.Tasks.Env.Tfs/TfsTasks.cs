@@ -13,7 +13,7 @@ namespace Cake.Tasks.Env.Tfs
 {
     public static class TfsTasks
     {
-        [Config(Environment = "tfs", Order = 1)]
+        [Config(CiSystem = "tfs", Order = 1)]
         public static void ConfigureTfsEnvironment(ICakeContext ctx, TaskConfig cfg)
         {
             ITFBuildProvider tfs = ctx.TFBuild();

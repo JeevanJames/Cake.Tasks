@@ -9,5 +9,31 @@
                 Encapsulates the logic to load Cake.Tasks plugins.
             </summary>
         </member>
+        <member name="T:Cake.Tasks.Module.RegisteredTask">
+            <summary>
+                A task registered from a plugin attribute.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Module.RegisteredTask.AttributeType">
+            <summary>
+                Gets or sets the type of the plugin attribute.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Module.RegisteredTask.Method">
+            <summary>
+                Gets or sets the method that contains the plugin logic.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Module.RegisteredTask.Name">
+            <summary>
+                Gets or sets the name of the plugin. This is used to name the Cake task.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Module.RegisteredTask.CiSystem">
+            <summary>
+                Gets or sets the name of the CI system under which this plugin can run. A <c>null</c>
+                value indicates that the plugin will always run.
+            </summary>
+        </member>
     </members>
 </doc>

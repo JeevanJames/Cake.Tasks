@@ -2,7 +2,7 @@
 
 namespace Cake.Tasks.Core
 {
-    public sealed class TaskEventAttribute : BaseTaskAttribute
+    public sealed class TaskEventAttribute : BasePipelineTaskAttribute
     {
         public TaskEventAttribute(TaskEventType eventType, CoreTask coreTask)
         {

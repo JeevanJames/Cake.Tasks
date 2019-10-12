@@ -131,7 +131,7 @@ namespace Cake.Tasks.Module
                     .Does(context =>
                     {
                         IList<string> environments = _registeredTasks
-                            .Select(task => task.Environment)
+                            .Select(task => task.CiSystem)
                             .Distinct(StringComparer.OrdinalIgnoreCase)
                             .OrderBy(env => env)
                             .ToList();
@@ -343,8 +343,8 @@ namespace Cake.Tasks.Module
                 Log.Information($"CI Environment specified: {ciEnv}");
 
             List<RegisteredTask> envTasks = string.IsNullOrEmpty(ciEnv)
-                ? _registeredTasks.Where(rt => rt.Environment is null).ToList()
-                : _registeredTasks.Where(rt => rt.Environment is null || rt.Environment.Equals(ciEnv, StringComparison.OrdinalIgnoreCase)).ToList();
+                ? _registeredTasks.Where(rt => rt.CiSystem is null).ToList()
+                : _registeredTasks.Where(rt => rt.CiSystem is null || rt.CiSystem.Equals(ciEnv, StringComparison.OrdinalIgnoreCase)).ToList();
             return envTasks;
         }
 

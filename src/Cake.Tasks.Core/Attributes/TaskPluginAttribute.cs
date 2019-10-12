@@ -2,6 +2,9 @@
 
 namespace Cake.Tasks.Core
 {
+    /// <summary>
+    ///     Registers a class in the assembly that has task plugins.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class TaskPluginAttribute : Attribute
     {
