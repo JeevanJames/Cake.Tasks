@@ -29,6 +29,9 @@ namespace Cake.Tasks.Config
             return (T)value;
         }
 
+        protected T GetFuncOrValue<T>(string name) =>
+            Get<FuncOrValue<T>>(name);
+
         private bool TryFromFuncOrValue<T>(string str, out T value)
         {
             value = default;

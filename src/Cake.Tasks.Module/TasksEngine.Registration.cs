@@ -26,7 +26,6 @@ namespace Cake.Tasks.Module
             RegisterPluginTasks();
             RegisterBuiltInTasks();
             RegisterPipelineTasks();
-            RegisterCiTasks();
         }
 
         private void InitializeConfiguration()
@@ -74,22 +73,31 @@ namespace Cake.Tasks.Module
         {
             foreach (RegisteredTask registeredTask in _registeredTasks)
             {
-                CakeTaskBuilder builder;
+                CakeTaskBuilder builder = RegisterTask(registeredTask.Name);
 
                 if (registeredTask.Method.GetParameters().Length == 2)
                 {
                     var action = (Action<ICakeContext, TaskConfig>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
-                    builder = RegisterTask(registeredTask.Name).Does(action);
+                    builder.Does(action);
                 }
                 else
                 {
                     var action = (Action<ICakeContext>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext>));
-                    builder = RegisterTask(registeredTask.Name).Does(action);
+                    builder.Does(action);
                 }
 
-                // For config tasks, add a description
+                // Add a description
+                string taskType;
                 if (registeredTask.AttributeType == typeof(ConfigAttribute))
-                    builder.Description($"Config for {registeredTask.Method.Name} from {registeredTask.Method.DeclaringType.FullName} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})");
+                    taskType = "Config task";
+                else if (registeredTask.AttributeType == typeof(TaskEventAttribute))
+                    taskType = $"{(registeredTask.EventType == TaskEventType.BeforeTask ? "Before" : "After")} {registeredTask.CoreTask} task";
+                else if (registeredTask.AttributeType == typeof(CoreTaskAttribute))
+                    taskType = $"{registeredTask.CoreTask} task";
+                else
+                    throw new NotSupportedException($"Unrecognized task type: {registeredTask.AttributeType.FullName}");
+
+                builder.Description($"{taskType} - {registeredTask.Method.DeclaringType.FullName}.{registeredTask.Method.Name} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})");
             }
         }
 
@@ -104,8 +112,10 @@ namespace Cake.Tasks.Module
                         context.Log.Information("---------");
                         foreach (ICakeTaskInfo task in Tasks)
                         {
-                            //if (task.Name.StartsWith("_"))
-                            //    continue;
+                            if (task.Name.StartsWith("_"))
+                                continue;
+                            if (task.Name.Equals("Default", StringComparison.OrdinalIgnoreCase))
+                                continue;
 
                             context.Log.Information(task.Name);
                             if (!string.IsNullOrWhiteSpace(task.Description))
@@ -142,10 +152,11 @@ namespace Cake.Tasks.Module
             {
                 CakeTaskBuilder listConfigsTask = RegisterTask(TaskNames.ListConfigs)
                     .Description("Lists all available configurations.");
-                IEnumerable<RegisteredTask> configTasks = _registeredTasks.Where(rt => rt.AttributeType == typeof(ConfigAttribute));
+                IEnumerable<RegisteredTask> configTasks = GetTasksForCiEnvironment()
+                    .Where(rt => rt.AttributeType == typeof(ConfigAttribute));
                 foreach (RegisteredTask configTask in configTasks)
                     listConfigsTask = listConfigsTask.IsDependentOn(configTask.Name);
-                listConfigsTask = listConfigsTask.IsDependentOn(TaskNames.ConfigFinalize);
+                listConfigsTask = listConfigsTask.IsDependentOn(TaskNames.Config);
                 listConfigsTask.Does<TaskConfig>((context, config) =>
                 {
                     context.Log.Information("Available Configurations");
@@ -155,72 +166,41 @@ namespace Cake.Tasks.Module
                 });
             }
 
-            void RegisterDeferredSetupTask()
+            void RegisterListTasksTask()
             {
-                RegisterTask(TaskNames.ConfigFinalize)
-                    .Does(ctx =>
+                RegisterTask(TaskNames.ListTasks)
+                    .Description("Lists all tasks including private tasks.")
+                    .Does(context =>
                     {
-                        TaskConfig config = TaskConfig.Current;
-
-                        // Run configurations specified in the build.cake file
-                        config.PerformDeferredSetup();
-
-                        // Override configurations from environment variables
-                        IDictionary<string, string> envVars = ctx.Environment.GetEnvironmentVariables();
-                        foreach (var envVar in envVars)
+                        context.Log.Information("Task List");
+                        context.Log.Information("---------");
+                        foreach (ICakeTaskInfo task in Tasks)
                         {
-                            if (config.Data.ContainsKey(envVar.Key))
-                                config.Data[envVar.Key] = envVar.Value;
+                            if (task.Name.Equals("Default", StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            context.Log.Information(task.Name);
+                            if (!string.IsNullOrWhiteSpace(task.Description))
+                                context.Log.Information($"    {task.Description}");
                         }
-
-                        // Override configurations from command line arguments
-                        List<string> keys = config.Data.Keys.ToList();
-                        for (int i = 0; i < keys.Count; i++)
-                        {
-                            string key = keys[i];
-                            if (ctx.Arguments.HasArgument(key))
-                                config.Data[key] = ctx.Arguments.GetArgument(key);
-                        }
-
-                        // Display the final configuration values
-                        ctx.Log.Information("Final Configurations");
-                        ctx.Log.Information("--------------------");
-                        foreach (var data in config.Data.OrderBy(kvp => kvp.Key))
-                            ctx.Log.Information($"{data.Key} = {data.Value?.ToString() ?? "[NULL]"}");
-
-                        // Clean out output directories or create them
-                        var ci = config.Load<CiConfig>();
-                        if (ctx.DirectoryExists(ci.ArtifactsDirectory))
-                            ctx.CleanDirectory(ci.ArtifactsDirectory);
-                        else
-                            ctx.CreateDirectory(ci.ArtifactsDirectory);
-                        if (ctx.DirectoryExists(ci.BuildOutputDirectory))
-                            ctx.CleanDirectory(ci.BuildOutputDirectory);
-                        else
-                            ctx.CreateDirectory(ci.BuildOutputDirectory);
-                        if (ctx.DirectoryExists(ci.TestOutputDirectory))
-                            ctx.CleanDirectory(ci.TestOutputDirectory);
-                        else
-                            ctx.CreateDirectory(ci.TestOutputDirectory);
                     });
             }
 
             RegisterDefaultTask();
             RegisterListEnvsTask();
             RegisterListConfigsTask();
-            RegisterDeferredSetupTask();
+            RegisterListTasksTask();
         }
 
         private void RegisterPipelineTasks()
         {
-            string env = Context.Arguments.GetArgument("env");
-            List<RegisteredTask> envTasks = string.IsNullOrEmpty(env)
-                ? _registeredTasks.Where(rt => rt.Environment is null).ToList()
-                : _registeredTasks.Where(rt => rt.Environment is null || rt.Environment.Equals(env, StringComparison.OrdinalIgnoreCase)).ToList();
+            IReadOnlyList<RegisteredTask> envTasks = GetTasksForCiEnvironment();
 
             RegisterConfigTask(envTasks);
             RegisterBuildTask(envTasks);
             RegisterTestTask(envTasks);
+            RegisterCiTask();
+            RegisterCicdTask(envTasks);
         }
 
         private void RegisterConfigTask(IReadOnlyList<RegisteredTask> envTasks)
@@ -234,12 +214,60 @@ namespace Cake.Tasks.Module
             foreach (RegisteredTask configTask in configTasks)
                 task.IsDependentOn(configTask.Name);
 
-            task.IsDependentOn(TaskNames.ConfigFinalize);
+            //task.IsDependentOn(TaskNames.ConfigFinalize);
+
+            task.Does(ctx =>
+            {
+                TaskConfig config = TaskConfig.Current;
+
+                // Run configurations specified in the build.cake file
+                config.PerformDeferredSetup();
+
+                // Override configurations from environment variables
+                IDictionary<string, string> envVars = ctx.Environment.GetEnvironmentVariables();
+                foreach (var envVar in envVars)
+                {
+                    if (config.Data.ContainsKey(envVar.Key))
+                        config.Data[envVar.Key] = envVar.Value;
+                }
+
+                // Override configurations from command line arguments
+                List<string> keys = config.Data.Keys.ToList();
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    string key = keys[i];
+                    if (ctx.Arguments.HasArgument(key))
+                        config.Data[key] = ctx.Arguments.GetArgument(key);
+                }
+
+                // Display the final configuration values
+                ctx.Log.Information("Final Configurations");
+                ctx.Log.Information("--------------------");
+                foreach (var data in config.Data.OrderBy(kvp => kvp.Key))
+                    ctx.Log.Information($"{data.Key} = {data.Value?.ToString() ?? "[NULL]"}");
+
+                // Clean out output directories or create them
+                var ci = config.Load<CiConfig>();
+                if (ctx.DirectoryExists(ci.ArtifactsDirectory))
+                    ctx.CleanDirectory(ci.ArtifactsDirectory);
+                else
+                    ctx.CreateDirectory(ci.ArtifactsDirectory);
+                if (ctx.DirectoryExists(ci.BuildOutputDirectory))
+                    ctx.CleanDirectory(ci.BuildOutputDirectory);
+                else
+                    ctx.CreateDirectory(ci.BuildOutputDirectory);
+                if (ctx.DirectoryExists(ci.TestOutputDirectory))
+                    ctx.CleanDirectory(ci.TestOutputDirectory);
+                else
+                    ctx.CreateDirectory(ci.TestOutputDirectory);
+            });
         }
 
         private void RegisterBuildTask(IReadOnlyList<RegisteredTask> envTasks)
         {
-            CakeTaskBuilder task = RegisterTask(TaskNames.Build).IsDependentOn(TaskNames.Config);
+            CakeTaskBuilder task = RegisterTask(TaskNames.Build)
+                .Description("Builds the solution.")
+                .IsDependentOn(TaskNames.Config);
 
             IEnumerable<RegisteredTask> preBuildTasks = envTasks
                 .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Build && t.EventType == TaskEventType.BeforeTask);
@@ -259,7 +287,9 @@ namespace Cake.Tasks.Module
 
         private void RegisterTestTask(IReadOnlyList<RegisteredTask> envTasks)
         {
-            CakeTaskBuilder task = RegisterTask(TaskNames.Test).IsDependentOn(TaskNames.Build);
+            CakeTaskBuilder task = RegisterTask(TaskNames.Test)
+                .Description("Runs tests in the project.")
+                .IsDependentOn(TaskNames.Build);
 
             IEnumerable<RegisteredTask> preTestTasks = envTasks
                 .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Test && t.EventType == TaskEventType.BeforeTask);
@@ -277,78 +307,53 @@ namespace Cake.Tasks.Module
                 task.IsDependentOn(postTestTask.Name);
         }
 
-        private void RegisterCiTasks()
+        private void RegisterCiTask()
         {
-            string env = Context.Arguments.GetArgument("env");
-            IList<RegisteredTask> envTasks = string.IsNullOrEmpty(env)
-                ? _registeredTasks.Where(rt => rt.Environment is null).ToList()
-                : _registeredTasks.Where(rt => rt.Environment is null || rt.Environment.Equals(env, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            CakeTaskBuilder ciTask = RegisterTask("CI").Description("Performs CI (Build and test)");
-
-            // Config dependencies
-            IEnumerable<RegisteredTask> configTasks = envTasks
-                .Where(task => task.AttributeType == typeof(ConfigAttribute))
-                .OrderBy(task => task.Order);
-            foreach (RegisteredTask configTask in configTasks)
-                ciTask = ciTask.IsDependentOn(configTask.Name);
-
-            ciTask = ciTask.IsDependentOn(TaskNames.ConfigFinalize);
-
-            // Build task
-            RegisteredTask buildTask = envTasks
-                .SingleOrDefault(task => task.AttributeType == typeof(CoreTaskAttribute) && task.CoreTask == CoreTask.Build);
-            BuildTaskChain(ciTask, buildTask, envTasks);
-
-            // Test task
-            RegisteredTask testTask = envTasks
-                .SingleOrDefault(task => task.AttributeType == typeof(CoreTaskAttribute) && task.CoreTask == CoreTask.Test);
-            BuildTaskChain(ciTask, testTask, envTasks);
-
-            ciTask.Does(() => { });
-
-            // Deploy task
-            RegisteredTask deployTask = envTasks
-                .SingleOrDefault(task => task.AttributeType == typeof(CoreTaskAttribute) && task.CoreTask == CoreTask.Deploy);
-            if (deployTask != null)
-            {
-                CakeTaskBuilder cicdTask = RegisterTask("CICD")
-                    .Description("Performs CD/CD (Build, test and deploy)")
-                    .IsDependentOn("CI");
-
-                BuildTaskChain(cicdTask, deployTask, envTasks);
-
-                cicdTask.Does(() => { });
-            }
+            RegisterTask(TaskNames.Ci)
+                .Description("Performs CI (Build and test)")
+                .IsDependentOn(TaskNames.Test);
         }
 
-        private void BuildTaskChain(CakeTaskBuilder builder, RegisteredTask coreTask, IList<RegisteredTask> envTasks)
+        private void RegisterCicdTask(IReadOnlyList<RegisteredTask> envTasks)
         {
-            if (coreTask is null)
-                return;
+            CakeTaskBuilder task = RegisterTask("CICD")
+                .Description("Performs CD/CD (Build, test and deploy)")
+                .IsDependentOn("CI");
 
-            // Add before tasks
-            IEnumerable<RegisteredTask> beforeTasks = envTasks
-                .Where(task => task.AttributeType == typeof(TaskEventAttribute) && task.CoreTask == coreTask.CoreTask && task.EventType == TaskEventType.BeforeTask);
-            foreach (RegisteredTask beforeTask in beforeTasks)
-                builder = builder.IsDependentOn(beforeTask.Name);
+            IEnumerable<RegisteredTask> preDeployTasks = envTasks
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Deploy && t.EventType == TaskEventType.BeforeTask);
+            foreach (RegisteredTask preDeployTask in preDeployTasks)
+                task.IsDependentOn(preDeployTask.Name);
 
-            // Add core task
-            builder = builder.IsDependentOn(coreTask.Name);
+            IEnumerable<RegisteredTask> deployTasks = envTasks
+                .Where(t => t.AttributeType == typeof(CoreTaskAttribute) && t.CoreTask == CoreTask.Deploy);
+            foreach (RegisteredTask deployTask in deployTasks)
+                task.IsDependentOn(deployTask.Name);
 
-            // Add after tasks
-            IEnumerable<RegisteredTask> afterTasks = envTasks
-                .Where(task => task.AttributeType == typeof(TaskEventAttribute) && task.CoreTask == coreTask.CoreTask && task.EventType == TaskEventType.AfterTask);
-            foreach (RegisteredTask afterTask in afterTasks)
-                builder = builder.IsDependentOn(afterTask.Name);
+            IEnumerable<RegisteredTask> postDeployTasks = envTasks
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Deploy && t.EventType == TaskEventType.AfterTask);
+            foreach (RegisteredTask postDeployTask in postDeployTasks)
+                task.IsDependentOn(postDeployTask.Name);
+        }
+
+        private IReadOnlyList<RegisteredTask> GetTasksForCiEnvironment()
+        {
+            string ciEnv = Context.Arguments.GetArgument("ci");
+            if (!string.IsNullOrEmpty(ciEnv))
+                Log.Information($"CI Environment specified: {ciEnv}");
+
+            List<RegisteredTask> envTasks = string.IsNullOrEmpty(ciEnv)
+                ? _registeredTasks.Where(rt => rt.Environment is null).ToList()
+                : _registeredTasks.Where(rt => rt.Environment is null || rt.Environment.Equals(ciEnv, StringComparison.OrdinalIgnoreCase)).ToList();
+            return envTasks;
         }
 
         internal static class TaskNames
         {
             internal const string Config = "_Config";
-            internal const string ConfigFinalize = "_Config-Finalize";
             internal const string ListConfigs = "List-Configs";
             internal const string ListEnvs = "List-Envs";
+            internal const string ListTasks = "List-Tasks";
 
             internal const string Build = "Build";
             internal const string Test = "Test";

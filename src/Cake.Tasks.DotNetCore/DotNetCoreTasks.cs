@@ -36,7 +36,7 @@ namespace Cake.Tasks.DotNetCore
         }
 
         [CoreTask(CoreTask.Build)]
-        public static void Build(ICakeContext context, TaskConfig config)
+        public static void BuildDotNetCoreSolution(ICakeContext context, TaskConfig config)
         {
             var build = config.Load<DotNetCoreConfig>().Build;
 
@@ -56,7 +56,7 @@ namespace Cake.Tasks.DotNetCore
         }
 
         [CoreTask(CoreTask.Test)]
-        public static void Test(ICakeContext context, TaskConfig config)
+        public static void TestDotNetCoreProjects(ICakeContext context, TaskConfig config)
         {
             var test = config.Load<DotNetCoreConfig>().Test;
 
@@ -97,13 +97,13 @@ namespace Cake.Tasks.DotNetCore
         }
 
         [TaskEvent(TaskEventType.AfterTask, CoreTask.Test)]
-        public static void AfterDotNetCoreTest(ICakeContext ctx, TaskConfig cfg)
+        public static void ShutDownBuildServer(ICakeContext ctx, TaskConfig cfg)
         {
             ctx.DotNetCoreBuildServerShutdown();
         }
 
         [TaskEvent(TaskEventType.BeforeTask, CoreTask.Deploy)]
-        public static void PublishDotNet(ICakeContext ctx, TaskConfig config)
+        public static void PublishDotNetProjects(ICakeContext ctx, TaskConfig config)
         {
             var cfg = config.Load<DotNetCoreConfig>().Publish;
             var env = config.Load<EnvConfig>();

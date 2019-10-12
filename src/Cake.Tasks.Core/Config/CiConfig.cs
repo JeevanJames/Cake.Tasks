@@ -17,7 +17,7 @@ namespace Cake.Tasks.Config
 
         public FuncOrValue<string> Version
         {
-            get => Get<string>(Keys.Version);
+            get => GetFuncOrValue<string>(Keys.Version);
             set => Set(Keys.Version, value);
         }
 

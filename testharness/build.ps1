@@ -29,6 +29,8 @@ Performs a dry run.
 Skips restoring of packages.
 .PARAMETER ScriptArgs
 Remaining arguments are added here.
+.PARAMETER CI
+Name of the CI environment the script is running in or "local" if running on local machine
 
 .LINK
 https://cakebuild.net
@@ -46,6 +48,7 @@ Param(
     [Alias("WhatIf", "Noop")]
     [switch]$DryRun,
     [switch]$SkipToolPackageRestore,
+    [string]$Ci,
     [Parameter(Position=0,Mandatory=$false,ValueFromRemainingArguments=$true)]
     [string[]]$ScriptArgs
 )
@@ -248,6 +251,7 @@ if ($Configuration) { $cakeArguments += "-configuration=$Configuration" }
 if ($Verbosity) { $cakeArguments += "-verbosity=$Verbosity" }
 if ($ShowDescription) { $cakeArguments += "-showdescription" }
 if ($DryRun) { $cakeArguments += "-dryrun" }
+if ($Ci) { $cakeArguments += "-ci=$Ci" }
 $cakeArguments += $ScriptArgs
 
 # Start Cake
