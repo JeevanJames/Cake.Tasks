@@ -32,5 +32,46 @@
                 Registers a class in the assembly that has task plugins.
             </summary>
         </member>
+        <member name="T:Cake.Tasks.Core.TaskConfigException">
+            <summary>
+                Exception to throw if a task's configuration value is invalid.
+            </summary>
+        </member>
+        <member name="M:Cake.Tasks.Core.TaskConfigException.#ctor">
+            <summary>
+                Initializes a new instance of the <see cref="T:Cake.Tasks.Core.TaskConfigException"/> class.
+            </summary>
+        </member>
+        <member name="M:Cake.Tasks.Core.TaskConfigException.#ctor(System.String)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Cake.Tasks.Core.TaskConfigException"/> class with the
+                specified <paramref name="message"/>.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+        </member>
+        <member name="M:Cake.Tasks.Core.TaskConfigException.#ctor(System.String,System.Exception)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Cake.Tasks.Core.TaskConfigException"/> class with the
+                specified <paramref name="message"/> and <paramref name="innerException"/>.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+            <param name="innerException">
+                The exception that is the cause of the current exception, or <c>null</c> if no inner
+                exception is specified.
+            </param>
+        </member>
+        <member name="M:Cake.Tasks.Core.TaskConfigException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Cake.Tasks.Core.TaskConfigException"/> class with serialized data.
+            </summary>
+            <param name="info">
+                The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> that holds the serialized object data about the
+                exception being thrown.
+            </param>
+            <param name="context">
+                The <see cref="T:System.Runtime.Serialization.StreamingContext"/> that contains contextual information about the
+                source or destination.
+            </param>
+        </member>
     </members>
 </doc>

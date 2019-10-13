@@ -47,6 +47,8 @@ namespace Cake.Tasks.Config
         public static void ConfigureTask<TConfig>(this ICakeContext ctx, Action<TConfig> setter)
             where TConfig : PluginConfig
         {
+            if (ctx is null)
+                throw new ArgumentNullException(nameof(ctx));
             if (setter is null)
                 throw new ArgumentNullException(nameof(setter));
 
@@ -62,6 +64,8 @@ namespace Cake.Tasks.Config
         public static void ConfigureTask<TConfig>(this ICakeContext ctx, Action<TConfig, TaskConfig> setter)
             where TConfig : PluginConfig
         {
+            if (ctx is null)
+                throw new ArgumentNullException(nameof(ctx));
             if (setter is null)
                 throw new ArgumentNullException(nameof(setter));
 
