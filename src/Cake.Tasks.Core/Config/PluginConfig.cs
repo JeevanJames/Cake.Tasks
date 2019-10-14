@@ -18,8 +18,10 @@ limitations under the License.
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
+using Cake.Tasks.Core;
 
 namespace Cake.Tasks.Config
 {
@@ -47,6 +49,9 @@ namespace Cake.Tasks.Config
 
             return (T)value;
         }
+
+        protected FuncOrListValue<T> GetFuncOrListValue<T>(string name) =>
+            Get<FuncOrListValue<T>>(name);
 
         protected T GetFuncOrValue<T>(string name) =>
             Get<FuncOrValue<T>>(name);
