@@ -19,10 +19,13 @@ limitations under the License.
 
 namespace Cake.Tasks.Core
 {
-    public enum CoreTask
+    public sealed class PipelineTaskAttribute : BasePipelineTaskAttribute
     {
-        Build,
-        Test,
-        Deploy,
+        public PipelineTaskAttribute(PipelineTask coreTask)
+        {
+            PipelineTask = coreTask;
+        }
+
+        public PipelineTask PipelineTask { get; }
     }
 }

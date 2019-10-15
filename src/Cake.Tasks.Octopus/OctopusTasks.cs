@@ -15,7 +15,7 @@ namespace Cake.Tasks.Octopus
 {
     public static class OctopusTasks
     {
-        [CoreTask(CoreTask.Deploy)]
+        [PipelineTask(PipelineTask.Deploy)]
         public static void Deploy(ICakeContext ctx, TaskConfig cfg)
         {
             var octopus = cfg.Load<OctopusConfig>();

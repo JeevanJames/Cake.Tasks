@@ -82,9 +82,9 @@ namespace Cake.Tasks.Module.PluginLoaders
 
                     switch (taskAttribute)
                     {
-                        case CoreTaskAttribute attr:
-                            registeredTask.CoreTask = attr.CoreTask;
-                            registeredTask.Name = $"_{attr.CoreTask}-{method.Name}{envSuffix}";
+                        case PipelineTaskAttribute attr:
+                            registeredTask.CoreTask = attr.PipelineTask;
+                            registeredTask.Name = $"_{attr.PipelineTask}-{method.Name}{envSuffix}";
                             break;
                         case TaskEventAttribute attr:
                             registeredTask.CoreTask = attr.CoreTask;
@@ -108,7 +108,7 @@ namespace Cake.Tasks.Module.PluginLoaders
             ParameterInfo[] parameters = method.GetParameters();
             switch (attribute)
             {
-                case CoreTaskAttribute _:
+                case PipelineTaskAttribute _:
                 case TaskEventAttribute _:
                     if (parameters.Length < 1 || parameters.Length > 2)
                         return false;

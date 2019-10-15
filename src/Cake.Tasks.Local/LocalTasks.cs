@@ -10,7 +10,7 @@ namespace Cake.Tasks.Local
 {
     public static class LocalTasks
     {
-        [TaskEvent(TaskEventType.BeforeTask, CoreTask.Build)]
+        [TaskEvent(TaskEventType.BeforeTask, PipelineTask.Build)]
         public static void CleanArtifactsDirectory(ICakeContext ctx, TaskConfig cfg)
         {
             var env = cfg.Load<EnvConfig>();

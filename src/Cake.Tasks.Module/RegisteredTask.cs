@@ -52,7 +52,7 @@ namespace Cake.Tasks.Module
 
         // Optional properties - specific to task type
 
-        internal CoreTask? CoreTask { get; set; }
+        internal PipelineTask? CoreTask { get; set; }
 
         internal TaskEventType? EventType { get; set; }
 

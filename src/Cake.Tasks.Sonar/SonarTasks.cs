@@ -11,7 +11,7 @@ namespace Cake.Tasks.Sonar
 {
     public static class SonarTasks
     {
-        [TaskEvent(TaskEventType.BeforeTask, CoreTask.Build)]
+        [TaskEvent(TaskEventType.BeforeTask, PipelineTask.Build)]
         public static void StartScanner(ICakeContext ctx, TaskConfig config)
         {
             var sonar = config.Load<SonarConfig>();
@@ -27,7 +27,7 @@ namespace Cake.Tasks.Sonar
             });
         }
 
-        [TaskEvent(TaskEventType.AfterTask, CoreTask.Test)]
+        [TaskEvent(TaskEventType.AfterTask, PipelineTask.Test)]
         public static void StopScanner(ICakeContext ctx, TaskConfig cfg)
         {
             var sonar = cfg.Load<SonarConfig>();

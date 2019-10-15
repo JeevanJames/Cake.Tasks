@@ -23,7 +23,7 @@ namespace Cake.Tasks.Core
 {
     public sealed class TaskEventAttribute : BasePipelineTaskAttribute
     {
-        public TaskEventAttribute(TaskEventType eventType, CoreTask coreTask)
+        public TaskEventAttribute(TaskEventType eventType, PipelineTask coreTask)
         {
             EventType = eventType;
             CoreTask = coreTask;
@@ -31,7 +31,7 @@ namespace Cake.Tasks.Core
 
         public TaskEventType EventType { get; }
 
-        public CoreTask CoreTask { get; }
+        public PipelineTask CoreTask { get; }
     }
 
     public enum TaskEventType

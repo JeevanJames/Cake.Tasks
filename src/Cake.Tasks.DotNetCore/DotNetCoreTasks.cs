@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -20,7 +19,7 @@ namespace Cake.Tasks.DotNetCore
 {
     public static class DotNetCoreTasks
     {
-        [TaskEvent(TaskEventType.BeforeTask, CoreTask.Build)]
+        [TaskEvent(TaskEventType.BeforeTask, PipelineTask.Build)]
         public static void BeforeDotNetCoreBuild(ICakeContext context, TaskConfig config)
         {
             context.DotNetCoreBuildServerShutdown();
@@ -36,7 +35,7 @@ namespace Cake.Tasks.DotNetCore
             });
         }
 
-        [CoreTask(CoreTask.Build)]
+        [PipelineTask(PipelineTask.Build)]
         public static void BuildDotNetCoreSolution(ICakeContext context, TaskConfig config)
         {
             var build = config.Load<DotNetCoreConfig>().Build;
@@ -56,7 +55,7 @@ namespace Cake.Tasks.DotNetCore
             });
         }
 
-        [CoreTask(CoreTask.Test)]
+        [PipelineTask(PipelineTask.Test)]
         public static void TestDotNetCoreProjects(ICakeContext context, TaskConfig config)
         {
             var test = config.Load<DotNetCoreConfig>().Test;
@@ -97,13 +96,13 @@ namespace Cake.Tasks.DotNetCore
             context.DotNetCoreTest(testProjectFile, settings);
         }
 
-        [TaskEvent(TaskEventType.AfterTask, CoreTask.Test)]
+        [TaskEvent(TaskEventType.AfterTask, PipelineTask.Test)]
         public static void ShutDownBuildServer(ICakeContext ctx, TaskConfig cfg)
         {
             ctx.DotNetCoreBuildServerShutdown();
         }
 
-        [TaskEvent(TaskEventType.BeforeTask, CoreTask.Deploy)]
+        [TaskEvent(TaskEventType.BeforeTask, PipelineTask.Deploy)]
         public static void PublishDotNetProjects(ICakeContext ctx, TaskConfig config)
         {
             var cfg = config.Load<DotNetCoreConfig>().Publish;

@@ -111,7 +111,7 @@ namespace Cake.Tasks.Module
                     taskType = "Config task";
                 else if (registeredTask.AttributeType == typeof(TaskEventAttribute))
                     taskType = $"{(registeredTask.EventType == TaskEventType.BeforeTask ? "Before" : "After")} {registeredTask.CoreTask} task";
-                else if (registeredTask.AttributeType == typeof(CoreTaskAttribute))
+                else if (registeredTask.AttributeType == typeof(PipelineTaskAttribute))
                     taskType = $"{registeredTask.CoreTask} task";
                 else
                     throw new NotSupportedException($"Unrecognized task type: {registeredTask.AttributeType.FullName}");
@@ -289,17 +289,17 @@ namespace Cake.Tasks.Module
                 .IsDependentOn(TaskNames.Config);
 
             IEnumerable<RegisteredTask> preBuildTasks = envTasks
-                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Build && t.EventType == TaskEventType.BeforeTask);
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == PipelineTask.Build && t.EventType == TaskEventType.BeforeTask);
             foreach (RegisteredTask preBuildTask in preBuildTasks)
                 task.IsDependentOn(preBuildTask.Name);
 
             IEnumerable<RegisteredTask> buildTasks = envTasks
-                .Where(t => t.AttributeType == typeof(CoreTaskAttribute) && t.CoreTask == CoreTask.Build);
+                .Where(t => t.AttributeType == typeof(PipelineTaskAttribute) && t.CoreTask == PipelineTask.Build);
             foreach (RegisteredTask buildTask in buildTasks)
                 task.IsDependentOn(buildTask.Name);
 
             IEnumerable<RegisteredTask> postBuildTasks = envTasks
-                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Build && t.EventType == TaskEventType.AfterTask);
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == PipelineTask.Build && t.EventType == TaskEventType.AfterTask);
             foreach (RegisteredTask postBuildTask in postBuildTasks)
                 task.IsDependentOn(postBuildTask.Name);
         }
@@ -311,17 +311,17 @@ namespace Cake.Tasks.Module
                 .IsDependentOn(TaskNames.Build);
 
             IEnumerable<RegisteredTask> preTestTasks = envTasks
-                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Test && t.EventType == TaskEventType.BeforeTask);
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == PipelineTask.Test && t.EventType == TaskEventType.BeforeTask);
             foreach (RegisteredTask preTestTask in preTestTasks)
                 task.IsDependentOn(preTestTask.Name);
 
             IEnumerable<RegisteredTask> testTasks = envTasks
-                .Where(t => t.AttributeType == typeof(CoreTaskAttribute) && t.CoreTask == CoreTask.Test);
+                .Where(t => t.AttributeType == typeof(PipelineTaskAttribute) && t.CoreTask == PipelineTask.Test);
             foreach (RegisteredTask testTask in testTasks)
                 task.IsDependentOn(testTask.Name);
 
             IEnumerable<RegisteredTask> postTestTasks = envTasks
-                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Test && t.EventType == TaskEventType.AfterTask);
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == PipelineTask.Test && t.EventType == TaskEventType.AfterTask);
             foreach (RegisteredTask postTestTask in postTestTasks)
                 task.IsDependentOn(postTestTask.Name);
         }
@@ -340,17 +340,17 @@ namespace Cake.Tasks.Module
                 .IsDependentOn("CI");
 
             IEnumerable<RegisteredTask> preDeployTasks = envTasks
-                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Deploy && t.EventType == TaskEventType.BeforeTask);
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == PipelineTask.Deploy && t.EventType == TaskEventType.BeforeTask);
             foreach (RegisteredTask preDeployTask in preDeployTasks)
                 task.IsDependentOn(preDeployTask.Name);
 
             IEnumerable<RegisteredTask> deployTasks = envTasks
-                .Where(t => t.AttributeType == typeof(CoreTaskAttribute) && t.CoreTask == CoreTask.Deploy);
+                .Where(t => t.AttributeType == typeof(PipelineTaskAttribute) && t.CoreTask == PipelineTask.Deploy);
             foreach (RegisteredTask deployTask in deployTasks)
                 task.IsDependentOn(deployTask.Name);
 
             IEnumerable<RegisteredTask> postDeployTasks = envTasks
-                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == CoreTask.Deploy && t.EventType == TaskEventType.AfterTask);
+                .Where(t => t.AttributeType == typeof(TaskEventAttribute) && t.CoreTask == PipelineTask.Deploy && t.EventType == TaskEventType.AfterTask);
             foreach (RegisteredTask postDeployTask in postDeployTasks)
                 task.IsDependentOn(postDeployTask.Name);
         }

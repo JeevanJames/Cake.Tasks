@@ -18,10 +18,8 @@ limitations under the License.
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
-using Cake.Tasks.Core;
 
 namespace Cake.Tasks.Config
 {
