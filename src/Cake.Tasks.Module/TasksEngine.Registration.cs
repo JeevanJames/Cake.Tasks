@@ -176,13 +176,6 @@ namespace Cake.Tasks.Module
                 foreach (RegisteredTask configTask in configTasks)
                     listConfigsTask = listConfigsTask.IsDependentOn(configTask.Name);
                 listConfigsTask = listConfigsTask.IsDependentOn(TaskNames.Config);
-                listConfigsTask.Does<TaskConfig>((context, config) =>
-                {
-                    context.Log.Information("Available Configurations");
-                    context.Log.Information("------------------------");
-                    foreach (KeyValuePair<string, object> kvp in config.Data.OrderBy(kvp => kvp.Key))
-                        context.Log.Information($"{kvp.Key} = {kvp.Value?.ToString() ?? "[NULL]"}");
-                });
             }
 
             void RegisterListTasksTask()
@@ -232,8 +225,6 @@ namespace Cake.Tasks.Module
 
             foreach (RegisteredTask configTask in configTasks)
                 task.IsDependentOn(configTask.Name);
-
-            //task.IsDependentOn(TaskNames.ConfigFinalize);
 
             task.Does(ctx =>
             {
