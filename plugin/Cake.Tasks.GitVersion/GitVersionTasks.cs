@@ -33,8 +33,11 @@ namespace Cake.Tasks.GitVersion
         public static void ConfigureGitVersion(ICakeContext ctx, TaskConfig cfg)
         {
             var ci = cfg.Load<CiConfig>();
+            var gitVersion = cfg.Load<GitVersionConfig>();
 
             Common.Tools.GitVersion.GitVersion version = ctx.GitVersion();
+
+            gitVersion.Version = version;
 
             ci.Version = version.FullSemVer;
 

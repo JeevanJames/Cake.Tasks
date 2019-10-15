@@ -1,7 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Cake.Tasks.GitVersion</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
+    <DocumentationFile>Properties\$(AssemblyName).xml</DocumentationFile>
+    <Description>Cake GitVersion tasks</Description>
   </PropertyGroup>
 
   <ItemGroup>
