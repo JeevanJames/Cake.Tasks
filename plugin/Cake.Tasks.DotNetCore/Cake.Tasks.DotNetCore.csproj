@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
+    <ProjectReference Include="..\..\src\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>Cake.Tasks.Octopus</AssemblyName>
-    <RootNamespace>Cake.Tasks.Octopus</RootNamespace>
+    <AssemblyName>Cake.Tasks.Local</AssemblyName>
+    <RootNamespace>Cake.Tasks.Local</RootNamespace>
     <DocumentationFile>Properties\$(AssemblyName).xml</DocumentationFile>
-    <Description>Cake Octopus Deploy tasks</Description>
+    <Description>Cake local tasks</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
+    <ProjectReference Include="..\..\src\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
   </ItemGroup>
-  
+
 </Project>
