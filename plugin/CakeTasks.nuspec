@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Cake.Tasks.JeevanJames</id>
+    <version>0.1.0</version>
+    <authors>Jeevan James</authors>
+    <owners>Jeevan James</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">Apache-2.0</license>
+    <projectUrl>https://github.com/JeevanJames/Cake.Tasks/</projectUrl>
+    <description>Cake Tasks recipe for Jeevan James</description>
+    <copyright>Copyright (c) 2019 Jeevan James</copyright>
+    <tags>Cake-Tasks</tags>
+    <repository type="Git" url="https://github.com/JeevanJames/Cake.Tasks.git" />
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Cake.Tasks.DotNetCore" version="0.1.0" exclude="Build,Analyzers" />
+        <dependency id="Cake.Tasks.Local" version="0.1.0" exclude="Build,Analyzers" />
+        <dependency id="Cake.Tasks.GitVersion" version="0.1.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>
