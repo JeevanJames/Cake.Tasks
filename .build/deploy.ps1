@@ -17,3 +17,8 @@ dotnet nuget push ./plugin/Cake.Tasks.DotNetCore/bin/Release/Cake.Tasks.DotNetCo
 # Cake Tasks Local plugin
 dotnet pack ./plugin/Cake.Tasks.Local/Cake.Tasks.Local.csproj --include-symbols --include-source -c Release /p:Version=$env:APPVEYOR_BUILD_VERSION
 dotnet nuget push ./plugin/Cake.Tasks.Local/bin/Release/Cake.Tasks.Local.$env:APPVEYOR_BUILD_VERSION.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY -ss $env:MYGET_SYMBOLS_FEED -sk $env:MYGET_SYMBOLS_APIKEY
+
+# Meta package
+((Get-Content -path ./plugin/CakeTasks.nuspec -Raw) -replace '0.1.0',$env:APPVEYOR_BUILD_VERSION) | Set-Content -Path ./plugin/CakeTasks.nuspec
+nuget pack ./plugin/CakeTasks.nuspec -OutputDirectory ./plugin -OutputFileNamesWithoutVersion
+dotnet nuget push ./plugin/CakeTasks.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY
