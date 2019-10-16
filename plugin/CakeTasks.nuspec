@@ -13,7 +13,7 @@
     <tags>Cake-Tasks</tags>
     <repository type="Git" url="https://github.com/JeevanJames/Cake.Tasks.git" />
     <dependencies>
-      <group targetFramework=".NETStandard2.0">
+      <group targetFramework="netstandard2.0">
         <dependency id="Cake.Tasks.DotNetCore" version="0.1.0" exclude="Build,Analyzers" />
         <dependency id="Cake.Tasks.Local" version="0.1.0" exclude="Build,Analyzers" />
         <dependency id="Cake.Tasks.GitVersion" version="0.1.0" exclude="Build,Analyzers" />
