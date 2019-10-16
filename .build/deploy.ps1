@@ -26,9 +26,13 @@ dotnet nuget push ./plugin/Cake.Tasks.Local/bin/Release/Cake.Tasks.Local.$env:AP
 # Meta package
 Write-Host "Publishing Cake Tasks addins metapackage" -ForegroundColor Magenta
 New-Item -ItemType Directory -Path ./metapackage/ref/netstandard2.0
+New-Item -ItemType Directory -Path ./metapackage/lib/netstandard2.0
 Copy-Item -Path ./plugin/Cake.Tasks.DotNetCore/bin/Release/netstandard2.0/Cake.Tasks.DotNetCore.dll -Destination .\metapackage\ref\netstandard2.0
 Copy-Item -Path ./plugin/Cake.Tasks.GitVersion/bin/Release/netstandard2.0/Cake.Tasks.GitVersion.dll -Destination .\metapackage\ref\netstandard2.0
 Copy-Item -Path ./plugin/Cake.Tasks.Local/bin/Release/netstandard2.0/Cake.Tasks.Local.dll -Destination .\metapackage\ref\netstandard2.0
+Copy-Item -Path ./plugin/Cake.Tasks.DotNetCore/bin/Release/netstandard2.0/Cake.Tasks.DotNetCore.dll -Destination .\metapackage\lib\netstandard2.0
+Copy-Item -Path ./plugin/Cake.Tasks.GitVersion/bin/Release/netstandard2.0/Cake.Tasks.GitVersion.dll -Destination .\metapackage\lib\netstandard2.0
+Copy-Item -Path ./plugin/Cake.Tasks.Local/bin/Release/netstandard2.0/Cake.Tasks.Local.dll -Destination .\metapackage\lib\netstandard2.0
 
 ((Get-Content -path ./metapackage/CakeTasks.nuspec -Raw) -replace '0.1.0',$env:APPVEYOR_BUILD_VERSION) | Set-Content -Path ./plugin/CakeTasks.nuspec
 nuget pack ./metapackage/CakeTasks.nuspec -OutputDirectory ./metapackage -OutputFileNamesWithoutVersion
