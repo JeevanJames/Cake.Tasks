@@ -25,6 +25,6 @@ dotnet nuget push ./plugin/Cake.Tasks.Local/bin/Release/Cake.Tasks.Local.$env:AP
 
 # Meta package
 Write-Host "Publishing Cake Tasks addins metapackage" -ForegroundColor Magenta
-((Get-Content -path ./plugin/CakeTasks.nuspec -Raw) -replace '0.1.0',$env:APPVEYOR_BUILD_VERSION) | Set-Content -Path ./plugin/CakeTasks.nuspec
-nuget pack ./plugin/CakeTasks.nuspec -OutputDirectory ./plugin -OutputFileNamesWithoutVersion
-dotnet nuget push ./plugin/Cake.Tasks.JeevanJames.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY
+((Get-Content -path ./metapackage/CakeTasks.nuspec -Raw) -replace '0.1.0',$env:APPVEYOR_BUILD_VERSION) | Set-Content -Path ./plugin/CakeTasks.nuspec
+nuget pack ./metapackage/CakeTasks.nuspec -OutputDirectory ./metapackage -OutputFileNamesWithoutVersion
+dotnet nuget push ./metapackage/Cake.Tasks.JeevanJames.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY
