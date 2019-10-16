@@ -1,12 +1,6 @@
 #module "nuget:?package=Cake.Tasks.Module&prerelease"
-
 #tool "nuget:?package=GitVersion.CommandLine"
-
-#addin "nuget:?package=Cake.Tasks.JeevanJames&prerelease"
-// #addin "nuget:?package=Cake.Tasks.Core&prerelease"
-// #addin "nuget:?package=Cake.Tasks.DotNetCore&prerelease"
-// #addin "nuget:?package=Cake.Tasks.GitVersion&prerelease"
-// #addin "nuget:?package=Cake.Tasks.Local&prerelease"
+#addin "nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.JeevanJames&prerelease"
 
 ConfigureTask<DotNetCoreConfig>(cfg =>
 {
