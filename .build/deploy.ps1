@@ -27,9 +27,13 @@ dotnet nuget push ./plugin/Cake.Tasks.Local/bin/Release/Cake.Tasks.Local.$env:AP
 Write-Host "Publishing Cake Tasks addins metapackage" -ForegroundColor Magenta
 New-Item -ItemType Directory -Path ./metapackage/ref/netstandard2.0
 New-Item -ItemType Directory -Path ./metapackage/lib/netstandard2.0
+
+Copy-Item -Path ./src/Cake.Tasks.Core/bin/Release/netstandard2.0/Cake.Tasks.Core.dll -Destination .\metapackage\ref\netstandard2.0
 Copy-Item -Path ./plugin/Cake.Tasks.DotNetCore/bin/Release/netstandard2.0/Cake.Tasks.DotNetCore.dll -Destination .\metapackage\ref\netstandard2.0
 Copy-Item -Path ./plugin/Cake.Tasks.GitVersion/bin/Release/netstandard2.0/Cake.Tasks.GitVersion.dll -Destination .\metapackage\ref\netstandard2.0
 Copy-Item -Path ./plugin/Cake.Tasks.Local/bin/Release/netstandard2.0/Cake.Tasks.Local.dll -Destination .\metapackage\ref\netstandard2.0
+
+Copy-Item -Path ./src/Cake.Tasks.Core/bin/Release/netstandard2.0/Cake.Tasks.Core.dll -Destination .\metapackage\lib\netstandard2.0
 Copy-Item -Path ./plugin/Cake.Tasks.DotNetCore/bin/Release/netstandard2.0/Cake.Tasks.DotNetCore.dll -Destination .\metapackage\lib\netstandard2.0
 Copy-Item -Path ./plugin/Cake.Tasks.GitVersion/bin/Release/netstandard2.0/Cake.Tasks.GitVersion.dll -Destination .\metapackage\lib\netstandard2.0
 Copy-Item -Path ./plugin/Cake.Tasks.Local/bin/Release/netstandard2.0/Cake.Tasks.Local.dll -Destination .\metapackage\lib\netstandard2.0
