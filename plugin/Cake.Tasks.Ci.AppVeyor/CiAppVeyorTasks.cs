@@ -20,7 +20,6 @@ limitations under the License.
 using Cake.Common.Build;
 using Cake.Common.Build.AppVeyor;
 using Cake.Core;
-using Cake.Core.Diagnostics;
 using Cake.Tasks.Ci.AppVeyor;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
@@ -32,7 +31,7 @@ namespace Cake.Tasks.Ci.AppVeyor
     public static class CiAppVeyorTasks
     {
         [Config(CiSystem = "appveyor", Order = int.MaxValue)]
-        public static void ConfigureTfsEnvironment(ICakeContext ctx, TaskConfig cfg)
+        public static void ConfigureAppVeyorEnvironment(ICakeContext ctx, TaskConfig cfg)
         {
             IAppVeyorProvider appveyor = ctx.AppVeyor();
 
