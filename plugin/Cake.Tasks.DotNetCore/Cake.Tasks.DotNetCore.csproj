@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Cake.Tasks.DotNetCore</AssemblyName>
-    <RootNamespace>Cake.Tasks.DotNetCore</RootNamespace>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
     <DocumentationFile>Properties\$(AssemblyName).xml</DocumentationFile>
     <Description>Cake .NET Core tasks</Description>
   </PropertyGroup>

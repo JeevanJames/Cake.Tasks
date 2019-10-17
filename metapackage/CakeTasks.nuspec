@@ -21,7 +21,6 @@
         <reference file="Cake.Tasks.Core.dll"/>
         <reference file="Cake.Tasks.DotNetCore.dll"/>
         <reference file="Cake.Tasks.GitVersion.dll"/>
-        <reference file="Cake.Tasks.Local.dll"/>
       </group>
     </references>
   </metadata>
