@@ -4,12 +4,13 @@
 #r ".\tools\Cake.Tasks.GitVersion.dll"
 #r ".\tools\Cake.Tasks.DotNetCore.dll"
 
-using Cake.Tasks.Config;
-
 ConfigureTask<DotNetCoreConfig>(cfg =>
 {
     cfg.Test.ProjectFile = @".\TestLibrary.Tests\TestLibrary.Tests.csproj";
-    cfg.Publish.ProjectFile = @".\TestLibrary\TestLibrary.csproj";
+    
+    var profiles = new List<PublishProfile>();
+    profiles.Add(new NuGetPackagePublishProfile("TestLibrary", @"./TestLibrary/TestLibrary.csproj"));
+    cfg.Publish.Profiles = profiles;
 });
 
 RunTarget(Argument("target", "Default"));

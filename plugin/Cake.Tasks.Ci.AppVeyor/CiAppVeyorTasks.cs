@@ -44,8 +44,6 @@ namespace Cake.Tasks.Ci.AppVeyor
 
             env.Version.BuildNumber = appveyor.Environment.Build.Number;
             env.Version.Build = $"{env.Version.Primary}-build.{env.Version.BuildNumber}";
-
-            ctx.Log.Information(appveyor.Environment.Build.Dump());
         }
     }
 }

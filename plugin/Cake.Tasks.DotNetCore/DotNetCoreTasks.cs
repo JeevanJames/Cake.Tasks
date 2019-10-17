@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 using Cake.Common.Tools.DotNetCore;
 using Cake.Common.Tools.DotNetCore.Build;
 using Cake.Common.Tools.DotNetCore.Clean;
+using Cake.Common.Tools.DotNetCore.Pack;
 using Cake.Common.Tools.DotNetCore.Publish;
 using Cake.Common.Tools.DotNetCore.Test;
 using Cake.Core;
@@ -46,9 +48,11 @@ namespace Cake.Tasks.DotNetCore
 
             var env = config.Load<EnvConfig>();
 
+            string outputDirectory = Path.Combine(env.Directories.BinaryOutput, "__build");
+
             context.DotNetCoreBuild(buildProjectFile, new DotNetCoreBuildSettings
             {
-                OutputDirectory = env.Directories.BinaryOutput,
+                OutputDirectory = outputDirectory,
                 Configuration = env.Configuration,
                 Verbosity = context.Log.Verbosity.ToVerbosity(),
             });
@@ -74,7 +78,7 @@ namespace Cake.Tasks.DotNetCore
             var settings = new DotNetCoreTestSettings
             {
                 Configuration = env.Configuration,
-                OutputDirectory = env.Directories.BinaryOutput,
+                OutputDirectory = Path.Combine(env.Directories.BinaryOutput, "__build"),
                 Logger = "trx",
                 ResultsDirectory = env.Directories.TestOutput,
                 NoBuild = true,
@@ -106,12 +110,54 @@ namespace Cake.Tasks.DotNetCore
             var cfg = config.Load<DotNetCoreConfig>().Publish;
             var env = config.Load<EnvConfig>();
 
-            ctx.DotNetCorePublish(cfg.ProjectFile, new DotNetCorePublishSettings
+            IList<PublishProfile> profiles = cfg.Profiles.Resolve();
+
+            if (profiles.Count == 0)
+            {
+                ctx.Log.Information("Nothing to publish. Specify a publish profile.");
+                return;
+            }
+
+            foreach (PublishProfile profile in profiles)
+            {
+                string outputDirectory = Path.Combine(env.Directories.BinaryOutput, "__publish", profile.Name);
+                switch (profile)
+                {
+                    case AspNetPublishProfile aspnet:
+                        PublishAspNet(ctx, config, aspnet, outputDirectory);
+                        break;
+                    case NuGetPackagePublishProfile nuget:
+                        PublishNuGet(ctx, config, nuget, outputDirectory);
+                        break;
+                }
+            }
+        }
+
+        private static void PublishAspNet(ICakeContext ctx, TaskConfig cfg, AspNetPublishProfile profile, string directory)
+        {
+            var env = cfg.Load<EnvConfig>();
+
+            ctx.DotNetCorePublish(profile.ProjectFile, new DotNetCorePublishSettings
             {
                 Configuration = env.Configuration,
-                OutputDirectory = Path.Combine(env.Directories.BinaryOutput, "publish"),
+                OutputDirectory = directory,
                 Verbosity = ctx.Log.Verbosity.ToVerbosity(),
-                ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version}"),
+                ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
+            });
+        }
+
+        private static void PublishNuGet(ICakeContext ctx, TaskConfig cfg, NuGetPackagePublishProfile profile, string directory)
+        {
+            var env = cfg.Load<EnvConfig>();
+
+            ctx.DotNetCorePack(profile.ProjectFile, new DotNetCorePackSettings
+            {
+                Configuration = env.Configuration,
+                OutputDirectory = directory,
+                Verbosity = ctx.Log.Verbosity.ToVerbosity(),
+                ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
+                IncludeSource = true,
+                IncludeSymbols = true,
             });
         }
 
@@ -134,8 +180,6 @@ namespace Cake.Tasks.DotNetCore
 
             cfg.Test.Skip = false;
             cfg.Test.ProjectFile = (Func<string>)GetBuildProjectFile;
-
-            cfg.Publish.ProjectFile = (Func<string>)GetBuildProjectFile;
         }
 
         private static DotNetCoreVerbosity ToVerbosity(this Verbosity verbosity)

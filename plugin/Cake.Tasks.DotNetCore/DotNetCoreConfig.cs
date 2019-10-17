@@ -63,10 +63,10 @@
             {
             }
 
-            public ConfigValue<string> ProjectFile
+            public ConfigList<PublishProfile> Profiles
             {
-                get => Get<ConfigValue<string>>(Keys.PublishProjectFile);
-                set => Set(Keys.PublishProjectFile, value);
+                get => GetList<PublishProfile>(Keys.PublishProfiles);
+                set => Set(Keys.PublishProfiles, value);
             }
         }
 
@@ -78,7 +78,7 @@
             public const string TestProjectFile = "DotNetCore_Test_ProjectFile";
             public const string TestFilter = "DotNetCore_Test_Filter";
 
-            public const string PublishProjectFile = "DotNetCore_Publish_ProjectFile";
+            public const string PublishProfiles = "DotNetCore_Publish_Profiles";
         }
     }
 }
