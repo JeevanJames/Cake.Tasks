@@ -40,15 +40,15 @@ namespace Cake.Tasks.GitVersion
 
             gitVersion.Version = version;
 
-            env.Version = version.MajorMinorPatch;
-            env.FullVersion = version.FullSemVer;
+            env.Version.Primary = version.MajorMinorPatch;
+            env.Version.Full = version.FullSemVer;
 
             if (version.CommitsSinceVersionSource.HasValue)
-                env.BuildNumber = version.CommitsSinceVersionSource.Value;
+                env.Version.BuildNumber = version.CommitsSinceVersionSource.Value;
             else if (int.TryParse(version.BuildMetaData, out int buildMetadata))
-                env.BuildNumber = buildMetadata;
+                env.Version.BuildNumber = buildMetadata;
             else
-                env.BuildNumber = 1;
+                env.Version.BuildNumber = 1;
         }
     }
 }

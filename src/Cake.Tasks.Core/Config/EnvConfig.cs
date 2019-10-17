@@ -25,8 +25,12 @@ namespace Cake.Tasks.Config
             : base(taskConfig)
         {
             Directories = new DirectoryConfig(taskConfig);
+            Version = new VersionConfig(taskConfig);
         }
 
+        /// <summary>
+        ///     Gets or sets the build configuration, such as Debug or Release.
+        /// </summary>
         public string Configuration
         {
             get => Get<string>(Keys.Configuration);
@@ -42,31 +46,15 @@ namespace Cake.Tasks.Config
             set => Set(Keys.IsCi, value);
         }
 
-        public FuncOrValue<int> BuildNumber
-        {
-            get => GetFuncOrValue<int>(Keys.BuildNumber);
-            set => Set(Keys.BuildNumber, value);
-        }
-
-        public FuncOrValue<string> Version
-        {
-            get => GetFuncOrValue<string>(Keys.Version);
-            set => Set(Keys.Version, value);
-        }
-
-        public FuncOrValue<string> FullVersion
-        {
-            get => GetFuncOrValue<string>(Keys.FullVersion);
-            set => Set(Keys.FullVersion, value);
-        }
-
-        public FuncOrValue<string> BuildVersion
-        {
-            get => GetFuncOrValue<string>(Keys.BuildVersion);
-            set => Set(Keys.BuildVersion, value);
-        }
-
+        /// <summary>
+        ///     Gets the configuration for the location of common directories used during a build.
+        /// </summary>
         public DirectoryConfig Directories { get; }
+
+        /// <summary>
+        ///     Gets the configuration for version-related information.
+        /// </summary>
+        public VersionConfig Version { get; }
 
         public sealed class DirectoryConfig : PluginConfig
         {
@@ -80,26 +68,89 @@ namespace Cake.Tasks.Config
             /// </summary>
             public string Working
             {
-                get => Get<string>(Keys.WorkingDirectory);
-                set => Set(Keys.WorkingDirectory, value);
+                get => Get<string>(Keys.DirectoryWorking);
+                set => Set(Keys.DirectoryWorking, value);
             }
 
+            /// <summary>
+            ///     Gets or sets the directory for storing build artifacts.
+            /// </summary>
             public string Artifacts
             {
-                get => Get<string>(Keys.ArtifactsDirectory);
-                set => Set(Keys.ArtifactsDirectory, value);
+                get => Get<string>(Keys.DirectoryArtifacts);
+                set => Set(Keys.DirectoryArtifacts, value);
             }
 
-            public string BuildOutput
+            /// <summary>
+            ///     Gets or sets the directory for storing binary output from the build process.
+            /// </summary>
+            public string BinaryOutput
             {
-                get => Get<string>(Keys.BuildOutputDirectory);
-                set => Set(Keys.BuildOutputDirectory, value);
+                get => Get<string>(Keys.DirectoryBinaryOutput);
+                set => Set(Keys.DirectoryBinaryOutput, value);
             }
 
+            /// <summary>
+            ///     Gets or sets the directory for storing test output from the build process.
+            /// </summary>
             public string TestOutput
             {
-                get => Get<string>(Keys.TestOutputDirectory);
-                set => Set(Keys.TestOutputDirectory, value);
+                get => Get<string>(Keys.DirectoryTestOutput);
+                set => Set(Keys.DirectoryTestOutput, value);
+            }
+        }
+
+        public sealed class VersionConfig : PluginConfig
+        {
+            public VersionConfig(TaskConfig taskConfig)
+                : base(taskConfig)
+            {
+            }
+
+            /// <summary>
+            ///     Gets or sets an unique build number for the build execution.
+            /// </summary>
+            public FuncOrValue<int> BuildNumber
+            {
+                get => GetFuncOrValue<int>(Keys.VersionBuildNumber);
+                set => Set(Keys.VersionBuildNumber, value);
+            }
+
+            /// <summary>
+            ///     Gets or sets the primary version number for the build. This is in a simple
+            ///     {Major}.{Minor}.{Patch} format without prerelease, build or other extra information.
+            ///     <para/>
+            ///     The value can repeat across multiple builds and is not unique.
+            /// </summary>
+            public FuncOrValue<string> Primary
+            {
+                get => GetFuncOrValue<string>(Keys.VersionPrimary);
+                set => Set(Keys.VersionPrimary, value);
+            }
+
+            /// <summary>
+            ///     Gets or sets the full semantic version of the build. This includes prerelease, build
+            ///     and other extra information.
+            ///     <para/>
+            ///     The value will be unique for every new commit, but if multiple builds are run for the
+            ///     same commit, it will remain the same, so it cannot be considered a unique build value.
+            /// </summary>
+            public FuncOrValue<string> Full
+            {
+                get => GetFuncOrValue<string>(Keys.VersionFull);
+                set => Set(Keys.VersionFull, value);
+            }
+
+            /// <summary>
+            ///     Gets or sets an unique version number for the build.
+            ///     <para/>
+            ///     The value is unique for every build, regardless of whether a new commit is made or
+            ///     the same commit is being rebuilt.
+            /// </summary>
+            public FuncOrValue<string> Build
+            {
+                get => GetFuncOrValue<string>(Keys.VersionBuild);
+                set => Set(Keys.VersionBuild, value);
             }
         }
 
@@ -108,15 +159,15 @@ namespace Cake.Tasks.Config
             public const string Configuration = "Env_Configuration";
             public const string IsCi = "Env_IsCi";
 
-            public const string BuildNumber = "Env_BuildNumber";
-            public const string Version = "Env_Version";
-            public const string FullVersion = "Env_FullVersion";
-            public const string BuildVersion = "Env_BuildVersion";
+            public const string DirectoryWorking = "Env_Directory_Working";
+            public const string DirectoryArtifacts = "Env_Directory_Artifacts";
+            public const string DirectoryBinaryOutput = "Env_Directory_BinaryOutput";
+            public const string DirectoryTestOutput = "Env_Directory_TestOutput";
 
-            public const string WorkingDirectory = "Env_Directory_Working";
-            public const string ArtifactsDirectory = "Env_Directory_Artifacts";
-            public const string BuildOutputDirectory = "Env_Directory_BuildOutput";
-            public const string TestOutputDirectory = "Env_Directory_TestOutput";
+            public const string VersionBuildNumber = "Env_Version_BuildNumber";
+            public const string VersionPrimary = "Env_Version_Primary";
+            public const string VersionFull = "Env_Version_Full";
+            public const string VersionBuild = "Env_Version_Build";
         }
     }
 }

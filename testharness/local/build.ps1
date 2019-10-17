@@ -257,5 +257,5 @@ $cakeArguments += $ScriptArgs
 # Start Cake
 Write-Host "Running build script..."
 # Invoke-Expression "& $CAKE_EXE_INVOCATION $Script --bootstrap"
-Invoke-Expression "& $CAKE_EXE_INVOCATION $($cakeArguments -join " ")"
+Invoke-Expression "& $CAKE_EXE_INVOCATION $($cakeArguments -join " ") --settings_skippackageversioncheck=true"
 exit $LASTEXITCODE

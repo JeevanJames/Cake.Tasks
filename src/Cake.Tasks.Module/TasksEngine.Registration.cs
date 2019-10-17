@@ -62,13 +62,13 @@ namespace Cake.Tasks.Module
                 env.Directories.Working = ctx.Environment.WorkingDirectory.FullPath;
                 string outputDirectory = Path.Combine(env.Directories.Working, "__output");
                 env.Directories.Artifacts = Path.Combine(outputDirectory, "artifacts");
-                env.Directories.BuildOutput = Path.Combine(outputDirectory, "build");
+                env.Directories.BinaryOutput = Path.Combine(outputDirectory, "build");
                 env.Directories.TestOutput = Path.Combine(outputDirectory, "testresults");
 
-                env.BuildNumber = 1;
-                env.Version = (Func<string>)(() => $"0.{env.BuildNumber}.0");
-                env.FullVersion = (Func<string>)(() => $"0.{env.BuildNumber}.0");
-                env.BuildVersion = (Func<string>)(() => $"0.{env.BuildNumber}.0");
+                env.Version.BuildNumber = 1;
+                env.Version.Primary = (Func<string>)(() => $"0.{env.Version.BuildNumber}.0");
+                env.Version.Full = (Func<string>)(() => $"0.{env.Version.BuildNumber}.0");
+                env.Version.Build = (Func<string>)(() => $"0.{env.Version.BuildNumber}.0");
 
                 return config;
             });
@@ -264,10 +264,10 @@ namespace Cake.Tasks.Module
                     ctx.CleanDirectory(env.Directories.Artifacts);
                 else
                     ctx.CreateDirectory(env.Directories.Artifacts);
-                if (ctx.DirectoryExists(env.Directories.BuildOutput))
-                    ctx.CleanDirectory(env.Directories.BuildOutput);
+                if (ctx.DirectoryExists(env.Directories.BinaryOutput))
+                    ctx.CleanDirectory(env.Directories.BinaryOutput);
                 else
-                    ctx.CreateDirectory(env.Directories.BuildOutput);
+                    ctx.CreateDirectory(env.Directories.BinaryOutput);
                 if (ctx.DirectoryExists(env.Directories.TestOutput))
                     ctx.CleanDirectory(env.Directories.TestOutput);
                 else

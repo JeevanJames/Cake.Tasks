@@ -3,7 +3,8 @@
 #r ".\tools\Cake.Tasks.Core.dll"
 #r ".\tools\Cake.Tasks.GitVersion.dll"
 #r ".\tools\Cake.Tasks.DotNetCore.dll"
-#r ".\tools\Cake.Tasks.Local.dll"
+
+using Cake.Tasks.Config;
 
 ConfigureTask<DotNetCoreConfig>(cfg =>
 {

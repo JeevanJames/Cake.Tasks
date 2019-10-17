@@ -4,14 +4,74 @@
         <name>Cake.Tasks.Core</name>
     </assembly>
     <members>
+        <member name="P:Cake.Tasks.Config.EnvConfig.Configuration">
+            <summary>
+                Gets or sets the build configuration, such as Debug or Release.
+            </summary>
+        </member>
         <member name="P:Cake.Tasks.Config.EnvConfig.IsCi">
             <summary>
                 Gets or sets a value indicating whether Cake is running in a CI environment.
             </summary>
         </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.Directories">
+            <summary>
+                Gets the configuration for the location of common directories used during a build.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.Version">
+            <summary>
+                Gets the configuration for version-related information.
+            </summary>
+        </member>
         <member name="P:Cake.Tasks.Config.EnvConfig.DirectoryConfig.Working">
             <summary>
                 Gets or sets the working directory.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.DirectoryConfig.Artifacts">
+            <summary>
+                Gets or sets the directory for storing build artifacts.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.DirectoryConfig.BinaryOutput">
+            <summary>
+                Gets or sets the directory for storing binary output from the build process.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.DirectoryConfig.TestOutput">
+            <summary>
+                Gets or sets the directory for storing test output from the build process.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.VersionConfig.BuildNumber">
+            <summary>
+                Gets or sets an unique build number for the build execution.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.VersionConfig.Primary">
+            <summary>
+                Gets or sets the primary version number for the build. This is in a simple
+                {Major}.{Minor}.{Patch} format without prerelease, build or other extra information.
+                <para/>
+                The value can repeat across multiple builds and is not unique.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.VersionConfig.Full">
+            <summary>
+                Gets or sets the full semantic version of the build. This includes prerelease, build
+                and other extra information.
+                <para/>
+                The value will be unique for every new commit, but if multiple builds are run for the
+                same commit, it will remain the same, so it cannot be considered a unique build value.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.VersionConfig.Build">
+            <summary>
+                Gets or sets an unique version number for the build.
+                <para/>
+                The value is unique for every build, regardless of whether a new commit is made or
+                the same commit is being rebuilt.
             </summary>
         </member>
         <member name="P:Cake.Tasks.Core.BasePipelineTaskAttribute.CiSystem">

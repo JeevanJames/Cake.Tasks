@@ -48,7 +48,7 @@ namespace Cake.Tasks.DotNetCore
 
             context.DotNetCoreBuild(buildProjectFile, new DotNetCoreBuildSettings
             {
-                OutputDirectory = env.Directories.BuildOutput,
+                OutputDirectory = env.Directories.BinaryOutput,
                 Configuration = env.Configuration,
                 Verbosity = context.Log.Verbosity.ToVerbosity(),
             });
@@ -74,7 +74,7 @@ namespace Cake.Tasks.DotNetCore
             var settings = new DotNetCoreTestSettings
             {
                 Configuration = env.Configuration,
-                OutputDirectory = env.Directories.BuildOutput,
+                OutputDirectory = env.Directories.BinaryOutput,
                 Logger = "trx",
                 ResultsDirectory = env.Directories.TestOutput,
                 NoBuild = true,
@@ -109,7 +109,7 @@ namespace Cake.Tasks.DotNetCore
             ctx.DotNetCorePublish(cfg.ProjectFile, new DotNetCorePublishSettings
             {
                 Configuration = env.Configuration,
-                OutputDirectory = Path.Combine(env.Directories.BuildOutput, "publish"),
+                OutputDirectory = Path.Combine(env.Directories.BinaryOutput, "publish"),
                 Verbosity = ctx.Log.Verbosity.ToVerbosity(),
                 ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version}"),
             });
