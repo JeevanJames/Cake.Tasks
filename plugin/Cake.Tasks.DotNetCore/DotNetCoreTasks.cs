@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using Cake.Common.IO;
 using Cake.Common.Tools.DotNetCore;
 using Cake.Common.Tools.DotNetCore.Build;
 using Cake.Common.Tools.DotNetCore.Clean;
@@ -138,40 +138,43 @@ namespace Cake.Tasks.DotNetCore
 
             foreach (PublishProfile profile in profiles)
             {
-                string outputDirectory = Path.Combine(env.Directories.BinaryOutput, "__publish", profile.Name);
+                profile.OutputDirectory = Path.Combine(env.Directories.BinaryOutput, "__publish", profile.Name);
+                if (!ctx.DirectoryExists(profile.OutputDirectory))
+                    ctx.CreateDirectory(profile.OutputDirectory);
+
                 switch (profile)
                 {
                     case AspNetPublishProfile aspnet:
-                        PublishAspNet(ctx, config, aspnet, outputDirectory);
+                        PublishAspNet(ctx, config, aspnet);
                         break;
                     case NuGetPackagePublishProfile nuget:
-                        PublishNuGet(ctx, config, nuget, outputDirectory);
+                        PublishNuGet(ctx, config, nuget);
                         break;
                 }
             }
         }
 
-        private static void PublishAspNet(ICakeContext ctx, TaskConfig cfg, AspNetPublishProfile profile, string directory)
+        private static void PublishAspNet(ICakeContext ctx, TaskConfig cfg, AspNetPublishProfile profile)
         {
             var env = cfg.Load<EnvConfig>();
 
             ctx.DotNetCorePublish(profile.ProjectFile, new DotNetCorePublishSettings
             {
                 Configuration = env.Configuration,
-                OutputDirectory = directory,
+                OutputDirectory = profile.OutputDirectory,
                 Verbosity = ctx.Log.Verbosity.ToVerbosity(),
                 ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
             });
         }
 
-        private static void PublishNuGet(ICakeContext ctx, TaskConfig cfg, NuGetPackagePublishProfile profile, string directory)
+        private static void PublishNuGet(ICakeContext ctx, TaskConfig cfg, NuGetPackagePublishProfile profile)
         {
             var env = cfg.Load<EnvConfig>();
 
             ctx.DotNetCorePack(profile.ProjectFile, new DotNetCorePackSettings
             {
                 Configuration = env.Configuration,
-                OutputDirectory = directory,
+                OutputDirectory = profile.OutputDirectory,
                 Verbosity = ctx.Log.Verbosity.ToVerbosity(),
                 ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
                 IncludeSource = true,

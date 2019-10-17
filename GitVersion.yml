@@ -1,11 +1,4 @@
-mode: ContinuousDeployment
-branches:
-  master:
-    mode: ContinuousDeployment
-  develop:
-    tag: build
-  feature:
-    tag: feature
+branches: {}
 ignore:
   sha: []
 merge-message-formats: {}

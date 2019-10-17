@@ -37,6 +37,8 @@ namespace Cake.Tasks.Config
         public string Name { get; }
 
         public string ProjectFile { get; }
+
+        public string OutputDirectory { get; set; }
     }
 
     public sealed class AspNetPublishProfile : PublishProfile
