@@ -22,6 +22,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using Cake.Tasks.Config;
 
 namespace Cake.Tasks.Core
 {
@@ -33,7 +34,9 @@ namespace Cake.Tasks.Core
                 return null;
 
             var dump = new StringBuilder();
-            if (obj is IEnumerable objEnumerable)
+            if (IsSimpleType(obj.GetType()))
+                dump.Append(obj.ToString());
+            else if (obj is IEnumerable objEnumerable)
             {
                 var first = true;
                 foreach (var o in objEnumerable)
@@ -76,7 +79,7 @@ namespace Cake.Tasks.Core
                     continue;
                 }
 
-                dump.AppendLine($"\t{descriptor.Name}:\t{value}");
+                dump.AppendLine($"\t{descriptor.Name} = {value}");
             }
 
             return dump.ToString();
@@ -123,7 +126,9 @@ namespace Cake.Tasks.Core
                 }.Contains(type) ||
                 Convert.GetTypeCode(type) != TypeCode.Object ||
                 (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) &&
-                 IsSimpleType(type.GetGenericArguments()[0]));
+                    IsSimpleType(type.GetGenericArguments()[0])) ||
+                (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ConfigValue<>) &&
+                    IsSimpleType(type.GetGenericArguments()[0]));
         }
     }
 }

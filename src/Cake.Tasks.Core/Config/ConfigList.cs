@@ -24,38 +24,38 @@ using System.Text;
 
 namespace Cake.Tasks.Config
 {
-    public sealed class FuncOrListValue<T>
+    public sealed class ConfigList<T>
     {
         private readonly T _value;
-        private readonly IEnumerable<T> _list;
+        private readonly IList<T> _list;
         private readonly Func<T> _valueFunc;
-        private readonly Func<IEnumerable<T>> _listFunc;
+        private readonly Func<IList<T>> _listFunc;
 
-        private FuncOrListValue(T value)
+        private ConfigList(T value)
         {
             _value = value;
         }
 
-        private FuncOrListValue(IEnumerable<T> list)
+        private ConfigList(IList<T> list)
         {
             _list = list;
         }
 
-        private FuncOrListValue(Func<T> valueFunc)
+        private ConfigList(Func<T> valueFunc)
         {
             if (valueFunc is null)
                 throw new ArgumentNullException(nameof(valueFunc));
             _valueFunc = valueFunc;
         }
 
-        private FuncOrListValue(Func<IEnumerable<T>> listFunc)
+        private ConfigList(Func<IList<T>> listFunc)
         {
             if (listFunc is null)
                 throw new ArgumentNullException(nameof(listFunc));
             _listFunc = listFunc;
         }
 
-        public IEnumerable<T> Resolve()
+        public IList<T> Resolve()
         {
             if (_listFunc != null)
                 return _listFunc();
@@ -67,7 +67,7 @@ namespace Cake.Tasks.Config
 
         public override string ToString()
         {
-            IEnumerable<T> values = Resolve();
+            IList<T> values = Resolve();
             if (values is null || !values.Any())
                 return "[]";
             StringBuilder builder = values.Aggregate(new StringBuilder("["),
@@ -82,16 +82,16 @@ namespace Cake.Tasks.Config
             return builder.ToString();
         }
 
-        public static implicit operator FuncOrListValue<T>(T value) => new FuncOrListValue<T>(value);
+        public static implicit operator ConfigList<T>(T value) => new ConfigList<T>(value);
 
-        public static implicit operator FuncOrListValue<T>(Func<T> valueFunc) => new FuncOrListValue<T>(valueFunc);
+        public static implicit operator ConfigList<T>(Func<T> valueFunc) => new ConfigList<T>(valueFunc);
 
-        public static implicit operator FuncOrListValue<T>(T[] list) => new FuncOrListValue<T>(list);
+        public static implicit operator ConfigList<T>(T[] list) => new ConfigList<T>(list);
 
-        public static implicit operator FuncOrListValue<T>(List<T> list) => new FuncOrListValue<T>(list);
+        public static implicit operator ConfigList<T>(List<T> list) => new ConfigList<T>(list);
 
-        public static implicit operator FuncOrListValue<T>(Func<IEnumerable<T>> listFunc) => new FuncOrListValue<T>(listFunc);
+        public static implicit operator ConfigList<T>(Func<IList<T>> listFunc) => new ConfigList<T>(listFunc);
 
-        public static implicit operator List<T>(FuncOrListValue<T> instance) => instance.Resolve().ToList();
+        public static implicit operator List<T>(ConfigList<T> instance) => instance.Resolve().ToList();
     }
 }

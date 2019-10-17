@@ -23,9 +23,9 @@
             {
             }
 
-            public FuncOrValue<string> ProjectFile
+            public ConfigValue<string> ProjectFile
             {
-                get => Get<FuncOrValue<string>>(Keys.BuildProjectFile);
+                get => Get<ConfigValue<string>>(Keys.BuildProjectFile);
                 set => Set(Keys.BuildProjectFile, value);
             }
         }
@@ -37,21 +37,21 @@
             {
             }
 
-            public FuncOrValue<bool> Skip
+            public ConfigValue<bool> Skip
             {
-                get => Get<FuncOrValue<bool>>(Keys.TestSkip);
+                get => Get<ConfigValue<bool>>(Keys.TestSkip);
                 set => Set(Keys.TestSkip, value);
             }
 
-            public FuncOrValue<string> ProjectFile
+            public ConfigValue<string> ProjectFile
             {
-                get => Get<FuncOrValue<string>>(Keys.TestProjectFile);
+                get => Get<ConfigValue<string>>(Keys.TestProjectFile);
                 set => Set(Keys.TestProjectFile, value);
             }
 
-            public FuncOrValue<string> Filter
+            public ConfigValue<string> Filter
             {
-                get => Get<FuncOrValue<string>>(Keys.TestFilter);
+                get => Get<ConfigValue<string>>(Keys.TestFilter);
                 set => Set(Keys.TestFilter, value);
             }
         }
@@ -63,9 +63,9 @@
             {
             }
 
-            public FuncOrValue<string> ProjectFile
+            public ConfigValue<string> ProjectFile
             {
-                get => Get<FuncOrValue<string>>(Keys.PublishProjectFile);
+                get => Get<ConfigValue<string>>(Keys.PublishProjectFile);
                 set => Set(Keys.PublishProjectFile, value);
             }
         }

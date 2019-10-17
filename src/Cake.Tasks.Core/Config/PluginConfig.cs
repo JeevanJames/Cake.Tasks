@@ -40,7 +40,7 @@ namespace Cake.Tasks.Config
                 return default;
             if (value is string str && typeof(T) != typeof(string))
             {
-                if (TryFromFuncOrValue<T>(str, out T fovValue))
+                if (TryFromConfigValue<T>(str, out T fovValue))
                     return fovValue;
                 return (T)FromString(str, typeof(T));
             }
@@ -48,20 +48,20 @@ namespace Cake.Tasks.Config
             return (T)value;
         }
 
-        protected FuncOrListValue<T> GetFuncOrListValue<T>(string name) =>
-            Get<FuncOrListValue<T>>(name);
+        protected ConfigList<T> GetList<T>(string name) =>
+            Get<ConfigList<T>>(name);
 
-        protected T GetFuncOrValue<T>(string name) =>
-            Get<FuncOrValue<T>>(name);
+        protected T GetValue<T>(string name) =>
+            Get<ConfigValue<T>>(name);
 
-        private bool TryFromFuncOrValue<T>(string str, out T value)
+        private bool TryFromConfigValue<T>(string str, out T value)
         {
             value = default;
             Type type = typeof(T);
             if (!type.IsGenericType)
                 return false;
             Type genericTypeDef = type.GetGenericTypeDefinition();
-            if (genericTypeDef != typeof(FuncOrValue<>))
+            if (genericTypeDef != typeof(ConfigValue<>))
                 return false;
 
             Type dataType = type.GetGenericArguments()[0];

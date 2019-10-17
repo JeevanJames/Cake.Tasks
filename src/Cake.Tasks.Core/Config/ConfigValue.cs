@@ -21,17 +21,17 @@ using System;
 
 namespace Cake.Tasks.Config
 {
-    public sealed class FuncOrValue<T>
+    public sealed class ConfigValue<T>
     {
         private readonly T _value;
         private readonly Func<T> _func;
 
-        private FuncOrValue(T value)
+        private ConfigValue(T value)
         {
             _value = value;
         }
 
-        private FuncOrValue(Func<T> func)
+        private ConfigValue(Func<T> func)
         {
             if (func is null)
                 throw new ArgumentNullException(nameof(func));
@@ -49,11 +49,11 @@ namespace Cake.Tasks.Config
             return value?.ToString() ?? "[NULL]";
         }
 
-        public static implicit operator FuncOrValue<T>(T value) => new FuncOrValue<T>(value);
+        public static implicit operator ConfigValue<T>(T value) => new ConfigValue<T>(value);
 
-        public static implicit operator FuncOrValue<T>(Func<T> func) => new FuncOrValue<T>(func);
+        public static implicit operator ConfigValue<T>(Func<T> func) => new ConfigValue<T>(func);
 
-        public static implicit operator T(FuncOrValue<T> instance)
+        public static implicit operator T(ConfigValue<T> instance)
         {
             return instance is null ? default : instance.Resolve();
         }

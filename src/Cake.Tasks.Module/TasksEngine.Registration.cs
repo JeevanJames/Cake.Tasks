@@ -256,18 +256,21 @@ namespace Cake.Tasks.Module
                 ctx.Log.Information("Final Configurations");
                 ctx.Log.Information("--------------------");
                 foreach (var data in config.Data.OrderBy(kvp => kvp.Key))
-                    ctx.Log.Information($"{data.Key} = {data.Value?.ToString() ?? "[NULL]"}");
+                    ctx.Log.Information($"{data.Key} = {data.Value?.Dump() ?? "[NULL]"}");
 
                 // Clean out output directories or create them
                 var env = config.Load<EnvConfig>();
+
                 if (ctx.DirectoryExists(env.Directories.Artifacts))
                     ctx.CleanDirectory(env.Directories.Artifacts);
                 else
                     ctx.CreateDirectory(env.Directories.Artifacts);
+
                 if (ctx.DirectoryExists(env.Directories.BinaryOutput))
                     ctx.CleanDirectory(env.Directories.BinaryOutput);
                 else
                     ctx.CreateDirectory(env.Directories.BinaryOutput);
+
                 if (ctx.DirectoryExists(env.Directories.TestOutput))
                     ctx.CleanDirectory(env.Directories.TestOutput);
                 else

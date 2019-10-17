@@ -110,9 +110,9 @@ namespace Cake.Tasks.Config
             /// <summary>
             ///     Gets or sets an unique build number for the build execution.
             /// </summary>
-            public FuncOrValue<int> BuildNumber
+            public ConfigValue<int> BuildNumber
             {
-                get => GetFuncOrValue<int>(Keys.VersionBuildNumber);
+                get => GetValue<int>(Keys.VersionBuildNumber);
                 set => Set(Keys.VersionBuildNumber, value);
             }
 
@@ -122,9 +122,9 @@ namespace Cake.Tasks.Config
             ///     <para/>
             ///     The value can repeat across multiple builds and is not unique.
             /// </summary>
-            public FuncOrValue<string> Primary
+            public ConfigValue<string> Primary
             {
-                get => GetFuncOrValue<string>(Keys.VersionPrimary);
+                get => GetValue<string>(Keys.VersionPrimary);
                 set => Set(Keys.VersionPrimary, value);
             }
 
@@ -135,9 +135,9 @@ namespace Cake.Tasks.Config
             ///     The value will be unique for every new commit, but if multiple builds are run for the
             ///     same commit, it will remain the same, so it cannot be considered a unique build value.
             /// </summary>
-            public FuncOrValue<string> Full
+            public ConfigValue<string> Full
             {
-                get => GetFuncOrValue<string>(Keys.VersionFull);
+                get => GetValue<string>(Keys.VersionFull);
                 set => Set(Keys.VersionFull, value);
             }
 
@@ -147,9 +147,9 @@ namespace Cake.Tasks.Config
             ///     The value is unique for every build, regardless of whether a new commit is made or
             ///     the same commit is being rebuilt.
             /// </summary>
-            public FuncOrValue<string> Build
+            public ConfigValue<string> Build
             {
-                get => GetFuncOrValue<string>(Keys.VersionBuild);
+                get => GetValue<string>(Keys.VersionBuild);
                 set => Set(Keys.VersionBuild, value);
             }
         }
