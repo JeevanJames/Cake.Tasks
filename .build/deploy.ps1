@@ -1,42 +1,26 @@
-# Cake Tasks module
-Write-Host "============================"
-Write-Host "Publishing Cake Tasks module" -ForegroundColor Magenta
-Write-Host "============================"
-dotnet pack ./src/Cake.Tasks.Module/Cake.Tasks.Module.csproj --include-symbols --include-source -c Release /p:Version=$env:APPVEYOR_BUILD_VERSION
-dotnet nuget push ./src/Cake.Tasks.Module/bin/Release/Cake.Tasks.Module.$env:APPVEYOR_BUILD_VERSION.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY -ss $env:MYGET_SYMBOLS_FEED -sk $env:MYGET_SYMBOLS_APIKEY
+function WriteBanner() {
+    param($message)
+    $Separator = "=" * $message.Length
+    Write-Host $Separator
+    Write-Host $message -ForegroundColor Magenta
+    Write-Host $Separator
+}
 
-# Cake Tasks core
-Write-Host "=================================="
-Write-Host "Publishing Cake Tasks core library" -ForegroundColor Magenta
-Write-Host "=================================="
-dotnet pack ./src/Cake.Tasks.Core/Cake.Tasks.Core.csproj --include-symbols --include-source -c Release /p:Version=$env:APPVEYOR_BUILD_VERSION
-dotnet nuget push ./src/Cake.Tasks.Core/bin/Release/Cake.Tasks.Core.$env:APPVEYOR_BUILD_VERSION.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY -ss $env:MYGET_SYMBOLS_FEED -sk $env:MYGET_SYMBOLS_APIKEY
+function PublishPackage($root, $name) {
+    WriteBanner "Publishing $name"
+    dotnet pack ./$root/$name/$name.csproj --include-symbols --include-source -c Release /p:Version=$env:APPVEYOR_BUILD_VERSION
+    dotnet nuget push ./$root/$name/bin/Release/$name.$env:APPVEYOR_BUILD_VERSION.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY -ss $env:MYGET_SYMBOLS_FEED -sk $env:MYGET_SYMBOLS_APIKEY
+}
 
-# Cake Tasks GitVersion plugin
-Write-Host "======================================"
-Write-Host "Publishing Cake Tasks GitVersion addin" -ForegroundColor Magenta
-Write-Host "======================================"
-dotnet pack ./plugin/Cake.Tasks.GitVersion/Cake.Tasks.GitVersion.csproj --include-symbols --include-source -c Release /p:Version=$env:APPVEYOR_BUILD_VERSION
-dotnet nuget push ./plugin/Cake.Tasks.GitVersion/bin/Release/Cake.Tasks.GitVersion.$env:APPVEYOR_BUILD_VERSION.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY -ss $env:MYGET_SYMBOLS_FEED -sk $env:MYGET_SYMBOLS_APIKEY
-
-# Cake Tasks TFS CI plugin
-Write-Host "=================================="
-Write-Host "Publishing Cake Tasks TFS CI addin" -ForegroundColor Magenta
-Write-Host "=================================="
-dotnet pack ./plugin/Cake.Tasks.Ci.Tfs/Cake.Tasks.Ci.Tfs.csproj --include-symbols --include-source -c Release /p:Version=$env:APPVEYOR_BUILD_VERSION
-dotnet nuget push ./plugin/Cake.Tasks.Ci.Tfs/bin/Release/Cake.Tasks.Ci.Tfs.$env:APPVEYOR_BUILD_VERSION.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY -ss $env:MYGET_SYMBOLS_FEED -sk $env:MYGET_SYMBOLS_APIKEY
-
-# Cake Tasks .NET Core plugin
-Write-Host "====================================="
-Write-Host "Publishing Cake Tasks .NET Core addin" -ForegroundColor Magenta
-Write-Host "====================================="
-dotnet pack ./plugin/Cake.Tasks.DotNetCore/Cake.Tasks.DotNetCore.csproj --include-symbols --include-source -c Release /p:Version=$env:APPVEYOR_BUILD_VERSION
-dotnet nuget push ./plugin/Cake.Tasks.DotNetCore/bin/Release/Cake.Tasks.DotNetCore.$env:APPVEYOR_BUILD_VERSION.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY -ss $env:MYGET_SYMBOLS_FEED -sk $env:MYGET_SYMBOLS_APIKEY
+PublishPackage "src" "Cake.Tasks.Module"
+PublishPackage "src" "Cake.Tasks.Core"
+PublishPackage "plugin" "Cake.Tasks.GitVersion"
+PublishPackage "plugin" "Cake.Tasks.Ci.Tfs"
+PublishPackage "plugin" "Cake.Tasks.Ci.AppVeyor"
+PublishPackage "plugin" "Cake.Tasks.DotNetCore"
 
 # Meta package
-Write-Host "========================================"
-Write-Host "Publishing Cake Tasks addins metapackage" -ForegroundColor Magenta
-Write-Host "========================================"
+WriteBanner "Publishing Cake Tasks addins metapackage"
 New-Item -ItemType Directory -Path ./metapackage/ref/netstandard2.0
 New-Item -ItemType Directory -Path ./metapackage/lib/netstandard2.0
 

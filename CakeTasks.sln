@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.DotNetCore", "pl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Ci.Tfs", "plugin\Cake.Tasks.Ci.Tfs\Cake.Tasks.Ci.Tfs.csproj", "{E5A6C6C8-82CC-4CD9-A01B-0B89F7D2B469}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Ci.AppVeyor", "plugin\Cake.Tasks.Ci.AppVeyor\Cake.Tasks.Ci.AppVeyor.csproj", "{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{E5A6C6C8-82CC-4CD9-A01B-0B89F7D2B469}.Release|x64.Build.0 = Release|Any CPU
 		{E5A6C6C8-82CC-4CD9-A01B-0B89F7D2B469}.Release|x86.ActiveCfg = Release|Any CPU
 		{E5A6C6C8-82CC-4CD9-A01B-0B89F7D2B469}.Release|x86.Build.0 = Release|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Debug|x64.Build.0 = Debug|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Debug|x86.Build.0 = Debug|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Release|x64.ActiveCfg = Release|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Release|x64.Build.0 = Release|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Release|x86.ActiveCfg = Release|Any CPU
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +111,7 @@ Global
 		{2E841359-6D8F-4B64-B8C7-3B85868E6C94} = {A0EED931-CF00-49AB-9DE7-EB1D9113CE07}
 		{438FB143-A0D6-4D4A-82F1-929984AFD2B2} = {A0EED931-CF00-49AB-9DE7-EB1D9113CE07}
 		{E5A6C6C8-82CC-4CD9-A01B-0B89F7D2B469} = {A0EED931-CF00-49AB-9DE7-EB1D9113CE07}
+		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB} = {A0EED931-CF00-49AB-9DE7-EB1D9113CE07}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {73A98824-1C6F-4682-918A-19493E5480CD}
