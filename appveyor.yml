@@ -10,7 +10,5 @@ environment:
 build_script:
 - pwsh: ./build.ps1 -target ci -ci appveyor
 - pwsh: tree ./tools
-test_script:
-- pwsh: ./.build/test.ps1
 deploy_script:
 - pwsh: ./.build/deploy.ps1
