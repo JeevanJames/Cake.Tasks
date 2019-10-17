@@ -127,10 +127,10 @@ namespace Cake.Tasks.Module
             void RegisterDefaultTask()
             {
                 RegisterTask("Default")
-                    .Does(context =>
+                    .Does(ctx =>
                     {
-                        context.Log.Information("Task List");
-                        context.Log.Information("---------");
+                        ctx.Log.Information("Task List");
+                        ctx.Log.Information("---------");
                         foreach (ICakeTaskInfo task in Tasks)
                         {
                             if (task.Name.StartsWith("_"))
@@ -138,9 +138,9 @@ namespace Cake.Tasks.Module
                             if (task.Name.Equals("Default", StringComparison.OrdinalIgnoreCase))
                                 continue;
 
-                            context.Log.Information(task.Name);
+                            ctx.Log.Information(task.Name);
                             if (!string.IsNullOrWhiteSpace(task.Description))
-                                context.Log.Information($"    {task.Description}");
+                                ctx.Log.Information($"    {task.Description}");
                         }
                     });
             }
@@ -149,7 +149,7 @@ namespace Cake.Tasks.Module
             {
                 RegisterTask(TaskNames.ListEnvs)
                     .Description("Lists all available environments.")
-                    .Does(context =>
+                    .Does(ctx =>
                     {
                         IList<string> environments = _registeredTasks
                             .Select(task => task.CiSystem)
@@ -159,13 +159,13 @@ namespace Cake.Tasks.Module
 
                         if (environments.Count > 0)
                         {
-                            context.Log.Information("Available Environments");
-                            context.Log.Information("----------------------");
+                            ctx.Log.Information("Available Environments");
+                            ctx.Log.Information("----------------------");
                             foreach (string env in environments)
-                                context.Log.Information(env);
+                                ctx.Log.Information(env);
                         }
                         else
-                            context.Log.Information("No environments found!");
+                            ctx.Log.Information("No environments found!");
                     });
             }
 
@@ -184,18 +184,18 @@ namespace Cake.Tasks.Module
             {
                 RegisterTask(TaskNames.ListTasks)
                     .Description("Lists all tasks including private tasks.")
-                    .Does(context =>
+                    .Does(ctx =>
                     {
-                        context.Log.Information("Task List");
-                        context.Log.Information("---------");
+                        ctx.Log.Information("Task List");
+                        ctx.Log.Information("---------");
                         foreach (ICakeTaskInfo task in Tasks)
                         {
                             if (task.Name.Equals("Default", StringComparison.OrdinalIgnoreCase))
                                 continue;
 
-                            context.Log.Information(task.Name);
+                            ctx.Log.Information(task.Name);
                             if (!string.IsNullOrWhiteSpace(task.Description))
-                                context.Log.Information($"    {task.Description}");
+                                ctx.Log.Information($"    {task.Description}");
                         }
                     });
             }
