@@ -21,3 +21,7 @@ dotnet nuget push ./src/Cake.Tasks.Core/bin/Release/Cake.Tasks.Core.$Version.nup
 # Cake Tasks GitVersion plugin
 dotnet pack ./plugin/Cake.Tasks.GitVersion/Cake.Tasks.GitVersion.csproj --include-symbols --include-source -c Release /p:Version=$Version
 dotnet nuget push ./plugin/Cake.Tasks.GitVersion/bin/Release/Cake.Tasks.GitVersion.$Version.nupkg -s https://api.nuget.org/v3/index.json
+
+# Cake Tasks TFS CI plugin
+dotnet pack ./plugin/Cake.Tasks.Ci.Tfs/Cake.Tasks.Ci.Tfs.csproj --include-symbols --include-source -c Release /p:Version=$Version
+dotnet nuget push ./plugin/Cake.Tasks.Ci.Tfs/bin/Release/Cake.Tasks.Ci.Tfs.$Version.nupkg -s https://api.nuget.org/v3/index.json

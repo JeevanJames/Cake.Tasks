@@ -19,6 +19,13 @@ Write-Host "======================================"
 dotnet pack ./plugin/Cake.Tasks.GitVersion/Cake.Tasks.GitVersion.csproj --include-symbols --include-source -c Release /p:Version=$env:APPVEYOR_BUILD_VERSION
 dotnet nuget push ./plugin/Cake.Tasks.GitVersion/bin/Release/Cake.Tasks.GitVersion.$env:APPVEYOR_BUILD_VERSION.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY -ss $env:MYGET_SYMBOLS_FEED -sk $env:MYGET_SYMBOLS_APIKEY
 
+# Cake Tasks TFS CI plugin
+Write-Host "=================================="
+Write-Host "Publishing Cake Tasks TFS CI addin" -ForegroundColor Magenta
+Write-Host "=================================="
+dotnet pack ./plugin/Cake.Tasks.Ci.Tfs/Cake.Tasks.Ci.Tfs.csproj --include-symbols --include-source -c Release /p:Version=$env:APPVEYOR_BUILD_VERSION
+dotnet nuget push ./plugin/Cake.Tasks.Ci.Tfs/bin/Release/Cake.Tasks.Ci.Tfs.$env:APPVEYOR_BUILD_VERSION.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY -ss $env:MYGET_SYMBOLS_FEED -sk $env:MYGET_SYMBOLS_APIKEY
+
 # Cake Tasks .NET Core plugin
 Write-Host "====================================="
 Write-Host "Publishing Cake Tasks .NET Core addin" -ForegroundColor Magenta

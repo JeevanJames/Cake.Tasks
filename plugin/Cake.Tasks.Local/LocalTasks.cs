@@ -17,10 +17,9 @@ namespace Cake.Tasks.Local
             if (env.IsCi)
                 return;
 
-            var ci = cfg.Load<CiConfig>();
-            if (ctx.DirectoryExists(ci.ArtifactsDirectory))
+            if (ctx.DirectoryExists(env.Directories.Artifacts))
             {
-                ctx.DeleteDirectory(ci.ArtifactsDirectory, new DeleteDirectorySettings
+                ctx.DeleteDirectory(env.Directories.Artifacts, new DeleteDirectorySettings
                 {
                     Recursive = true,
                 });

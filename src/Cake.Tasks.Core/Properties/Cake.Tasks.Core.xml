@@ -9,7 +9,7 @@
                 Gets or sets a value indicating whether Cake is running in a CI environment.
             </summary>
         </member>
-        <member name="P:Cake.Tasks.Config.EnvConfig.WorkingDirectory">
+        <member name="P:Cake.Tasks.Config.EnvConfig.DirectoryConfig.Working">
             <summary>
                 Gets or sets the working directory.
             </summary>

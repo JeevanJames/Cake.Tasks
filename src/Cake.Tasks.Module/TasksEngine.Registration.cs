@@ -58,15 +58,17 @@ namespace Cake.Tasks.Module
                 var env = config.Load<EnvConfig>();
                 env.Configuration = ctx.Arguments.GetArgument("Configuration") ?? "Release";
                 env.IsCi = false;
-                env.WorkingDirectory = ctx.Environment.WorkingDirectory.FullPath;
 
-                var ci = config.Load<CiConfig>();
-                string outputDirectory = Path.Combine(env.WorkingDirectory, "__output");
-                ci.ArtifactsDirectory = Path.Combine(outputDirectory, "artifacts");
-                ci.BuildOutputDirectory = Path.Combine(outputDirectory, "build");
-                ci.TestOutputDirectory = Path.Combine(outputDirectory, "testresults");
-                ci.BuildNumber = 1;
-                ci.Version = (Func<string>)(() => $"0.{ci.BuildNumber}.0");
+                env.Directories.Working = ctx.Environment.WorkingDirectory.FullPath;
+                string outputDirectory = Path.Combine(env.Directories.Working, "__output");
+                env.Directories.Artifacts = Path.Combine(outputDirectory, "artifacts");
+                env.Directories.BuildOutput = Path.Combine(outputDirectory, "build");
+                env.Directories.TestOutput = Path.Combine(outputDirectory, "testresults");
+
+                env.BuildNumber = 1;
+                env.Version = (Func<string>)(() => $"0.{env.BuildNumber}.0");
+                env.FullVersion = (Func<string>)(() => $"0.{env.BuildNumber}.0");
+                env.BuildVersion = (Func<string>)(() => $"0.{env.BuildNumber}.0");
 
                 return config;
             });
@@ -257,19 +259,19 @@ namespace Cake.Tasks.Module
                     ctx.Log.Information($"{data.Key} = {data.Value?.ToString() ?? "[NULL]"}");
 
                 // Clean out output directories or create them
-                var ci = config.Load<CiConfig>();
-                if (ctx.DirectoryExists(ci.ArtifactsDirectory))
-                    ctx.CleanDirectory(ci.ArtifactsDirectory);
+                var env = config.Load<EnvConfig>();
+                if (ctx.DirectoryExists(env.Directories.Artifacts))
+                    ctx.CleanDirectory(env.Directories.Artifacts);
                 else
-                    ctx.CreateDirectory(ci.ArtifactsDirectory);
-                if (ctx.DirectoryExists(ci.BuildOutputDirectory))
-                    ctx.CleanDirectory(ci.BuildOutputDirectory);
+                    ctx.CreateDirectory(env.Directories.Artifacts);
+                if (ctx.DirectoryExists(env.Directories.BuildOutput))
+                    ctx.CleanDirectory(env.Directories.BuildOutput);
                 else
-                    ctx.CreateDirectory(ci.BuildOutputDirectory);
-                if (ctx.DirectoryExists(ci.TestOutputDirectory))
-                    ctx.CleanDirectory(ci.TestOutputDirectory);
+                    ctx.CreateDirectory(env.Directories.BuildOutput);
+                if (ctx.DirectoryExists(env.Directories.TestOutput))
+                    ctx.CleanDirectory(env.Directories.TestOutput);
                 else
-                    ctx.CreateDirectory(ci.TestOutputDirectory);
+                    ctx.CreateDirectory(env.Directories.TestOutput);
             });
         }
 

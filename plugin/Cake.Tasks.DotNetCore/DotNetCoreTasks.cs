@@ -45,11 +45,10 @@ namespace Cake.Tasks.DotNetCore
                 throw new TaskConfigException("Build solution or project file not specified.");
 
             var env = config.Load<EnvConfig>();
-            var ci = config.Load<CiConfig>();
 
             context.DotNetCoreBuild(buildProjectFile, new DotNetCoreBuildSettings
             {
-                OutputDirectory = ci.BuildOutputDirectory,
+                OutputDirectory = env.Directories.BuildOutput,
                 Configuration = env.Configuration,
                 Verbosity = context.Log.Verbosity.ToVerbosity(),
             });
@@ -67,7 +66,6 @@ namespace Cake.Tasks.DotNetCore
             }
 
             var env = config.Load<EnvConfig>();
-            var ci = config.Load<CiConfig>();
 
             string testProjectFile = test.ProjectFile;
             if (testProjectFile is null)
@@ -76,15 +74,15 @@ namespace Cake.Tasks.DotNetCore
             var settings = new DotNetCoreTestSettings
             {
                 Configuration = env.Configuration,
-                OutputDirectory = ci.BuildOutputDirectory,
+                OutputDirectory = env.Directories.BuildOutput,
                 Logger = "trx",
-                ResultsDirectory = ci.TestOutputDirectory,
+                ResultsDirectory = env.Directories.TestOutput,
                 NoBuild = true,
                 NoRestore = true,
                 Verbosity = context.Log.Verbosity.ToVerbosity(),
                 ArgumentCustomization = pab => pab
                     .Append("/p:CollectCoverage=true")
-                    .Append($"/p:CoverletOutput={Path.Combine(ci.TestOutputDirectory, "coverage")}")
+                    .Append($"/p:CoverletOutput={Path.Combine(env.Directories.TestOutput, "coverage")}")
                     .Append("/p:CoverletOutputFormat=cobertura")
                     .Append("/p:CoverletOutputFormat=opencover")
                     .Append("/p:Exclude=[xunit.*]*"),
@@ -107,14 +105,13 @@ namespace Cake.Tasks.DotNetCore
         {
             var cfg = config.Load<DotNetCoreConfig>().Publish;
             var env = config.Load<EnvConfig>();
-            var ci = config.Load<CiConfig>();
 
             ctx.DotNetCorePublish(cfg.ProjectFile, new DotNetCorePublishSettings
             {
                 Configuration = env.Configuration,
-                OutputDirectory = Path.Combine(ci.BuildOutputDirectory, "publish"),
+                OutputDirectory = Path.Combine(env.Directories.BuildOutput, "publish"),
                 Verbosity = ctx.Log.Verbosity.ToVerbosity(),
-                ArgumentCustomization = arg => arg.Append($"/p:Version={ci.Version}"),
+                ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version}"),
             });
         }
 
@@ -124,7 +121,7 @@ namespace Cake.Tasks.DotNetCore
             var cfg = config.Load<DotNetCoreConfig>();
 
             var env = config.Load<EnvConfig>();
-            string workingDirectory = env.WorkingDirectory ?? Directory.GetCurrentDirectory();
+            string workingDirectory = env.Directories.Working ?? Directory.GetCurrentDirectory();
 
             string GetBuildProjectFile()
             {
