@@ -43,7 +43,7 @@ namespace Cake.Tasks.Ci.AppVeyor
             env.IsCi = true;
 
             env.Version.BuildNumber = appveyor.Environment.Build.Number;
-            env.Version.Build = $"{env.Version}-build.{env.Version.BuildNumber}";
+            env.Version.Build = $"{env.Version.Primary}-build.{env.Version.BuildNumber}";
 
             ctx.Log.Information(appveyor.Environment.Build.Dump());
         }
