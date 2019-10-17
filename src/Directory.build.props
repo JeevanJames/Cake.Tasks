@@ -27,7 +27,6 @@
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
       
         <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CakeTasks.ruleset</CodeAnalysisRuleSet>
-
     </PropertyGroup>
 
     <ItemGroup>
