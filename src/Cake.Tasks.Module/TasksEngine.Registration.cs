@@ -60,7 +60,7 @@ namespace Cake.Tasks.Module
                 env.IsCi = false;
 
                 env.Directories.Working = ctx.Environment.WorkingDirectory.FullPath;
-                string outputDirectory = Path.Combine(env.Directories.Working, "__output");
+                string outputDirectory = Path.Combine(env.Directories.Working, "bin", "__output");
                 env.Directories.Artifacts = Path.Combine(outputDirectory, "artifacts");
                 env.Directories.BinaryOutput = Path.Combine(outputDirectory, "build");
                 env.Directories.TestOutput = Path.Combine(outputDirectory, "testresults");
