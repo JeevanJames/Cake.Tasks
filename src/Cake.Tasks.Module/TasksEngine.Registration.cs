@@ -97,6 +97,9 @@ namespace Cake.Tasks.Module
                 CakeTaskBuilder builder = RegisterTask(registeredTask.Name)
                     .Description(registeredTask.Description);
 
+                if (registeredTask.AttributeType == typeof(TaskAttribute) && registeredTask.RequiresConfig)
+                    builder.IsDependentOn(TaskNames.Config);
+
                 if (registeredTask.Method.GetParameters().Length == 2)
                 {
                     var action = (Action<ICakeContext, TaskConfig>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));

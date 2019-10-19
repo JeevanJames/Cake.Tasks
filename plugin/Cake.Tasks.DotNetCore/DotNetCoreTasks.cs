@@ -182,7 +182,7 @@ namespace Cake.Tasks.DotNetCore
             });
         }
 
-        [Task(Description = "Lists all project files under the solution")]
+        [Task(RequiresConfig = true, Description = "Lists all project files under the solution")]
         public static void ListProjectFiles(ICakeContext ctx, TaskConfig cfg)
         {
             var env = cfg.Load<EnvConfig>();

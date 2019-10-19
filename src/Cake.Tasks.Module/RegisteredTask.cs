@@ -62,5 +62,7 @@ namespace Cake.Tasks.Module
         internal TaskEventType? EventType { get; set; }
 
         internal int Order { get; set; }
+
+        internal bool RequiresConfig { get; set; }
     }
 }

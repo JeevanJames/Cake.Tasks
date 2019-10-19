@@ -103,6 +103,7 @@ namespace Cake.Tasks.Module.PluginLoaders
                         case TaskAttribute attr:
                             registeredTask.Name = method.Name;
                             registeredTask.Description = $"{attr.Description}{envSuffix} - {methodDetails}";
+                            registeredTask.RequiresConfig = attr.RequiresConfig;
                             break;
                     }
 

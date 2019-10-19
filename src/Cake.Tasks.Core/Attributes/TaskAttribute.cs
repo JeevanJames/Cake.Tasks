@@ -21,6 +21,14 @@ namespace Cake.Tasks.Core
 {
     public sealed class TaskAttribute : BaseTaskAttribute
     {
+        /// <summary>
+        ///     Gets or sets a value indicating whether to run the config tasks before this task is run.
+        /// </summary>
+        public bool RequiresConfig { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the description of this task.
+        /// </summary>
         public string Description { get; set; }
     }
 }
