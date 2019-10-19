@@ -29,6 +29,11 @@
                 Gets or sets the name of the plugin. This is used to name the Cake task.
             </summary>
         </member>
+        <member name="P:Cake.Tasks.Module.RegisteredTask.Description">
+            <summary>
+                Gets or sets the description of the plugin. This is used to describe the Cake task.
+            </summary>
+        </member>
         <member name="P:Cake.Tasks.Module.RegisteredTask.CiSystem">
             <summary>
                 Gets or sets the name of the CI system under which this plugin can run. A <c>null</c>

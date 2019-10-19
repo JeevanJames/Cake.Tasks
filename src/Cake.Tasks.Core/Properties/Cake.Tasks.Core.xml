@@ -74,7 +74,7 @@
                 the same commit is being rebuilt.
             </summary>
         </member>
-        <member name="P:Cake.Tasks.Core.BasePipelineTaskAttribute.CiSystem">
+        <member name="P:Cake.Tasks.Core.BaseTaskAttribute.CiSystem">
             <summary>
                 Gets or sets the name of the CI system in which this task can be executed (TFS,
                 AppVeyor, etc.).

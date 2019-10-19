@@ -17,13 +17,19 @@ limitations under the License.
 */
 #endregion
 
+using System;
+
 namespace Cake.Tasks.Core
 {
-    /// <summary>
-    ///     Marks a method as a configuration task.
-    /// </summary>
-    public sealed class ConfigAttribute : BaseTaskAttribute
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public abstract class BaseTaskAttribute : Attribute
     {
-        public int Order { get; set; }
+        /// <summary>
+        ///     Gets or sets the name of the CI system in which this task can be executed (TFS,
+        ///     AppVeyor, etc.).
+        ///     <para/>
+        ///     If not specified, this task will always be executed.
+        /// </summary>
+        public string CiSystem { get; set; }
     }
 }

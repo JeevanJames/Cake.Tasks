@@ -45,6 +45,11 @@ namespace Cake.Tasks.Module
         internal string Name { get; set; }
 
         /// <summary>
+        ///     Gets or sets the description of the plugin. This is used to describe the Cake task.
+        /// </summary>
+        internal string Description { get; set; }
+
+        /// <summary>
         ///     Gets or sets the name of the CI system under which this plugin can run. A <c>null</c>
         ///     value indicates that the plugin will always run.
         /// </summary>

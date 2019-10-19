@@ -62,7 +62,7 @@ namespace Cake.Tasks.Module
                 env.Directories.Working = ctx.Environment.WorkingDirectory.FullPath;
                 string outputDirectory = Path.Combine(env.Directories.Working, "bin", "__output");
                 env.Directories.Artifacts = Path.Combine(outputDirectory, "artifacts");
-                env.Directories.BinaryOutput = Path.Combine(outputDirectory, "build");
+                env.Directories.BinaryOutput = Path.Combine(outputDirectory, "binaries");
                 env.Directories.TestOutput = Path.Combine(outputDirectory, "testresults");
 
                 env.Version.BuildNumber = 1;
@@ -94,7 +94,8 @@ namespace Cake.Tasks.Module
         {
             foreach (RegisteredTask registeredTask in _registeredTasks)
             {
-                CakeTaskBuilder builder = RegisterTask(registeredTask.Name);
+                CakeTaskBuilder builder = RegisterTask(registeredTask.Name)
+                    .Description(registeredTask.Description);
 
                 if (registeredTask.Method.GetParameters().Length == 2)
                 {
@@ -106,19 +107,6 @@ namespace Cake.Tasks.Module
                     var action = (Action<ICakeContext>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext>));
                     builder.Does(action);
                 }
-
-                // Add a description
-                string taskType;
-                if (registeredTask.AttributeType == typeof(ConfigAttribute))
-                    taskType = "Config task";
-                else if (registeredTask.AttributeType == typeof(TaskEventAttribute))
-                    taskType = $"{(registeredTask.EventType == TaskEventType.BeforeTask ? "Before" : "After")} {registeredTask.CoreTask} task";
-                else if (registeredTask.AttributeType == typeof(PipelineTaskAttribute))
-                    taskType = $"{registeredTask.CoreTask} task";
-                else
-                    throw new NotSupportedException($"Unrecognized task type: {registeredTask.AttributeType.FullName}");
-
-                builder.Description($"{taskType} - {registeredTask.Method.DeclaringType.FullName}.{registeredTask.Method.Name} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})");
             }
         }
 

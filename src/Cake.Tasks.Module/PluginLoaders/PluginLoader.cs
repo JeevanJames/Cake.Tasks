@@ -60,10 +60,10 @@ namespace Cake.Tasks.Module.PluginLoaders
                 MethodInfo[] methods = taskPluginType.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public);
                 foreach (MethodInfo method in methods)
                 {
-                    BasePipelineTaskAttribute taskAttribute = method.GetCustomAttribute<BasePipelineTaskAttribute>(inherit: true);
+                    BaseTaskAttribute taskAttribute = method.GetCustomAttribute<BaseTaskAttribute>(inherit: true);
                     if (taskAttribute is null)
                         continue;
-                    if (!IsValidPluginMethod(method, taskAttribute))
+                    if (!IsValidPluginMethod(method))
                     {
                         Log.Warning($"Method {taskPluginType.FullName}.{method.Name} is decorated with a task attribute ({taskAttribute.GetType().Name}), but does not have the correct signature, so it will not be considered. A valid task method should be a static or instance method that returns void and accepts a first parameter of type {typeof(ICakeContext).FullName} and an optional second parameter of type {typeof(TaskConfig).FullName}.");
                         continue;
@@ -79,22 +79,30 @@ namespace Cake.Tasks.Module.PluginLoaders
                     };
 
                     string envSuffix = taskAttribute.CiSystem is null ? string.Empty : $"-{taskAttribute.CiSystem}";
+                    string methodDetails = $"{registeredTask.Method.DeclaringType.FullName}.{registeredTask.Method.Name} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})";
 
                     switch (taskAttribute)
                     {
                         case PipelineTaskAttribute attr:
                             registeredTask.CoreTask = attr.PipelineTask;
                             registeredTask.Name = $"_{attr.PipelineTask}-{method.Name}{envSuffix}";
+                            registeredTask.Description = $"{attr.PipelineTask} task - {methodDetails}";
                             break;
                         case TaskEventAttribute attr:
-                            registeredTask.CoreTask = attr.CoreTask;
+                            registeredTask.CoreTask = attr.PipelineTask;
                             registeredTask.EventType = attr.EventType;
                             string namePrefix = attr.EventType == TaskEventType.BeforeTask ? "Before" : "After";
-                            registeredTask.Name = $"_{namePrefix}{attr.CoreTask}-{method.Name}{envSuffix}";
+                            registeredTask.Name = $"_{namePrefix}{attr.PipelineTask}-{method.Name}{envSuffix}";
+                            registeredTask.Description = $"{namePrefix} {attr.PipelineTask} task - {methodDetails}";
                             break;
                         case ConfigAttribute attr:
                             registeredTask.Name = $"_Config-{method.Name}{envSuffix}";
+                            registeredTask.Description = $"Config task - {methodDetails}";
                             registeredTask.Order = attr.Order;
+                            break;
+                        case TaskAttribute attr:
+                            registeredTask.Name = method.Name;
+                            registeredTask.Description = $"{attr.Description}{envSuffix} - {methodDetails}";
                             break;
                     }
 
@@ -103,23 +111,25 @@ namespace Cake.Tasks.Module.PluginLoaders
             }
         }
 
-        protected bool IsValidPluginMethod(MethodInfo method, BasePipelineTaskAttribute attribute)
+        protected bool IsValidPluginMethod(MethodInfo method)
         {
             ParameterInfo[] parameters = method.GetParameters();
-            switch (attribute)
-            {
-                case PipelineTaskAttribute _:
-                case TaskEventAttribute _:
-                    if (parameters.Length < 1 || parameters.Length > 2)
-                        return false;
-                    if (!typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType))
-                        return false;
-                    if (parameters.Length > 1 && parameters[1].ParameterType != typeof(TaskConfig))
-                        return false;
-                    if (method.ReturnType != typeof(void))
-                        return false;
-                    return true;
-            }
+
+            // There can be one or two parameters.
+            if (parameters.Length < 1 || parameters.Length > 2)
+                return false;
+
+            // The first parameter should be ICakeContext.
+            if (!typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType))
+                return false;
+
+            // The second parameter, if specified, should be TaskConfig.
+            if (parameters.Length > 1 && parameters[1].ParameterType != typeof(TaskConfig))
+                return false;
+
+            // The method should return void.
+            if (method.ReturnType != typeof(void))
+                return false;
 
             return true;
         }
