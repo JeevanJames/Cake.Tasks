@@ -12,4 +12,3 @@ build_script:
 - pwsh: tree ./tools
 deploy_script:
 - pwsh: ./build.ps1 -target DeployRecipePackage -ci appveyor
-- pwsh: ./.build/deploy.ps1
