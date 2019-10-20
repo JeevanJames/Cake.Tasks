@@ -1,5 +1,7 @@
 #module "nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.Module&prerelease"
 
+#tool "nuget:?package=GitVersion.CommandLine&version=5.0.1"
+
 // #addin "nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.JeevanJames&prerelease&loaddependencies=true"
 #addin "nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.Ci.AppVeyor&prerelease"
 #addin "nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.Core&prerelease"
