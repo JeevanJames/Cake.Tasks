@@ -7,6 +7,7 @@
 #addin "nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.Core&prerelease"
 #addin "nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.GitVersion&prerelease"
 #addin "nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.DotNetCore&prerelease"
+#addin "nuget:https://myget.org/f/cake-tasks/?package=Cake.Tasks.JeevanJames&prerelease"
 
 ConfigureTask<DotNetCoreConfig>(cfg =>
 {

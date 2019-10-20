@@ -8,7 +8,7 @@ environment:
   MYGET_SYMBOLS_APIKEY:
     secure: 3tEiaoqZlTJcJkAX+3wWyp3mbCYuJpALEFzTEaum6ACiXbWgsa1kWYGBi3TUFY7c
 build_script:
-- pwsh: ./build.ps1 -target cicd -cicd appveyor
+- pwsh: ./build.ps1 -target cicd -ci appveyor
 - pwsh: tree ./tools
 # deploy_script:
 # - pwsh: ./build.ps1 -target DeployIndividualPackages -ci appveyor
