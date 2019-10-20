@@ -14,14 +14,14 @@
     <repository type="Git" url="https://github.com/JeevanJames/Cake.Tasks.git" />
     <dependencies>
       <group targetFramework="netstandard2.0">
+        <dependency id="Cake.Tasks.Core.dll" version="0.1.0"/>
+        <dependency id="Cake.Tasks.DotNetCore.dll" version="0.1.0"/>
+        <dependency id="Cake.Tasks.GitVersion.dll" version="0.1.0"/>
         <dependency id="GitVersion.CommandLine" version="5.0.1"/>
       </group>
     </dependencies>
     <references>
       <group targetFramework="netstandard2.0">
-        <reference file="Cake.Tasks.Core.dll"/>
-        <reference file="Cake.Tasks.DotNetCore.dll"/>
-        <reference file="Cake.Tasks.GitVersion.dll"/>
       </group>
     </references>
   </metadata>
