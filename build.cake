@@ -39,6 +39,7 @@ public static void DeployPackage(this ICakeContext ctx, string root, string proj
 }
 
 Task("DeployPackages")
+    .IsDependentOn("_Config")
     .Does<TaskConfig>((ctx, cfg) =>
 {
     EnvConfig env = cfg.Load<EnvConfig>();
