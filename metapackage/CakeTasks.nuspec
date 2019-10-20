@@ -20,9 +20,5 @@
         <dependency id="GitVersion.CommandLine" version="5.0.1"/>
       </group>
     </dependencies>
-    <references>
-      <group targetFramework="netstandard2.0">
-      </group>
-    </references>
   </metadata>
 </package>
