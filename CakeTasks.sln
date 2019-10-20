@@ -15,9 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.GitVersion", "pl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.DotNetCore", "plugin\Cake.Tasks.DotNetCore\Cake.Tasks.DotNetCore.csproj", "{438FB143-A0D6-4D4A-82F1-929984AFD2B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Ci.Tfs", "plugin\Cake.Tasks.Ci.Tfs\Cake.Tasks.Ci.Tfs.csproj", "{E5A6C6C8-82CC-4CD9-A01B-0B89F7D2B469}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.Ci.Tfs", "plugin\Cake.Tasks.Ci.Tfs\Cake.Tasks.Ci.Tfs.csproj", "{E5A6C6C8-82CC-4CD9-A01B-0B89F7D2B469}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Ci.AppVeyor", "plugin\Cake.Tasks.Ci.AppVeyor\Cake.Tasks.Ci.AppVeyor.csproj", "{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.Ci.AppVeyor", "plugin\Cake.Tasks.Ci.AppVeyor\Cake.Tasks.Ci.AppVeyor.csproj", "{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.JeevanJames", "plugin\Cake.Tasks.JeevanJames\Cake.Tasks.JeevanJames.csproj", "{5141E4E5-2AA1-4334-B7AA-B74F5546E017}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,6 +103,18 @@ Global
 		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Release|x64.Build.0 = Release|Any CPU
 		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Release|x86.ActiveCfg = Release|Any CPU
 		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB}.Release|x86.Build.0 = Release|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Debug|x64.Build.0 = Debug|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Debug|x86.Build.0 = Debug|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Release|x64.ActiveCfg = Release|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Release|x64.Build.0 = Release|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Release|x86.ActiveCfg = Release|Any CPU
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -112,6 +126,7 @@ Global
 		{438FB143-A0D6-4D4A-82F1-929984AFD2B2} = {A0EED931-CF00-49AB-9DE7-EB1D9113CE07}
 		{E5A6C6C8-82CC-4CD9-A01B-0B89F7D2B469} = {A0EED931-CF00-49AB-9DE7-EB1D9113CE07}
 		{E65AACAB-FCCA-42E0-A1B3-1B032AEBE9BB} = {A0EED931-CF00-49AB-9DE7-EB1D9113CE07}
+		{5141E4E5-2AA1-4334-B7AA-B74F5546E017} = {A0EED931-CF00-49AB-9DE7-EB1D9113CE07}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {73A98824-1C6F-4682-918A-19493E5480CD}

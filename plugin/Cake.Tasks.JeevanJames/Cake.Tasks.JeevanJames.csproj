@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Cake.Tasks.JeevanJames</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
+    <DocumentationFile>Properties\$(AssemblyName).xml</DocumentationFile>
+    <Description>Cake JeevanJames tasks</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cake.Common" Version="0.34.1" />
+    <PackageReference Include="Cake.Common" Version="0.34.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
+  </ItemGroup>
+
+</Project>

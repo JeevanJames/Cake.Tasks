@@ -55,6 +55,7 @@ Task("DeployIndividualPackages")
     ctx.DeployPackage("plugin", "Cake.Tasks.Ci.Tfs", env);
     ctx.DeployPackage("plugin", "Cake.Tasks.DotNetCore", env);
     ctx.DeployPackage("plugin", "Cake.Tasks.GitVersion", env);
+    ctx.DeployPackage("plugin", "Cake.Tasks.JeevanJames", env);
 });
 
 Task("DeployRecipePackage")
