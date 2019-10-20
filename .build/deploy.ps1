@@ -20,7 +20,7 @@ function PublishPackage($root, $name) {
 # PublishPackage "plugin" "Cake.Tasks.DotNetCore"
 
 # Meta package
-WriteBanner "Publishing Cake Tasks addins metapackage"
-((Get-Content -path ./metapackage/CakeTasks.nuspec -Raw) -replace '0.1.0',$env:APPVEYOR_BUILD_VERSION) | Set-Content -Path ./metapackage/CakeTasks.nuspec
-nuget pack ./metapackage/CakeTasks.nuspec -OutputDirectory ./metapackage -OutputFileNamesWithoutVersion
-dotnet nuget push ./metapackage/Cake.Tasks.JeevanJames.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY
+# WriteBanner "Publishing Cake Tasks addins metapackage"
+# ((Get-Content -path ./metapackage/CakeTasks.nuspec -Raw) -replace '0.1.0',$env:APPVEYOR_BUILD_VERSION) | Set-Content -Path ./metapackage/CakeTasks.nuspec
+# nuget pack ./metapackage/CakeTasks.nuspec -OutputDirectory ./metapackage -OutputFileNamesWithoutVersion
+# dotnet nuget push ./metapackage/Cake.Tasks.JeevanJames.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY

@@ -38,7 +38,7 @@ public static void DeployPackage(this ICakeContext ctx, string root, string proj
     });
 }
 
-Task("DeployPackages")
+Task("DeployIndividualPackages")
     .IsDependentOn("_Config")
     .Does<TaskConfig>((ctx, cfg) =>
 {
@@ -55,6 +55,38 @@ Task("DeployPackages")
     ctx.DeployPackage("plugin", "Cake.Tasks.Ci.Tfs", env);
     ctx.DeployPackage("plugin", "Cake.Tasks.DotNetCore", env);
     ctx.DeployPackage("plugin", "Cake.Tasks.GitVersion", env);
+});
+
+Task("DeployRecipePackage")
+    .IsDependentOn("DeployIndividualPackages")
+    .Does<TaskConfig>((ctx, cfg) =>
+{
+    EnvConfig env = cfg.Load<EnvConfig>();
+    if (!env.IsCi)
+        return;
+
+    string nuspecFile = System.IO.Path.Combine(env.Directories.Working, "metapackage", "CakeTasks.nuspec");
+    string nuspecContent = System.IO.File.ReadAllText(nuspecFile)
+        .Replace("0.1.0", env.Version.Build);
+    System.IO.File.WriteAllText(nuspecFile, nuspecContent);
+
+    string nugetFeed = EnvironmentVariable("MYGET_FEED");
+    string nugetApiKey = EnvironmentVariable("MYGET_APIKEY");
+
+    string outputDirectory = System.IO.Path.Combine(env.Directories.BinaryOutput, "metapackage");
+    string packagePath = System.IO.Path.Combine(outputDirectory, $"Cake.Tasks.JeevanJames.{env.Version.Build}.nupkg");
+
+    NuGetPack(nuspecFile, new NuGetPackSettings
+    {
+        OutputDirectory = outputDirectory,
+        Version = env.Version.Build,
+    });
+
+    ctx.DotNetCoreNuGetPush(packagePath, new DotNetCoreNuGetPushSettings
+    {
+        ApiKey = nugetApiKey,
+        Source = nugetFeed,
+    });
 });
 
 RunTarget(Argument("target", "Default"));
