@@ -12,12 +12,12 @@ function PublishPackage($root, $name) {
     dotnet nuget push ./$root/$name/bin/Release/$name.$env:APPVEYOR_BUILD_VERSION.nupkg -s $env:MYGET_FEED -k $env:MYGET_APIKEY -ss $env:MYGET_SYMBOLS_FEED -sk $env:MYGET_SYMBOLS_APIKEY
 }
 
-PublishPackage "src" "Cake.Tasks.Module"
-PublishPackage "src" "Cake.Tasks.Core"
-PublishPackage "plugin" "Cake.Tasks.GitVersion"
-PublishPackage "plugin" "Cake.Tasks.Ci.Tfs"
-PublishPackage "plugin" "Cake.Tasks.Ci.AppVeyor"
-PublishPackage "plugin" "Cake.Tasks.DotNetCore"
+# PublishPackage "src" "Cake.Tasks.Module"
+# PublishPackage "src" "Cake.Tasks.Core"
+# PublishPackage "plugin" "Cake.Tasks.GitVersion"
+# PublishPackage "plugin" "Cake.Tasks.Ci.Tfs"
+# PublishPackage "plugin" "Cake.Tasks.Ci.AppVeyor"
+# PublishPackage "plugin" "Cake.Tasks.DotNetCore"
 
 # Meta package
 WriteBanner "Publishing Cake Tasks addins metapackage"
