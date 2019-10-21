@@ -17,6 +17,8 @@ limitations under the License.
 */
 #endregion
 
+using System.Collections.Generic;
+
 namespace Cake.Tasks.Config
 {
     public sealed class EnvConfig : PluginConfig
@@ -24,6 +26,7 @@ namespace Cake.Tasks.Config
         public EnvConfig(TaskConfig taskConfig)
             : base(taskConfig)
         {
+            Ci = new CiConfig(taskConfig);
             Directories = new DirectoryConfig(taskConfig);
             Version = new VersionConfig(taskConfig);
         }
@@ -46,6 +49,17 @@ namespace Cake.Tasks.Config
             set => Set(Keys.IsCi, value);
         }
 
+        public IList<PublishProfile> PublishProfiles
+        {
+            get => Get<List<PublishProfile>>(Keys.PublishProfiles) ?? new List<PublishProfile>();
+            set => Set(Keys.PublishProfiles, value);
+        }
+
+        /// <summary>
+        ///     Gets the configuration for the CI settings.
+        /// </summary>
+        public CiConfig Ci { get; }
+
         /// <summary>
         ///     Gets the configuration for the location of common directories used during a build.
         /// </summary>
@@ -55,6 +69,26 @@ namespace Cake.Tasks.Config
         ///     Gets the configuration for version-related information.
         /// </summary>
         public VersionConfig Version { get; }
+
+        public sealed class CiConfig : PluginConfig
+        {
+            public CiConfig(TaskConfig taskConfig)
+                : base(taskConfig)
+            {
+            }
+
+            public IList<string> Artifacts
+            {
+                get => Get<List<string>>(Keys.CiArtifacts);
+                set => Set(Keys.CiArtifacts, value);
+            }
+
+            public IList<string> TestArtifacts
+            {
+                get => Get<List<string>>(Keys.CiTestArtifacts);
+                set => Set(Keys.CiTestArtifacts, value);
+            }
+        }
 
         public sealed class DirectoryConfig : PluginConfig
         {
@@ -157,7 +191,12 @@ namespace Cake.Tasks.Config
         public static class Keys
         {
             public const string Configuration = "Env_Configuration";
-            public const string IsCi = "Env_IsCi";
+            public const string IsCi = "Env_IsCI";
+
+            public const string PublishProfiles = "Env_PublishProfiles";
+
+            public const string CiArtifacts = "Env_CI_Artifacts";
+            public const string CiTestArtifacts = "Env_CI_TestArtifacts";
 
             public const string DirectoryWorking = "Env_Directory_Working";
             public const string DirectoryArtifacts = "Env_Directory_Artifacts";

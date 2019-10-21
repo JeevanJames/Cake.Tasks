@@ -42,7 +42,7 @@ namespace Cake.Tasks.Ci.Tfs
 
             env.Version.BuildNumber = int.TryParse(tfs.Environment.Build.Number, out int buildNum)
                 ? buildNum : tfs.Environment.Build.Id;
-            env.Version.Build = $"{env.Version}-build.{env.Version.BuildNumber}";
+            env.Version.Build = $"{env.Version.Build}-build.{env.Version.BuildNumber}";
         }
     }
 }

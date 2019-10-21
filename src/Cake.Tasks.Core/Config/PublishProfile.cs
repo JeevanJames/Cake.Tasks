@@ -40,24 +40,4 @@ namespace Cake.Tasks.Config
 
         public string OutputDirectory { get; set; }
     }
-
-    public sealed class AspNetPublishProfile : PublishProfile
-    {
-        public AspNetPublishProfile(string name, string projectFile)
-            : base(name, projectFile)
-        {
-        }
-    }
-
-    public sealed class NuGetPackagePublishProfile : PublishProfile
-    {
-        public NuGetPackagePublishProfile(string name, string projectFile)
-            : base(name, projectFile)
-        {
-        }
-
-        public string Source { get; set; }
-
-        public string ApiKey { get; set; }
-    }
 }

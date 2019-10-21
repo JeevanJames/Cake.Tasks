@@ -26,14 +26,11 @@ namespace Cake.Tasks.Config
         {
             Build = new BuildConfig(taskConfig);
             Test = new TestConfig(taskConfig);
-            Publish = new PublishConfig(taskConfig);
         }
 
         public BuildConfig Build { get; }
 
         public TestConfig Test { get; }
-
-        public PublishConfig Publish { get; }
 
         public sealed class BuildConfig : PluginConfig
         {
@@ -75,20 +72,6 @@ namespace Cake.Tasks.Config
             }
         }
 
-        public sealed class PublishConfig : PluginConfig
-        {
-            public PublishConfig(TaskConfig taskConfig)
-                : base(taskConfig)
-            {
-            }
-
-            public ConfigList<PublishProfile> Profiles
-            {
-                get => GetList<PublishProfile>(Keys.PublishProfiles);
-                set => Set(Keys.PublishProfiles, value);
-            }
-        }
-
         public static class Keys
         {
             public const string BuildProjectFile = "DotNetCore_Build_ProjectFile";
@@ -96,8 +79,34 @@ namespace Cake.Tasks.Config
             public const string TestSkip = "DotNetCore_Test_Skip";
             public const string TestProjectFile = "DotNetCore_Test_ProjectFile";
             public const string TestFilter = "DotNetCore_Test_Filter";
-
-            public const string PublishProfiles = "DotNetCore_Publish_Profiles";
         }
+    }
+
+    public abstract class DotNetCorePublishProfile : PublishProfile
+    {
+        protected DotNetCorePublishProfile(string name, string projectFile)
+            : base(name, projectFile)
+        {
+        }
+    }
+
+    public sealed class AspNetPublishProfile : DotNetCorePublishProfile
+    {
+        public AspNetPublishProfile(string name, string projectFile)
+            : base(name, projectFile)
+        {
+        }
+    }
+
+    public sealed class NuGetPackagePublishProfile : DotNetCorePublishProfile
+    {
+        public NuGetPackagePublishProfile(string name, string projectFile)
+            : base(name, projectFile)
+        {
+        }
+
+        public string Source { get; set; }
+
+        public string ApiKey { get; set; }
     }
 }

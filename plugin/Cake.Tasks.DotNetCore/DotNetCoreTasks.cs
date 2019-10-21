@@ -125,14 +125,15 @@ namespace Cake.Tasks.DotNetCore
         [TaskEvent(TaskEventType.BeforeTask, PipelineTask.Deploy)]
         public static void PublishDotNetProjects(ICakeContext ctx, TaskConfig config)
         {
-            var cfg = config.Load<DotNetCoreConfig>().Publish;
             var env = config.Load<EnvConfig>();
 
-            IList<PublishProfile> profiles = cfg.Profiles.Resolve();
+            IList<DotNetCorePublishProfile> profiles = env.PublishProfiles
+                .OfType<DotNetCorePublishProfile>()
+                .ToList();
 
             if (profiles.Count == 0)
             {
-                ctx.Log.Information("Nothing to publish. Specify a publish profile.");
+                ctx.Log.Information("No .NET Core projects to publish. Specify a publish profile.");
                 return;
             }
 
@@ -150,6 +151,8 @@ namespace Cake.Tasks.DotNetCore
                     case NuGetPackagePublishProfile nuget:
                         PublishNuGet(ctx, config, nuget);
                         break;
+                    default:
+                        throw new TaskConfigException($"Unrecognized publish profile type: {profile.GetType().FullName}.");
                 }
             }
         }
