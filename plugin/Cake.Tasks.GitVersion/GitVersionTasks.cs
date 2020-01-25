@@ -41,7 +41,7 @@ namespace Cake.Tasks.GitVersion
             gitVersion.Version = version;
 
             env.Version.Primary = version.MajorMinorPatch;
-            env.Version.Full = version.FullSemVer;
+            env.Version.Full = version.SemVer;
 
             if (version.CommitsSinceVersionSource.HasValue)
                 env.Version.BuildNumber = version.CommitsSinceVersionSource.Value;

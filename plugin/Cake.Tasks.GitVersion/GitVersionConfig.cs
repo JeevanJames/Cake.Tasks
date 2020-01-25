@@ -17,8 +17,6 @@ limitations under the License.
 */
 #endregion
 
-using Cake.Tasks.Config;
-
 namespace Cake.Tasks.Config
 {
     public sealed class GitVersionConfig : PluginConfig

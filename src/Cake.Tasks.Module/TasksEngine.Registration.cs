@@ -66,9 +66,9 @@ namespace Cake.Tasks.Module
                 env.Directories.TestOutput = Path.Combine(outputDirectory, "testresults");
 
                 env.Version.BuildNumber = 1;
-                env.Version.Primary = (Func<string>)(() => $"0.{env.Version.BuildNumber}.0");
-                env.Version.Full = (Func<string>)(() => $"0.{env.Version.BuildNumber}.0");
-                env.Version.Build = (Func<string>)(() => $"0.{env.Version.BuildNumber}.0");
+                env.Version.Primary = (Func<string>)(() => $"0.{env.Version.BuildNumber.Resolve()}.0");
+                env.Version.Full = (Func<string>)(() => env.Version.Primary.Resolve());
+                env.Version.Build = (Func<string>)(() => $"{env.Version.Full.Resolve()}+{env.Version.BuildNumber.Resolve()}");
 
                 return config;
             });

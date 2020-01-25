@@ -17,8 +17,6 @@ limitations under the License.
 */
 #endregion
 
-using System;
-
 namespace Cake.Tasks.Core
 {
     public abstract class BasePipelineTaskAttribute : BaseTaskAttribute

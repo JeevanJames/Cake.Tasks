@@ -20,12 +20,11 @@ limitations under the License.
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Cake.Common;
+
 using Cake.Common.Tools.DotNetCore;
 using Cake.Common.Tools.DotNetCore.NuGet.Push;
 using Cake.Common.Tools.DotNetCore.Pack;
 using Cake.Core;
-using Cake.Core.Diagnostics;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
 using Cake.Tasks.JeevanJames;
