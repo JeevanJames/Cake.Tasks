@@ -23,6 +23,13 @@ using System.Reflection;
 
 namespace Cake.Tasks.Config
 {
+    /// <summary>
+    ///     Represents the config object for a Cake.Task plugin.
+    ///     <para/>
+    ///     Plugins should create a class that derives from this class, if they want to have
+    ///     configuration.
+    /// </summary>
+    /// <example><see cref="EnvConfig"/>.</example>
     public abstract class PluginConfig
     {
         private readonly TaskConfig _taskConfig;

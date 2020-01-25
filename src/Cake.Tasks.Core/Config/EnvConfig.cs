@@ -21,6 +21,9 @@ using System.Collections.Generic;
 
 namespace Cake.Tasks.Config
 {
+    /// <summary>
+    ///     Global environment configuration, including CI, directory and version information.
+    /// </summary>
     public sealed class EnvConfig : PluginConfig
     {
         public EnvConfig(TaskConfig taskConfig)

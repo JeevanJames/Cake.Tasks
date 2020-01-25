@@ -40,6 +40,8 @@ namespace Cake.Tasks.Ci.Tfs
             var env = cfg.Load<EnvConfig>();
             env.IsCi = true;
 
+            // If the build number is configured as an integer, use it. Otherwise use the build ID.
+            // Basically, we need something unique.
             env.Version.BuildNumber = int.TryParse(tfs.Environment.Build.Number, out int buildNum)
                 ? buildNum : tfs.Environment.Build.Id;
         }

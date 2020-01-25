@@ -17,7 +17,6 @@ limitations under the License.
 */
 #endregion
 
-using System;
 using Cake.Common.Tools.GitVersion;
 using Cake.Core;
 using Cake.Tasks.Config;
@@ -33,16 +32,18 @@ namespace Cake.Tasks.GitVersion
         [Config(Order = 100)]
         public static void ConfigureGitVersion(ICakeContext ctx, TaskConfig cfg)
         {
-            var env = cfg.Load<EnvConfig>();
+            // Update the GitVersion config
             var gitVersion = cfg.Load<GitVersionConfig>();
-
             Common.Tools.GitVersion.GitVersion version = ctx.GitVersion();
-
             gitVersion.Version = version;
 
+            var env = cfg.Load<EnvConfig>();
+
+            // Update primary and full versions
             env.Version.Primary = version.MajorMinorPatch;
             env.Version.Full = version.SemVer;
 
+            // Update build number
             if (version.CommitsSinceVersionSource.HasValue)
                 env.Version.BuildNumber = version.CommitsSinceVersionSource.Value;
             else if (int.TryParse(version.BuildMetaData, out int buildMetadata))
