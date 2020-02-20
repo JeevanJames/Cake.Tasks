@@ -89,7 +89,7 @@ namespace Cake.Tasks.Module.PluginLoaders
                             registeredTask.Name = $"_{attr.PipelineTask}-{method.Name}{envSuffix}";
                             registeredTask.Description = $"{attr.PipelineTask} task - {methodDetails}";
                             break;
-                        case TaskEventAttribute attr:
+                        case PipelineTaskEventAttribute attr:
                             registeredTask.CoreTask = attr.PipelineTask;
                             registeredTask.EventType = attr.EventType;
                             string namePrefix = attr.EventType == TaskEventType.BeforeTask ? "Before" : "After";

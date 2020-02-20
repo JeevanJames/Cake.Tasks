@@ -41,7 +41,7 @@ namespace Cake.Tasks.DotNetCore
 {
     public static class DotNetCoreTasks
     {
-        [TaskEvent(TaskEventType.BeforeTask, PipelineTask.Build)]
+        [BeforePipelineTask(PipelineTask.Build)]
         public static void CleanDotNetCoreSolution(ICakeContext context, TaskConfig config)
         {
             context.DotNetCoreBuildServerShutdown();
@@ -117,13 +117,13 @@ namespace Cake.Tasks.DotNetCore
             context.DotNetCoreTest(testProjectFile, settings);
         }
 
-        [TaskEvent(TaskEventType.AfterTask, PipelineTask.Test)]
+        [AfterPipelineTask(PipelineTask.Test)]
         public static void ShutDownBuildServer(ICakeContext ctx, TaskConfig cfg)
         {
             ctx.DotNetCoreBuildServerShutdown();
         }
 
-        [TaskEvent(TaskEventType.BeforeTask, PipelineTask.Deploy)]
+        [BeforePipelineTask(PipelineTask.Deploy)]
         public static void PublishDotNetProjects(ICakeContext ctx, TaskConfig config)
         {
             var env = config.Load<EnvConfig>();

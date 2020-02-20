@@ -19,20 +19,37 @@ limitations under the License.
 
 namespace Cake.Tasks.Core
 {
-    public sealed class TaskEventAttribute : BasePipelineTaskAttribute
+    public abstract class PipelineTaskEventAttribute : BasePipelineTaskAttribute
     {
-        public TaskEventAttribute(TaskEventType eventType, PipelineTask pipelineTask)
+        protected PipelineTaskEventAttribute(PipelineTask pipelineTask)
         {
-            EventType = eventType;
             PipelineTask = pipelineTask;
         }
 
-        public TaskEventType EventType { get; }
-
         public PipelineTask PipelineTask { get; }
+
+        internal TaskEventType EventType { get; set; }
     }
 
-    public enum TaskEventType
+    public sealed class BeforePipelineTaskAttribute : PipelineTaskEventAttribute
+    {
+        public BeforePipelineTaskAttribute(PipelineTask pipelineTask)
+            : base(pipelineTask)
+        {
+            EventType = TaskEventType.BeforeTask;
+        }
+    }
+
+    public sealed class AfterPipelineTaskAttribute : PipelineTaskEventAttribute
+    {
+        public AfterPipelineTaskAttribute(PipelineTask pipelineTask)
+            : base(pipelineTask)
+        {
+            EventType = TaskEventType.AfterTask;
+        }
+    }
+
+    internal enum TaskEventType
     {
         BeforeTask,
         AfterTask,
