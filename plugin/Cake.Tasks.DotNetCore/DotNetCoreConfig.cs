@@ -79,6 +79,7 @@ namespace Cake.Tasks.Config
             public const string TestSkip = "DotNetCore_Test_Skip";
             public const string TestProjectFile = "DotNetCore_Test_ProjectFile";
             public const string TestFilter = "DotNetCore_Test_Filter";
+            public const string TestLogger = "DotNetCore_Test_Logger";
         }
     }
 

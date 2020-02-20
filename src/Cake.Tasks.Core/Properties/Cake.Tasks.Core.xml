@@ -4,6 +4,11 @@
         <name>Cake.Tasks.Core</name>
     </assembly>
     <members>
+        <member name="T:Cake.Tasks.Config.EnvConfig">
+            <summary>
+                Global environment configuration, including CI, directory and version information.
+            </summary>
+        </member>
         <member name="P:Cake.Tasks.Config.EnvConfig.Configuration">
             <summary>
                 Gets or sets the build configuration, such as Debug or Release.
@@ -78,6 +83,15 @@
                 The value is unique for every build, regardless of whether a new commit is made or
                 the same commit is being rebuilt.
             </summary>
+        </member>
+        <member name="T:Cake.Tasks.Config.PluginConfig">
+            <summary>
+                Represents the config object for a Cake.Task plugin.
+                <para/>
+                Plugins should create a class that derives from this class, if they want to have
+                configuration.
+            </summary>
+            <example><see cref="T:Cake.Tasks.Config.EnvConfig"/>.</example>
         </member>
         <member name="P:Cake.Tasks.Core.BaseTaskAttribute.CiSystem">
             <summary>
