@@ -31,5 +31,11 @@ namespace Cake.Tasks.Core
         ///     If not specified, this task will always be executed.
         /// </summary>
         public string CiSystem { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether the task should swallow any exceptions and
+        ///     continue running.
+        /// </summary>
+        public bool ContinueOnError { get; set; }
     }
 }

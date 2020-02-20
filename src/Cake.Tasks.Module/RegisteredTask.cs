@@ -55,6 +55,12 @@ namespace Cake.Tasks.Module
         /// </summary>
         internal string CiSystem { get; set; }
 
+        /// <summary>
+        ///     Gets or sets a value indicating whether the task should swallow any exceptions and
+        ///     continue running.
+        /// </summary>
+        internal bool ContinueOnError { get; set; }
+
         // Optional properties - specific to task type
 
         internal PipelineTask? CoreTask { get; set; }

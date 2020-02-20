@@ -76,6 +76,7 @@ namespace Cake.Tasks.Module.PluginLoaders
                         AttributeType = taskAttribute.GetType(),
                         Method = method,
                         CiSystem = taskAttribute.CiSystem,
+                        ContinueOnError = taskAttribute.ContinueOnError,
                     };
 
                     string envSuffix = taskAttribute.CiSystem is null ? string.Empty : $"-{taskAttribute.CiSystem}";
