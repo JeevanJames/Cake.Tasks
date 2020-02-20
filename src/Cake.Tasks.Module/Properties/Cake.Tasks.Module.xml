@@ -40,5 +40,16 @@
                 value indicates that the plugin will always run.
             </summary>
         </member>
+        <member name="P:Cake.Tasks.Module.RegisteredTask.ContinueOnError">
+            <summary>
+                Gets or sets a value indicating whether the task should swallow any exceptions and
+                continue running.
+            </summary>
+        </member>
+        <member name="M:Cake.Tasks.Module.TasksEngine.RegisterPluginTasks">
+            <summary>
+                Creates an actual Cake task from the internal <see cref="T:Cake.Tasks.Module.RegisteredTask"/> structure.
+            </summary>
+        </member>
     </members>
 </doc>

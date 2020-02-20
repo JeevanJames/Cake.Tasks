@@ -53,9 +53,9 @@ namespace Cake.Tasks.Module
             {
                 Log.Verbose("Initializing Cake.Tasks configuration.");
 
-                var config = TaskConfig.Current;
+                TaskConfig config = TaskConfig.Current;
 
-                var env = config.Load<EnvConfig>();
+                EnvConfig env = config.Load<EnvConfig>();
                 env.Configuration = ctx.Arguments.GetArgument("Configuration") ?? "Release";
                 env.IsCi = false;
 
@@ -90,12 +90,18 @@ namespace Cake.Tasks.Module
             _registeredTasks = pluginLoader.LoadPlugins().ToList();
         }
 
+        /// <summary>
+        ///     Creates an actual Cake task from the internal <see cref="RegisteredTask"/> structure.
+        /// </summary>
         private void RegisterPluginTasks()
         {
             foreach (RegisteredTask registeredTask in _registeredTasks)
             {
                 CakeTaskBuilder builder = RegisterTask(registeredTask.Name)
                     .Description(registeredTask.Description);
+
+                if (registeredTask.ContinueOnError)
+                    builder.ContinueOnError();
 
                 if (registeredTask.AttributeType == typeof(TaskAttribute) && registeredTask.RequiresConfig)
                     builder.IsDependentOn(TaskNames.Config);
@@ -228,7 +234,7 @@ namespace Cake.Tasks.Module
 
                 // Override configurations from environment variables
                 IDictionary<string, string> envVars = ctx.Environment.GetEnvironmentVariables();
-                foreach (var envVar in envVars)
+                foreach (KeyValuePair<string, string> envVar in envVars)
                 {
                     if (config.Data.ContainsKey(envVar.Key))
                         config.Data[envVar.Key] = envVar.Value;
@@ -236,9 +242,8 @@ namespace Cake.Tasks.Module
 
                 // Override configurations from command line arguments
                 List<string> keys = config.Data.Keys.ToList();
-                for (int i = 0; i < keys.Count; i++)
+                foreach (string key in keys)
                 {
-                    string key = keys[i];
                     if (ctx.Arguments.HasArgument(key))
                         config.Data[key] = ctx.Arguments.GetArgument(key);
                 }
@@ -250,6 +255,7 @@ namespace Cake.Tasks.Module
                     ctx.Log.Information($"{data.Key} = {data.Value?.Dump() ?? "[NULL]"}");
 
                 // Clean out output directories or create them
+                //TODO: Can these directories be created on-demand? For some project types like Angular, these folders are ignored and the dist folder is used.
                 var env = config.Load<EnvConfig>();
 
                 if (ctx.DirectoryExists(env.Directories.Artifacts))
