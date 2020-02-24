@@ -4,5 +4,17 @@
         <name>Cake.Tasks.DotNetCore</name>
     </assembly>
     <members>
+        <member name="P:Cake.Tasks.Config.NuGetPublisher.Source">
+            <summary>
+                Gets or sets the function to return the NuGet source URL, based on the specified branch
+                name.
+            </summary>
+        </member>
+        <member name="P:Cake.Tasks.Config.NuGetPublisher.ApiKey">
+            <summary>
+                Gets or sets the function to return the NuGet API key, based on the specified branch
+                name.
+            </summary>
+        </member>
     </members>
 </doc>

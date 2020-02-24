@@ -133,10 +133,7 @@ namespace Cake.Tasks.DotNetCore
                 .ToList();
 
             if (profiles.Count == 0)
-            {
                 ctx.Log.Information("No .NET Core projects to publish. Specify a publish profile.");
-                return;
-            }
 
             foreach (PublishProfile profile in profiles)
             {
@@ -184,20 +181,6 @@ namespace Cake.Tasks.DotNetCore
                 IncludeSource = true,
                 IncludeSymbols = true,
             });
-        }
-
-        [Task(RequiresConfig = true, Description = "Lists all project files under the solution")]
-        public static void ListProjectFiles(ICakeContext ctx, TaskConfig cfg)
-        {
-            var env = cfg.Load<EnvConfig>();
-            string workingDir = env.Directories.Working;
-            IEnumerable<string> projectFiles = Directory
-                .EnumerateFiles(workingDir, "*.csproj", SearchOption.AllDirectories)
-                .Select(f => Path.GetFileName(f));
-            foreach (string projectFile in projectFiles)
-            {
-                ctx.Log.Information(projectFile);
-            }
         }
 
         [Config]

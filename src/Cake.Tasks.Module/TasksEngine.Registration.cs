@@ -49,6 +49,8 @@ namespace Cake.Tasks.Module
 
         private void InitializeConfiguration()
         {
+            // Setup action to initialize some really core stuff, including directories and version
+            // details.
             RegisterSetupAction(ctx =>
             {
                 Log.Verbose("Initializing Cake.Tasks configuration.");

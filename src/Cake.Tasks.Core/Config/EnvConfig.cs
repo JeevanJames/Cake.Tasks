@@ -58,6 +58,12 @@ namespace Cake.Tasks.Config
             set => Set(Keys.PublishProfiles, value);
         }
 
+        public IList<Publisher> Publishers
+        {
+            get => Get<List<Publisher>>(Keys.Publishers) ?? new List<Publisher>();
+            set => Set(Keys.Publishers, value);
+        }
+
         /// <summary>
         ///     Gets the configuration for the CI settings.
         /// </summary>
@@ -197,6 +203,7 @@ namespace Cake.Tasks.Config
             public const string IsCi = "Env_IsCI";
 
             public const string PublishProfiles = "Env_PublishProfiles";
+            public const string Publishers = "Env_Publishers";
 
             public const string CiArtifacts = "Env_CI_Artifacts";
             public const string CiTestArtifacts = "Env_CI_TestArtifacts";
