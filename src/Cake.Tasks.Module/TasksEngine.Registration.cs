@@ -176,7 +176,7 @@ namespace Cake.Tasks.Module
                     .Where(rt => rt.AttributeType == typeof(ConfigAttribute));
                 foreach (RegisteredTask configTask in configTasks)
                     listConfigsTask = listConfigsTask.IsDependentOn(configTask.Name);
-                listConfigsTask = listConfigsTask.IsDependentOn(TaskNames.Config);
+                listConfigsTask.IsDependentOn(TaskNames.Config);
             }
 
             void RegisterListTasksTask()

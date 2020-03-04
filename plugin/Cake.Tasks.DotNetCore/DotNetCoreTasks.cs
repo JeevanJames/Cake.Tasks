@@ -135,7 +135,7 @@ namespace Cake.Tasks.DotNetCore
             if (profiles.Count == 0)
                 ctx.Log.Information("No .NET Core projects to publish. Specify a publish profile.");
 
-            foreach (PublishProfile profile in profiles)
+            foreach (DotNetCorePublishProfile profile in profiles)
             {
                 profile.OutputDirectory = Path.Combine(env.Directories.BinaryOutput, "__publish", profile.Name);
                 if (!ctx.DirectoryExists(profile.OutputDirectory))
@@ -191,30 +191,30 @@ namespace Cake.Tasks.DotNetCore
             var env = config.Load<EnvConfig>();
             string workingDirectory = env.Directories.Working ?? Directory.GetCurrentDirectory();
 
-            string GetBuildProjectFile()
-            {
-                return Directory
-                    .GetFiles(workingDirectory, "*.sln", SearchOption.TopDirectoryOnly)
-                    .FirstOrDefault();
-            }
-
-            cfg.Build.ProjectFile = (Func<string>)GetBuildProjectFile;
+            cfg.Build.ProjectFile = (Func<string>)(() => GetBuildProjectFile(workingDirectory));
 
             cfg.Test.Skip = false;
-            cfg.Test.ProjectFile = (Func<string>)GetBuildProjectFile;
+            cfg.Test.ProjectFile = (Func<string>)(() => GetBuildProjectFile(workingDirectory));
+
+            static string GetBuildProjectFile(string wdir)
+            {
+                return Directory
+                    .GetFiles(wdir, "*.sln", SearchOption.TopDirectoryOnly)
+                    .FirstOrDefault();
+            }
         }
 
         private static DotNetCoreVerbosity ToVerbosity(this Verbosity verbosity)
         {
-            switch (verbosity)
+            return verbosity switch
             {
-                case Verbosity.Diagnostic: return DotNetCoreVerbosity.Diagnostic;
-                case Verbosity.Minimal: return DotNetCoreVerbosity.Minimal;
-                case Verbosity.Normal: return DotNetCoreVerbosity.Normal;
-                case Verbosity.Quiet: return DotNetCoreVerbosity.Quiet;
-                case Verbosity.Verbose: return DotNetCoreVerbosity.Detailed;
-                default: return DotNetCoreVerbosity.Normal;
-            }
+                Verbosity.Diagnostic => DotNetCoreVerbosity.Diagnostic,
+                Verbosity.Minimal => DotNetCoreVerbosity.Minimal,
+                Verbosity.Normal => DotNetCoreVerbosity.Normal,
+                Verbosity.Quiet => DotNetCoreVerbosity.Quiet,
+                Verbosity.Verbose => DotNetCoreVerbosity.Detailed,
+                _ => DotNetCoreVerbosity.Normal,
+            };
         }
     }
 }
