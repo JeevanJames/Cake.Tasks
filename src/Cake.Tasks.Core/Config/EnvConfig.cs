@@ -134,6 +134,15 @@ namespace Cake.Tasks.Config
             }
 
             /// <summary>
+            ///     Gets or sets the directory for storing publish output from the build process.
+            /// </summary>
+            public string PublishOutput
+            {
+                get => Get<string>(Keys.DirectoryPublishOutput);
+                set => Set(Keys.DirectoryPublishOutput, value);
+            }
+
+            /// <summary>
             ///     Gets or sets the directory for storing test output from the build process.
             /// </summary>
             public string TestOutput
@@ -211,6 +220,7 @@ namespace Cake.Tasks.Config
             public const string DirectoryWorking = "Env_Directory_Working";
             public const string DirectoryArtifacts = "Env_Directory_Artifacts";
             public const string DirectoryBinaryOutput = "Env_Directory_BinaryOutput";
+            public const string DirectoryPublishOutput = "Env_Directory_PublishOutput";
             public const string DirectoryTestOutput = "Env_Directory_TestOutput";
 
             public const string VersionBuildNumber = "Env_Version_BuildNumber";

@@ -62,9 +62,10 @@ namespace Cake.Tasks.Module
                 env.IsCi = false;
 
                 env.Directories.Working = ctx.Environment.WorkingDirectory.FullPath;
-                string outputDirectory = Path.Combine(env.Directories.Working, "bin", "__output");
+                string outputDirectory = Path.Combine(env.Directories.Working, ".ci");
                 env.Directories.Artifacts = Path.Combine(outputDirectory, "artifacts");
                 env.Directories.BinaryOutput = Path.Combine(outputDirectory, "binaries");
+                env.Directories.PublishOutput = Path.Combine(outputDirectory, "publish");
                 env.Directories.TestOutput = Path.Combine(outputDirectory, "testresults");
 
                 env.Version.BuildNumber = 1;

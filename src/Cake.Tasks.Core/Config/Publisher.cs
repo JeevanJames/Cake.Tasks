@@ -41,6 +41,8 @@ namespace Cake.Tasks.Config
         /// </summary>
         private bool _outputSet;
 
+        private PublishOutputType _outputType;
+
         protected Publisher(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -68,7 +70,7 @@ namespace Cake.Tasks.Config
         /// <summary>
         ///     Gets whether the published output is a directory of multiple files or a single file.
         /// </summary>
-        public PublishOutputType OutputType { get; private set; }
+        public virtual PublishOutputType OutputType => _outputType;
 
         public void SetOutput(string location, PublishOutputType type = PublishOutputType.Directory)
         {
@@ -81,7 +83,7 @@ namespace Cake.Tasks.Config
                 throw new FileNotFoundException($"The specified output file does not exist.", location ?? string.Empty);
 
             OutputLocation = location;
-            OutputType = type;
+            _outputType = type;
 
             _outputSet = true;
         }

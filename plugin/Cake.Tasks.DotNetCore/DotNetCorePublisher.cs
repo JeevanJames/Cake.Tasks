@@ -23,9 +23,9 @@ using System.IO;
 
 namespace Cake.Tasks.Config
 {
-    public class DotNetCorePublisher : Publisher
+    public abstract class DotNetCorePublisher : Publisher
     {
-        public DotNetCorePublisher(string name, string projectFile)
+        protected DotNetCorePublisher(string name, string projectFile)
             : base(name)
         {
             if (string.IsNullOrWhiteSpace(projectFile))
@@ -33,26 +33,26 @@ namespace Cake.Tasks.Config
 
             ProjectFile = Path.GetFullPath(projectFile);
             if (!File.Exists(ProjectFile))
-                throw new FileNotFoundException($"Cannot find the specified .NET Core solution or project file.", ProjectFile);
+                throw new FileNotFoundException($"Cannot find the specified .NET Core solution or project file '{ProjectFile}'.", ProjectFile);
         }
 
         public string ProjectFile { get; }
     }
 
-    public sealed class NuGetPublisher : Publisher
+    public class AspDotNetCorePublisher : DotNetCorePublisher
+    {
+        public AspDotNetCorePublisher(string name, string projectFile)
+            : base(name, projectFile)
+        {
+        }
+    }
+
+    public sealed class NuGetPublisher : DotNetCorePublisher
     {
         public NuGetPublisher(string name, string projectFile)
-            : base(name)
+            : base(name, projectFile)
         {
-            if (string.IsNullOrWhiteSpace(projectFile))
-                throw new ArgumentException("Specify a valid .NET Core solution or project file to publish.", nameof(projectFile));
-
-            ProjectFile = Path.GetFullPath(projectFile);
-            if (!File.Exists(ProjectFile))
-                throw new FileNotFoundException($"Cannot find the specified .NET Core solution or project file.", ProjectFile);
         }
-
-        public string ProjectFile { get; set; }
 
         /// <summary>
         ///     Gets or sets the function to return the NuGet source URL, based on the specified branch
@@ -69,9 +69,9 @@ namespace Cake.Tasks.Config
 
     public static class PublisherExtensions
     {
-        public static Publisher AddDotNetCore(this IList<Publisher> publishers, string name, string projectFile)
+        public static Publisher AddAspDotNetCore(this IList<Publisher> publishers, string name, string projectFile)
         {
-            var publisher = new DotNetCorePublisher(name, projectFile);
+            var publisher = new AspDotNetCorePublisher(name, projectFile);
             publishers.Add(publisher);
             return publisher;
         }

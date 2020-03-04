@@ -49,6 +49,11 @@
                 Gets or sets the directory for storing binary output from the build process.
             </summary>
         </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.DirectoryConfig.PublishOutput">
+            <summary>
+                Gets or sets the directory for storing publish output from the build process.
+            </summary>
+        </member>
         <member name="P:Cake.Tasks.Config.EnvConfig.DirectoryConfig.TestOutput">
             <summary>
                 Gets or sets the directory for storing test output from the build process.
@@ -92,6 +97,11 @@
                 configuration.
             </summary>
             <example><see cref="T:Cake.Tasks.Config.EnvConfig"/>.</example>
+        </member>
+        <member name="T:Cake.Tasks.Config.Publisher">
+            <summary>
+                Represents an item that can be published from the current build.
+            </summary>
         </member>
         <member name="F:Cake.Tasks.Config.Publisher._properties">
             <summary>

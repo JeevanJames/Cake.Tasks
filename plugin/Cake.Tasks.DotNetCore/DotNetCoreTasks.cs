@@ -35,6 +35,8 @@ using Cake.Tasks.Config;
 using Cake.Tasks.Core;
 using Cake.Tasks.DotNetCore;
 
+using DotNetCorePublisher = Cake.Tasks.Config.DotNetCorePublisher;
+
 [assembly: TaskPlugin(typeof(DotNetCoreTasks))]
 
 namespace Cake.Tasks.DotNetCore
@@ -144,18 +146,65 @@ namespace Cake.Tasks.DotNetCore
                 switch (profile)
                 {
                     case AspNetPublishProfile aspnet:
-                        PublishAspNet(ctx, config, aspnet);
+                        PublishAspNetProfile(ctx, config, aspnet);
                         break;
                     case NuGetPackagePublishProfile nuget:
-                        PublishNuGet(ctx, config, nuget);
                         break;
                     default:
                         throw new TaskConfigException($"Unrecognized publish profile type: {profile.GetType().FullName}.");
                 }
             }
+
+            IList<DotNetCorePublisher> publishers = env.Publishers.OfType<DotNetCorePublisher>().ToList();
+            if (publishers.Count == 0)
+                ctx.Log.Information("No .NET Core projects to publish. Specify a publisher.");
+            foreach (DotNetCorePublisher publisher in publishers)
+            {
+                string publishDirectory = Path.Combine(env.Directories.PublishOutput, publisher.Name);
+                publisher.SetOutput(publishDirectory);
+                switch (publisher)
+                {
+                    case AspDotNetCorePublisher aspnet:
+                        PublishAspNetCore(ctx, config, aspnet);
+                        break;
+                    case NuGetPublisher nuget:
+                        PublishNuGet(ctx, config, nuget);
+                        break;
+                    default:
+                        throw new TaskConfigException($"Unrecognized .NET Core publisher type: {publisher.GetType().FullName}.");
+                }
+            }
         }
 
-        private static void PublishAspNet(ICakeContext ctx, TaskConfig cfg, AspNetPublishProfile profile)
+        private static void PublishAspNetCore(ICakeContext ctx, TaskConfig cfg, AspDotNetCorePublisher publisher)
+        {
+            var env = cfg.Load<EnvConfig>();
+
+            ctx.DotNetCorePublish(publisher.ProjectFile, new DotNetCorePublishSettings
+            {
+                Configuration = env.Configuration,
+                OutputDirectory = publisher.OutputLocation,
+                Verbosity = ctx.Log.Verbosity.ToVerbosity(),
+                ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
+            });
+        }
+
+        private static void PublishNuGet(ICakeContext ctx, TaskConfig cfg, NuGetPublisher nuget)
+        {
+            var env = cfg.Load<EnvConfig>();
+
+            ctx.DotNetCorePack(nuget.ProjectFile, new DotNetCorePackSettings
+            {
+                Configuration = env.Configuration,
+                OutputDirectory = nuget.OutputLocation,
+                Verbosity = ctx.Log.Verbosity.ToVerbosity(),
+                ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
+                IncludeSource = true,
+                IncludeSymbols = true,
+            });
+        }
+
+        private static void PublishAspNetProfile(ICakeContext ctx, TaskConfig cfg, AspNetPublishProfile profile)
         {
             var env = cfg.Load<EnvConfig>();
 
@@ -165,21 +214,6 @@ namespace Cake.Tasks.DotNetCore
                 OutputDirectory = profile.OutputDirectory,
                 Verbosity = ctx.Log.Verbosity.ToVerbosity(),
                 ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
-            });
-        }
-
-        private static void PublishNuGet(ICakeContext ctx, TaskConfig cfg, NuGetPackagePublishProfile profile)
-        {
-            var env = cfg.Load<EnvConfig>();
-
-            ctx.DotNetCorePack(profile.ProjectFile, new DotNetCorePackSettings
-            {
-                Configuration = env.Configuration,
-                OutputDirectory = profile.OutputDirectory,
-                Verbosity = ctx.Log.Verbosity.ToVerbosity(),
-                ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
-                IncludeSource = true,
-                IncludeSymbols = true,
             });
         }
 
