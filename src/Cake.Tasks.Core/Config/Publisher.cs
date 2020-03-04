@@ -23,6 +23,9 @@ using System.IO;
 
 namespace Cake.Tasks.Config
 {
+    /// <summary>
+    ///     Represents an item that can be published from the current build.
+    /// </summary>
     public abstract class Publisher
     {
         /// <summary>
