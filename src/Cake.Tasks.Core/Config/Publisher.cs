@@ -25,7 +25,17 @@ namespace Cake.Tasks.Config
 {
     public abstract class Publisher
     {
+        /// <summary>
+        ///     Additional properties that can be set on the publisher to control the behavior of
+        ///     specific tasks.
+        /// </summary>
         private readonly IDictionary<string, object> _properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        ///     Indicates whether the output properties - <see cref="OutputLocation"/> and
+        ///     <see cref="OutputType"/> have been set using the <see cref="SetOutput"/> method. This
+        ///     is used to ensure that the method is called only once.
+        /// </summary>
         private bool _outputSet;
 
         protected Publisher(string name)
@@ -33,17 +43,28 @@ namespace Cake.Tasks.Config
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Specify a valid and unique name for the publisher.", nameof(name));
 
-            // Name must be a valid directory name
+            // Name must be a valid directory name. The framework will use it as the directory name
+            // to copy the publish output to.
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
                 throw new ArgumentException("Specify a valid directory name for the publisher name.", nameof(name));
 
             Name = name;
         }
 
+        /// <summary>
+        ///     Gets the unique name for this publisher.
+        /// </summary>
         public string Name { get; }
 
+        /// <summary>
+        ///     Gets the directory where the published output is copied to, or the file name of the
+        ///     published output, depending on the value of <see cref="OutputType"/>.
+        /// </summary>
         public string OutputLocation { get; private set; }
 
+        /// <summary>
+        ///     Gets whether the published output is a directory of multiple files or a single file.
+        /// </summary>
         public PublishOutputType OutputType { get; private set; }
 
         public void SetOutput(string location, PublishOutputType type = PublishOutputType.Directory)

@@ -18,6 +18,7 @@ limitations under the License.
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Cake.Tasks.Config
@@ -64,5 +65,44 @@ namespace Cake.Tasks.Config
         ///     name.
         /// </summary>
         public Func<string, string> ApiKey { get; set; }
+    }
+
+    public static class PublisherExtensions
+    {
+        public static Publisher AddDotNetCore(this IList<Publisher> publishers, string name, string projectFile)
+        {
+            var publisher = new DotNetCorePublisher(name, projectFile);
+            publishers.Add(publisher);
+            return publisher;
+        }
+
+        public static Publisher AddNuGetPackage(this IList<Publisher> publishers, string name, string projectFile,
+            string source = "https: //api.nuget.org/v3/index.json",
+            string apiKey = null)
+        {
+            var publisher = new NuGetPublisher(name, projectFile)
+            {
+                Source = _ => source,
+                ApiKey = _ => apiKey,
+            };
+            publishers.Add(publisher);
+            return publisher;
+        }
+
+        public static Publisher AddNuGetPackage(this IList<Publisher> publishers, string name, string projectFile,
+            Func<string, string> sourceFn = null,
+            Func<string, string> apiKeyFn = null)
+        {
+            if (sourceFn is null)
+                sourceFn = _ => "https: //api.nuget.org/v3/index.json";
+
+            var publisher = new NuGetPublisher(name, projectFile)
+            {
+                Source = sourceFn,
+                ApiKey = apiKeyFn,
+            };
+            publishers.Add(publisher);
+            return publisher;
+        }
     }
 }

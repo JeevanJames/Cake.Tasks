@@ -39,12 +39,16 @@ namespace Cake.Tasks.Config
             _taskConfig = taskConfig;
         }
 
-        protected T Get<T>(string name)
+        protected T Get<T>(string name, T defaultValue = default)
         {
             if (!_taskConfig.Data.TryGetValue(name, out object value))
-                return default;
+            {
+                _taskConfig.Data.Add(name, defaultValue);
+                return defaultValue;
+            }
+
             if (value is null)
-                return default;
+                return defaultValue;
             if (value is string str && typeof(T) != typeof(string))
             {
                 if (TryFromConfigValue<T>(str, out T fovValue))

@@ -54,13 +54,13 @@ namespace Cake.Tasks.Config
 
         public IList<PublishProfile> PublishProfiles
         {
-            get => Get<List<PublishProfile>>(Keys.PublishProfiles) ?? new List<PublishProfile>();
+            get => Get(Keys.PublishProfiles, new List<PublishProfile>());
             set => Set(Keys.PublishProfiles, value);
         }
 
         public IList<Publisher> Publishers
         {
-            get => Get<List<Publisher>>(Keys.Publishers) ?? new List<Publisher>();
+            get => Get(Keys.Publishers, new List<Publisher>());
             set => Set(Keys.Publishers, value);
         }
 
