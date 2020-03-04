@@ -27,8 +27,6 @@ namespace Cake.Tasks.Core
         }
 
         public PipelineTask PipelineTask { get; }
-
-        internal TaskEventType EventType { get; set; }
     }
 
     public sealed class BeforePipelineTaskAttribute : PipelineTaskEventAttribute
@@ -36,7 +34,6 @@ namespace Cake.Tasks.Core
         public BeforePipelineTaskAttribute(PipelineTask pipelineTask)
             : base(pipelineTask)
         {
-            EventType = TaskEventType.BeforeTask;
         }
     }
 
@@ -45,7 +42,6 @@ namespace Cake.Tasks.Core
         public AfterPipelineTaskAttribute(PipelineTask pipelineTask)
             : base(pipelineTask)
         {
-            EventType = TaskEventType.AfterTask;
         }
     }
 
