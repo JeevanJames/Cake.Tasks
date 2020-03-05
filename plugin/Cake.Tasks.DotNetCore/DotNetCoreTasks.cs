@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using Cake.Common.IO;
 using Cake.Common.Tools.DotNetCore;
 using Cake.Common.Tools.DotNetCore.Build;
 using Cake.Common.Tools.DotNetCore.Clean;
@@ -134,25 +133,10 @@ namespace Cake.Tasks.DotNetCore
                 .OfType<DotNetCorePublishProfile>()
                 .ToList();
 
-            if (profiles.Count == 0)
-                ctx.Log.Information("No .NET Core projects to publish. Specify a publish profile.");
-
-            foreach (DotNetCorePublishProfile profile in profiles)
+            if (profiles.Count > 0)
             {
-                profile.OutputDirectory = Path.Combine(env.Directories.BinaryOutput, "__publish", profile.Name);
-                if (!ctx.DirectoryExists(profile.OutputDirectory))
-                    ctx.CreateDirectory(profile.OutputDirectory);
-
-                switch (profile)
-                {
-                    case AspNetPublishProfile aspnet:
-                        PublishAspNetProfile(ctx, config, aspnet);
-                        break;
-                    case NuGetPackagePublishProfile nuget:
-                        break;
-                    default:
-                        throw new TaskConfigException($"Unrecognized publish profile type: {profile.GetType().FullName}.");
-                }
+                ctx.Log.Warning(
+                    "The PublishProfiles feature has been deprecated. Please use the new Publishers feature. Contact your Cake admin for more details.");
             }
 
             IList<DotNetCorePublisher> publishers = env.Publishers.OfType<DotNetCorePublisher>().ToList();
@@ -161,10 +145,12 @@ namespace Cake.Tasks.DotNetCore
             foreach (DotNetCorePublisher publisher in publishers)
             {
                 string publishDirectory = Path.Combine(env.Directories.PublishOutput, publisher.Name);
+                if (!Directory.Exists(publishDirectory))
+                    Directory.CreateDirectory(publishDirectory);
                 publisher.SetOutput(publishDirectory);
                 switch (publisher)
                 {
-                    case AspDotNetCorePublisher aspnet:
+                    case AspNetCorePublisher aspnet:
                         PublishAspNetCore(ctx, config, aspnet);
                         break;
                     case NuGetPublisher nuget:
@@ -176,7 +162,7 @@ namespace Cake.Tasks.DotNetCore
             }
         }
 
-        private static void PublishAspNetCore(ICakeContext ctx, TaskConfig cfg, AspDotNetCorePublisher publisher)
+        private static void PublishAspNetCore(ICakeContext ctx, TaskConfig cfg, AspNetCorePublisher publisher)
         {
             var env = cfg.Load<EnvConfig>();
 
@@ -201,19 +187,6 @@ namespace Cake.Tasks.DotNetCore
                 ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
                 IncludeSource = true,
                 IncludeSymbols = true,
-            });
-        }
-
-        private static void PublishAspNetProfile(ICakeContext ctx, TaskConfig cfg, AspNetPublishProfile profile)
-        {
-            var env = cfg.Load<EnvConfig>();
-
-            ctx.DotNetCorePublish(profile.ProjectFile, new DotNetCorePublishSettings
-            {
-                Configuration = env.Configuration,
-                OutputDirectory = profile.OutputDirectory,
-                Verbosity = ctx.Log.Verbosity.ToVerbosity(),
-                ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
             });
         }
 

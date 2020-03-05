@@ -39,9 +39,9 @@ namespace Cake.Tasks.Config
         public string ProjectFile { get; }
     }
 
-    public class AspDotNetCorePublisher : DotNetCorePublisher
+    public class AspNetCorePublisher : DotNetCorePublisher
     {
-        public AspDotNetCorePublisher(string name, string projectFile)
+        public AspNetCorePublisher(string name, string projectFile)
             : base(name, projectFile)
         {
         }
@@ -69,9 +69,9 @@ namespace Cake.Tasks.Config
 
     public static class PublisherExtensions
     {
-        public static Publisher AddAspDotNetCore(this IList<Publisher> publishers, string name, string projectFile)
+        public static Publisher AddAspNetCore(this IList<Publisher> publishers, string name, string projectFile)
         {
-            var publisher = new AspDotNetCorePublisher(name, projectFile);
+            var publisher = new AspNetCorePublisher(name, projectFile);
             publishers.Add(publisher);
             return publisher;
         }
