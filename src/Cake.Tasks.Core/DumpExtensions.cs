@@ -22,15 +22,16 @@ using System.Collections;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+
 using Cake.Tasks.Config;
 
 namespace Cake.Tasks.Core
 {
-    public static class Helpers
+    public static class DumpExtensions
     {
         public static string Dump<T>(this T obj)
         {
-            if (obj == null)
+            if (obj is null)
                 return null;
 
             var dump = new StringBuilder();
@@ -39,7 +40,7 @@ namespace Cake.Tasks.Core
             else if (obj is IEnumerable objEnumerable)
             {
                 var first = true;
-                foreach (var o in objEnumerable)
+                foreach (object o in objEnumerable)
                 {
                     if (first)
                     {

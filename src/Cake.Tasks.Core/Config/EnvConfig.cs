@@ -17,6 +17,7 @@ limitations under the License.
 */
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 namespace Cake.Tasks.Config
@@ -52,6 +53,7 @@ namespace Cake.Tasks.Config
             set => Set(Keys.IsCi, value);
         }
 
+        [Obsolete("Deprecated in favor of the Publishers property.", error: false)]
         public IList<PublishProfile> PublishProfiles
         {
             get => Get(Keys.PublishProfiles, new List<PublishProfile>());
