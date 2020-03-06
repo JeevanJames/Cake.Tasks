@@ -25,6 +25,14 @@ namespace Cake.Tasks.Config
 {
     public abstract class DotNetCorePublisher : Publisher
     {
+        protected DotNetCorePublisher(string projectFile)
+            : base()
+        {
+            ProjectFile = Path.GetFullPath(projectFile);
+            if (!File.Exists(ProjectFile))
+                throw new FileNotFoundException($"Cannot find the specified .NET Core solution or project file '{ProjectFile}'.", ProjectFile);
+        }
+
         protected DotNetCorePublisher(string name, string projectFile)
             : base(name)
         {
@@ -41,6 +49,11 @@ namespace Cake.Tasks.Config
 
     public class AspNetCorePublisher : DotNetCorePublisher
     {
+        public AspNetCorePublisher(string projectFile)
+            : base(projectFile)
+        {
+        }
+
         public AspNetCorePublisher(string name, string projectFile)
             : base(name, projectFile)
         {
@@ -49,6 +62,11 @@ namespace Cake.Tasks.Config
 
     public sealed class NuGetPublisher : DotNetCorePublisher
     {
+        public NuGetPublisher(string projectFile)
+            : base(projectFile)
+        {
+        }
+
         public NuGetPublisher(string name, string projectFile)
             : base(name, projectFile)
         {
@@ -69,6 +87,14 @@ namespace Cake.Tasks.Config
 
     public static class PublisherExtensions
     {
+        public static Publisher AddAspNetCore(this IList<Publisher> publishers, string projectFile)
+        {
+            var publisher = new AspNetCorePublisher(projectFile);
+            publishers.Add(publisher);
+            return publisher;
+        }
+
+        [Obsolete("Deprecated in favor of overload without the name parameter")]
         public static Publisher AddAspNetCore(this IList<Publisher> publishers, string name, string projectFile)
         {
             var publisher = new AspNetCorePublisher(name, projectFile);
@@ -76,11 +102,11 @@ namespace Cake.Tasks.Config
             return publisher;
         }
 
-        public static Publisher AddNuGetPackage(this IList<Publisher> publishers, string name, string projectFile,
+        public static Publisher AddNuGetPackage(this IList<Publisher> publishers, string projectFile,
             string source = "https: //api.nuget.org/v3/index.json",
             string apiKey = null)
         {
-            var publisher = new NuGetPublisher(name, projectFile)
+            var publisher = new NuGetPublisher(projectFile)
             {
                 Source = _ => source,
                 ApiKey = _ => apiKey,
@@ -89,14 +115,14 @@ namespace Cake.Tasks.Config
             return publisher;
         }
 
-        public static Publisher AddNuGetPackage(this IList<Publisher> publishers, string name, string projectFile,
+        public static Publisher AddNuGetPackage(this IList<Publisher> publishers, string projectFile,
             Func<string, string> sourceFn = null,
             Func<string, string> apiKeyFn = null)
         {
             if (sourceFn is null)
                 sourceFn = _ => "https: //api.nuget.org/v3/index.json";
 
-            var publisher = new NuGetPublisher(name, projectFile)
+            var publisher = new NuGetPublisher(projectFile)
             {
                 Source = sourceFn,
                 ApiKey = apiKeyFn,

@@ -129,16 +129,6 @@ namespace Cake.Tasks.DotNetCore
         {
             var env = config.Load<EnvConfig>();
 
-            IList<DotNetCorePublishProfile> profiles = env.PublishProfiles
-                .OfType<DotNetCorePublishProfile>()
-                .ToList();
-
-            if (profiles.Count > 0)
-            {
-                ctx.Log.Warning(
-                    "The PublishProfiles feature has been deprecated. Please use the new Publishers feature. Contact your Cake admin for more details.");
-            }
-
             IList<DotNetCorePublisher> publishers = env.Publishers.OfType<DotNetCorePublisher>().ToList();
             if (publishers.Count == 0)
                 ctx.Log.Information("No .NET Core projects to publish. Specify a publisher.");

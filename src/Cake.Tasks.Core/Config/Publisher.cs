@@ -43,6 +43,11 @@ namespace Cake.Tasks.Config
 
         private PublishOutputType _outputType;
 
+        protected Publisher()
+        {
+            Name = $"{GetType().Name}_{DateTime.Now.Ticks}";
+        }
+
         protected Publisher(string name)
         {
             if (string.IsNullOrWhiteSpace(name))

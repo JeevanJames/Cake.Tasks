@@ -20,6 +20,7 @@ limitations under the License.
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using Cake.Core;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
@@ -30,8 +31,15 @@ namespace Cake.Tasks.Core
 {
     public static class CoreTasks
     {
+        /// <summary>
+        ///     Sets the output details for any <see cref="DirectoryPublisher"/> publishers or derived
+        ///     publishers. It does this by resolving the final directory path and calling the
+        ///     <see cref="Publisher.SetOutput(string, PublishOutputType)"/> method on the publisher.
+        /// </summary>
+        /// <param name="ctx">The <see cref="ICakeContext"/>.</param>
+        /// <param name="cfg">The <see cref="TaskConfig"/>.</param>
         [BeforePipelineTask(PipelineTask.Build)]
-        public static void UpdateDirectoryPublisherOutputs(ICakeContext ctx, TaskConfig cfg)
+        public static void SetDirectoryPublisherOutputs(ICakeContext ctx, TaskConfig cfg)
         {
             var env = cfg.Load<EnvConfig>();
 

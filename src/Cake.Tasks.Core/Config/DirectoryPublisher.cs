@@ -23,11 +23,9 @@ namespace Cake.Tasks.Config
 {
     public class DirectoryPublisher : Publisher
     {
-        public DirectoryPublisher(string name, string directory)
-            : base(name)
+        public DirectoryPublisher(string directory)
         {
             Directory = directory;
-            SetProperty(DirectoryPublisherKeys.IsDirectory, true);
         }
 
         public string Directory { get; }
@@ -37,16 +35,11 @@ namespace Cake.Tasks.Config
 
     public static class DirectoryPublisherExtensions
     {
-        public static Publisher AddDirectory(this IList<Publisher> publishers, string name, string directory)
+        public static Publisher AddDirectory(this IList<Publisher> publishers, string directory)
         {
-            var publisher = new DirectoryPublisher(name, directory);
+            var publisher = new DirectoryPublisher(directory);
             publishers.Add(publisher);
             return publisher;
         }
-    }
-
-    public static class DirectoryPublisherKeys
-    {
-        public const string IsDirectory = "IsDirectory";
     }
 }
