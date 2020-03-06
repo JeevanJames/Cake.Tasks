@@ -46,6 +46,8 @@ namespace Cake.Tasks.Core
             List<DirectoryPublisher> directoryPublishers = env.Publishers.OfType<DirectoryPublisher>().ToList();
             foreach (DirectoryPublisher publisher in directoryPublishers)
             {
+                publisher.ValidateDirectory();
+
                 string directory = Path.Combine(env.Directories.Working, publisher.Directory);
                 publisher.SetOutput(directory);
             }

@@ -31,6 +31,11 @@ namespace Cake.Tasks.Config
         public string Directory { get; }
 
         public override PublishOutputType OutputType => PublishOutputType.Directory;
+
+        public virtual void ValidateDirectory()
+        {
+            // No validation, by default
+        }
     }
 
     public static class DirectoryPublisherExtensions
