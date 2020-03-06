@@ -257,10 +257,25 @@ namespace Cake.Tasks.Module
                 foreach (var data in config.Data.OrderBy(kvp => kvp.Key))
                     ctx.Log.Information($"{data.Key} = {data.Value?.Dump() ?? "[NULL]"}");
 
-                // Clean out output directories or create them
-                //TODO: Can these directories be created on-demand? For some project types like Angular, these folders are ignored and the dist folder is used.
                 var env = config.Load<EnvConfig>();
 
+                // Display the subdirectories under the tools/Addins directory.
+                // To verify the versions of the addins and tools installed.
+                // Useful for troubleshooting.
+                //TODO: Make this a configuration
+                ctx.Log.Information("Addin subdirectories");
+                ctx.Log.Information("--------------------");
+                string addinsDir = Path.Combine(env.Directories.Working, "tools", "Addins");
+                if (Directory.Exists(addinsDir))
+                {
+                    string[] subdirectories = Directory.GetDirectories(addinsDir, "*", SearchOption.TopDirectoryOnly);
+                    foreach (string subdirectory in subdirectories)
+                        ctx.Log.Information(subdirectory);
+                }
+
+                // Clean out output directories or create them
+                //TODO: Can these directories be created on-demand? For some project types like Angular,
+                //these folders are ignored and the dist folder is used.
                 if (ctx.DirectoryExists(env.Directories.Artifacts))
                     ctx.CleanDirectory(env.Directories.Artifacts);
                 else
