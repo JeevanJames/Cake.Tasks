@@ -39,6 +39,9 @@ namespace Cake.Tasks.GitVersion
 
             var env = cfg.Load<EnvConfig>();
 
+            // Update branch name
+            env.Branch = version.BranchName;
+
             // Update primary and full versions
             env.Version.Primary = version.MajorMinorPatch;
             env.Version.Full = version.SemVer;

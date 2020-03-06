@@ -60,6 +60,7 @@ namespace Cake.Tasks.Module
                 EnvConfig env = config.Load<EnvConfig>();
                 env.Configuration = ctx.Arguments.GetArgument("Configuration") ?? "Release";
                 env.IsCi = false;
+                env.Branch = null;
 
                 env.Directories.Working = ctx.Environment.WorkingDirectory.FullPath;
                 string outputDirectory = Path.Combine(env.Directories.Working, ".ci");
@@ -263,6 +264,7 @@ namespace Cake.Tasks.Module
                 // To verify the versions of the addins and tools installed.
                 // Useful for troubleshooting.
                 //TODO: Make this a configuration
+                ctx.Log.Information("--------------------");
                 ctx.Log.Information("Addin subdirectories");
                 ctx.Log.Information("--------------------");
                 string addinsDir = Path.Combine(env.Directories.Working, "tools", "Addins");
@@ -270,7 +272,7 @@ namespace Cake.Tasks.Module
                 {
                     string[] subdirectories = Directory.GetDirectories(addinsDir, "*", SearchOption.TopDirectoryOnly);
                     foreach (string subdirectory in subdirectories)
-                        ctx.Log.Information(subdirectory);
+                        ctx.Log.Information(Path.GetFileName(subdirectory));
                 }
 
                 // Clean out output directories or create them

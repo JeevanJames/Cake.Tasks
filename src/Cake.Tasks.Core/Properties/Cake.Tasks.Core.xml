@@ -19,6 +19,11 @@
                 Gets or sets a value indicating whether Cake is running in a CI environment.
             </summary>
         </member>
+        <member name="P:Cake.Tasks.Config.EnvConfig.Branch">
+            <summary>
+                Gets or sets the version control branch that this build is running from.
+            </summary>
+        </member>
         <member name="P:Cake.Tasks.Config.EnvConfig.Ci">
             <summary>
                 Gets the configuration for the CI settings.

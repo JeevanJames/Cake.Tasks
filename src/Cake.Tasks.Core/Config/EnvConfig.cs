@@ -53,6 +53,15 @@ namespace Cake.Tasks.Config
             set => Set(Keys.IsCi, value);
         }
 
+        /// <summary>
+        ///     Gets or sets the version control branch that this build is running from.
+        /// </summary>
+        public string Branch
+        {
+            get => Get<string>(Keys.Branch);
+            set => Set(Keys.Branch, value);
+        }
+
         [Obsolete("Deprecated in favor of the Publishers property.", error: false)]
         public IList<PublishProfile> PublishProfiles
         {
@@ -212,6 +221,7 @@ namespace Cake.Tasks.Config
         {
             public const string Configuration = "Env_Configuration";
             public const string IsCi = "Env_IsCI";
+            public const string Branch = "Env_Branch";
 
             public const string PublishProfiles = "Env_PublishProfiles";
             public const string Publishers = "Env_Publishers";
