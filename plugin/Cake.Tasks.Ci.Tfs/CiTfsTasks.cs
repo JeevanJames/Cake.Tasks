@@ -30,7 +30,7 @@ namespace Cake.Tasks.Ci.Tfs
 {
     public static class CiTfsTasks
     {
-        [Config(CiSystem = "tfs", Order = int.MaxValue)]
+        [Config(CiSystem = "tfs", Order = ConfigTaskOrder.CiSystem)]
         public static void ConfigureTfsEnvironment(ICakeContext ctx, TaskConfig cfg)
         {
             ITFBuildProvider tfs = ctx.TFBuild();

@@ -156,6 +156,23 @@
                 Marks a method as a configuration task.
             </summary>
         </member>
+        <member name="F:Cake.Tasks.Core.ConfigTaskOrder.Priority">
+            <summary>
+                Priority config tasks should run after all the normal config tasks, but before any CI
+                system tasks.
+            </summary>
+        </member>
+        <member name="F:Cake.Tasks.Core.ConfigTaskOrder.CiSystem">
+            <summary>
+                Config tasks for CI systems should run after all the normal and priority tasks, but
+                before any recipe tasks.
+            </summary>
+        </member>
+        <member name="F:Cake.Tasks.Core.ConfigTaskOrder.Recipe">
+            <summary>
+                Config tasks for recipes should always run last, as they are application-specific.
+            </summary>
+        </member>
         <member name="P:Cake.Tasks.Core.TaskAttribute.RequiresConfig">
             <summary>
                 Gets or sets a value indicating whether to run the config tasks before this task is run.

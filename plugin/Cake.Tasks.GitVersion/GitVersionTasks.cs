@@ -29,7 +29,7 @@ namespace Cake.Tasks.GitVersion
 {
     public static class GitVersionTasks
     {
-        [Config(Order = 100)]
+        [Config(Order = ConfigTaskOrder.Priority)]
         public static void ConfigureGitVersion(ICakeContext ctx, TaskConfig cfg)
         {
             // Update the GitVersion config

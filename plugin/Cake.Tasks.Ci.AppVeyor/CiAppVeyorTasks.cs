@@ -30,7 +30,7 @@ namespace Cake.Tasks.Ci.AppVeyor
 {
     public static class CiAppVeyorTasks
     {
-        [Config(CiSystem = "appveyor", Order = int.MaxValue)]
+        [Config(CiSystem = "appveyor", Order = ConfigTaskOrder.CiSystem)]
         public static void ConfigureAppVeyorEnvironment(ICakeContext ctx, TaskConfig cfg)
         {
             IAppVeyorProvider appveyor = ctx.AppVeyor();
