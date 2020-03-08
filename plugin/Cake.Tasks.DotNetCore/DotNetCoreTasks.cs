@@ -30,6 +30,7 @@ using Cake.Common.Tools.DotNetCore.Publish;
 using Cake.Common.Tools.DotNetCore.Test;
 using Cake.Core;
 using Cake.Core.Diagnostics;
+using Cake.Coverlet;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
 using Cake.Tasks.DotNetCore;
@@ -82,7 +83,9 @@ namespace Cake.Tasks.DotNetCore
         [PipelineTask(PipelineTask.Test)]
         public static void TestDotNetCoreProjects(ICakeContext context, TaskConfig config)
         {
-            var test = config.Load<DotNetCoreConfig>().Test;
+            var dotNetCoreConfig = config.Load<DotNetCoreConfig>();
+            DotNetCoreConfig.TestConfig test = dotNetCoreConfig.Test;
+            DotNetCoreConfig.CoverageConfig coverage = dotNetCoreConfig.Coverage;
 
             if (test.Skip)
             {
@@ -96,26 +99,34 @@ namespace Cake.Tasks.DotNetCore
             if (testProjectFile is null)
                 throw new TaskConfigException("Build solution or project file not specified.");
 
+            var coverletSettings = new CoverletSettings
+            {
+                CollectCoverage = true,
+                CoverletOutputFormat = CoverletOutputFormat.opencover,
+                CoverletOutputDirectory = Path.Combine(env.Directories.TestOutput, "coverage"),
+            };
+            IList<string> excludeFilters = coverage.ExcludeFilters;
+            if (excludeFilters.Count > 0)
+                coverletSettings.Exclude = excludeFilters.ToList();
+            IList<string> includeFilters = coverage.IncludeFilters;
+            if (includeFilters.Count > 0)
+                coverletSettings.Include = includeFilters.ToList();
+
             var settings = new DotNetCoreTestSettings
             {
                 Configuration = env.Configuration,
                 OutputDirectory = Path.Combine(env.Directories.BinaryOutput, "__build"),
-                Logger = "trx",
-                ResultsDirectory = env.Directories.TestOutput,
+                Logger = test.Logger ?? "trx",
+                ResultsDirectory = Path.Combine(env.Directories.TestOutput, "testresults"),
                 NoBuild = true,
                 NoRestore = true,
                 Verbosity = context.Log.Verbosity.ToVerbosity(),
-                ArgumentCustomization = pab => pab
-                    .Append("/p:CollectCoverage=true")
-                    .Append($"/p:CoverletOutput={Path.Combine(env.Directories.TestOutput, "coverage")}")
-                    .Append("/p:CoverletOutputFormat=opencover")
-                    .Append("/p:Exclude=[xunit.*]*"),
             };
             string filter = test.Filter;
             if (!string.IsNullOrWhiteSpace(filter))
                 settings.Filter = filter;
 
-            context.DotNetCoreTest(testProjectFile, settings);
+            context.DotNetCoreTest(testProjectFile, settings, coverletSettings);
         }
 
         [AfterPipelineTask(PipelineTask.Test)]
@@ -192,6 +203,7 @@ namespace Cake.Tasks.DotNetCore
 
             cfg.Test.Skip = false;
             cfg.Test.ProjectFile = (Func<string>)(() => GetBuildProjectFile(workingDirectory));
+            cfg.Test.Logger = "trx";
 
             static string GetBuildProjectFile(string wdir)
             {

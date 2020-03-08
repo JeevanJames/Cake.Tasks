@@ -17,6 +17,8 @@ limitations under the License.
 */
 #endregion
 
+using System.Collections.Generic;
+
 namespace Cake.Tasks.Config
 {
     public sealed class DotNetCoreConfig : PluginConfig
@@ -26,11 +28,14 @@ namespace Cake.Tasks.Config
         {
             Build = new BuildConfig(taskConfig);
             Test = new TestConfig(taskConfig);
+            Coverage = new CoverageConfig(taskConfig);
         }
 
         public BuildConfig Build { get; }
 
         public TestConfig Test { get; }
+
+        public CoverageConfig Coverage { get; }
 
         public sealed class BuildConfig : PluginConfig
         {
@@ -70,6 +75,32 @@ namespace Cake.Tasks.Config
                 get => Get<ConfigValue<string>>(Keys.TestFilter);
                 set => Set(Keys.TestFilter, value);
             }
+
+            public ConfigValue<string> Logger
+            {
+                get => GetValue<string>(Keys.TestLogger);
+                set => Set(Keys.TestLogger, value);
+            }
+        }
+
+        public sealed class CoverageConfig : PluginConfig
+        {
+            public CoverageConfig(TaskConfig taskConfig)
+                : base(taskConfig)
+            {
+            }
+
+            public IList<string> ExcludeFilters
+            {
+                get => Get(Keys.CoverageExcludeFilters, new List<string>());
+                set => Set(Keys.CoverageExcludeFilters, value);
+            }
+
+            public IList<string> IncludeFilters
+            {
+                get => Get(Keys.CoverageIncludeFilters, new List<string>());
+                set => Set(Keys.CoverageIncludeFilters, value);
+            }
         }
 
         public static class Keys
@@ -80,34 +111,9 @@ namespace Cake.Tasks.Config
             public const string TestProjectFile = "DotNetCore_Test_ProjectFile";
             public const string TestFilter = "DotNetCore_Test_Filter";
             public const string TestLogger = "DotNetCore_Test_Logger";
+
+            public const string CoverageExcludeFilters = "DotNetCore_Coverage_ExcludeFilters";
+            public const string CoverageIncludeFilters = "DotNetCore_Coverage_IncludeFilters";
         }
-    }
-
-    public abstract class DotNetCorePublishProfile : PublishProfile
-    {
-        protected DotNetCorePublishProfile(string name, string projectFile)
-            : base(name, projectFile)
-        {
-        }
-    }
-
-    public sealed class AspNetPublishProfile : DotNetCorePublishProfile
-    {
-        public AspNetPublishProfile(string name, string projectFile)
-            : base(name, projectFile)
-        {
-        }
-    }
-
-    public sealed class NuGetPackagePublishProfile : DotNetCorePublishProfile
-    {
-        public NuGetPackagePublishProfile(string name, string projectFile)
-            : base(name, projectFile)
-        {
-        }
-
-        public string Source { get; set; }
-
-        public string ApiKey { get; set; }
     }
 }
