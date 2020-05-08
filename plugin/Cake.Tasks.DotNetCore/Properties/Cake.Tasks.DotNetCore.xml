@@ -16,5 +16,10 @@
                 name.
             </summary>
         </member>
+        <member name="P:Cake.Tasks.Config.NuGetPublisher.PublishAsSnupkg">
+            <summary>
+                Gets or sets a value indicating whether to publish in the new SNupkg package format.
+            </summary>
+        </member>
     </members>
 </doc>

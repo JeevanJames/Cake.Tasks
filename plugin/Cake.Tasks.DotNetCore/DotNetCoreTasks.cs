@@ -25,6 +25,7 @@ using System.Linq;
 using Cake.Common.Tools.DotNetCore;
 using Cake.Common.Tools.DotNetCore.Build;
 using Cake.Common.Tools.DotNetCore.Clean;
+using Cake.Common.Tools.DotNetCore.NuGet.Push;
 using Cake.Common.Tools.DotNetCore.Pack;
 using Cake.Common.Tools.DotNetCore.Publish;
 using Cake.Common.Tools.DotNetCore.Test;
@@ -185,10 +186,27 @@ namespace Cake.Tasks.DotNetCore
                 Configuration = env.Configuration,
                 OutputDirectory = nuget.OutputLocation,
                 Verbosity = ctx.Log.Verbosity.ToVerbosity(),
-                ArgumentCustomization = arg => arg.Append($"/p:Version={env.Version.Build}"),
+                ArgumentCustomization = arg =>
+                {
+                    arg.Append($"/p:Version={env.Version.Build}");
+                    if (nuget.PublishAsSnupkg)
+                        arg.Append("/p:SymbolPackageFormat=snupkg");
+                    return arg;
+                },
                 IncludeSource = true,
                 IncludeSymbols = true,
             });
+
+            IEnumerable<string> packageFiles = Directory.EnumerateFiles(
+                nuget.OutputLocation, nuget.PublishAsSnupkg ? "*.snupkg" : "*.nupkg");
+            foreach (string packageFile in packageFiles)
+            {
+                ctx.DotNetCoreNuGetPush(packageFile, new DotNetCoreNuGetPushSettings
+                {
+                    Source = nuget.Source(env.Branch),
+                    ApiKey = nuget.ApiKey?.Invoke(env.Branch),
+                });
+            }
         }
 
         [Config]

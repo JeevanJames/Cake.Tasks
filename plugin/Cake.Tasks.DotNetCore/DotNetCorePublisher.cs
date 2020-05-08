@@ -83,6 +83,11 @@ namespace Cake.Tasks.Config
         ///     name.
         /// </summary>
         public Func<string, string> ApiKey { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether to publish in the new SNupkg package format.
+        /// </summary>
+        public bool PublishAsSnupkg { get; set; }
     }
 
     public static class PublisherExtensions
@@ -104,12 +109,14 @@ namespace Cake.Tasks.Config
 
         public static Publisher AddNuGetPackage(this IList<Publisher> publishers, string projectFile,
             string source = "https: //api.nuget.org/v3/index.json",
-            string apiKey = null)
+            string apiKey = null,
+            bool publishAsSnupkg = false)
         {
             var publisher = new NuGetPublisher(projectFile)
             {
                 Source = _ => source,
                 ApiKey = _ => apiKey,
+                PublishAsSnupkg = publishAsSnupkg,
             };
             publishers.Add(publisher);
             return publisher;
@@ -117,7 +124,8 @@ namespace Cake.Tasks.Config
 
         public static Publisher AddNuGetPackage(this IList<Publisher> publishers, string projectFile,
             Func<string, string> sourceFn = null,
-            Func<string, string> apiKeyFn = null)
+            Func<string, string> apiKeyFn = null,
+            bool publishAsSnupkg = false)
         {
             if (sourceFn is null)
                 sourceFn = _ => "https: //api.nuget.org/v3/index.json";
@@ -126,6 +134,7 @@ namespace Cake.Tasks.Config
             {
                 Source = sourceFn,
                 ApiKey = apiKeyFn,
+                PublishAsSnupkg = publishAsSnupkg,
             };
             publishers.Add(publisher);
             return publisher;
