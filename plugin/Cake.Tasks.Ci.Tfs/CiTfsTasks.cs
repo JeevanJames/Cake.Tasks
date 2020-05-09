@@ -17,9 +17,14 @@ limitations under the License.
 */
 #endregion
 
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Cake.Common.Build;
 using Cake.Common.Build.TFBuild;
+using Cake.Common.Build.TFBuild.Data;
 using Cake.Core;
+using Cake.Core.IO;
 using Cake.Tasks.Ci.Tfs;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
@@ -30,6 +35,26 @@ namespace Cake.Tasks.Ci.Tfs
 {
     public static class CiTfsTasks
     {
+        [AfterPipelineTask(PipelineTask.Test, CiSystem = "tfs", ContinueOnError = true)]
+        public static void PublishTestResults(ICakeContext ctx, TaskConfig cfg)
+        {
+            ITFBuildProvider tfs = ctx.TFBuild();
+
+            EnvConfig env = cfg.Load<EnvConfig>();
+
+            List<FilePath> testResultsFiles = Directory
+                .GetFiles(env.Directories.TestOutput, "*.trx", SearchOption.AllDirectories)
+                .Select(f => FilePath.FromString(f))
+                .ToList();
+
+            tfs.Commands.PublishTestResults(new TFBuildPublishTestResultsData
+            {
+                Configuration = env.Configuration,
+                TestResultsFiles = testResultsFiles,
+                MergeTestResults = true,
+            });
+        }
+
         [Config(CiSystem = "tfs", Order = ConfigTaskOrder.CiSystem)]
         public static void ConfigureTfsEnvironment(ICakeContext ctx, TaskConfig cfg)
         {
