@@ -57,7 +57,7 @@ namespace Cake.Tasks.Module.PluginLoaders
             {
                 Type taskPluginType = taskPlugin.PluginType;
                 Log.Verbose($"[Plugin Class] {taskPluginType.FullName}");
-                MethodInfo[] methods = taskPluginType.GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public);
+                MethodInfo[] methods = taskPluginType.GetMethods(BindingFlags.Static | BindingFlags.Public);
                 foreach (MethodInfo method in methods)
                 {
                     BaseTaskAttribute taskAttribute = method.GetCustomAttribute<BaseTaskAttribute>(inherit: true);
@@ -126,19 +126,18 @@ namespace Cake.Tasks.Module.PluginLoaders
             if (parameters.Length > 2)
                 return false;
 
-            // The first parameter, if specified, should be ICakeContext.
-            if (parameters.Length > 0 && !typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType))
-                return false;
-
-            // The second parameter, if specified, should be TaskConfig.
-            if (parameters.Length > 1 && parameters[1].ParameterType != typeof(TaskConfig))
-                return false;
-
             // The method should return void.
             if (method.ReturnType != typeof(void))
                 return false;
 
-            return true;
+            return parameters.Length switch
+            {
+                2 => typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType)
+                   && parameters[1].ParameterType == typeof(TaskConfig),
+                1 => typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType)
+                    || parameters[0].ParameterType == typeof(TaskConfig),
+                _ => true,
+            };
         }
 
         protected abstract Assembly ResolveAssembly(object sender, ResolveEventArgs args);

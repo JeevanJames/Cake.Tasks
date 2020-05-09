@@ -125,21 +125,36 @@ namespace Cake.Tasks.Module
                 if (registeredTask.AttributeType == typeof(TaskAttribute) && registeredTask.RequiresConfig)
                     builder.IsDependentOn(TaskNames.Config);
 
-                int paramCount = registeredTask.Method.GetParameters().Length;
-                if (paramCount == 2)
+                ParameterInfo[] parameters = registeredTask.Method.GetParameters();
+                switch (parameters.Length)
                 {
-                    var action = (Action<ICakeContext, TaskConfig>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
-                    builder.Does(action);
-                }
-                else if (paramCount == 1)
-                {
-                    var action = (Action<ICakeContext>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext>));
-                    builder.Does(action);
-                }
-                else
-                {
-                    var action = (Action)registeredTask.Method.CreateDelegate(typeof(Action));
-                    builder.Does(action);
+                    case 2:
+                        var action2 = (Action<ICakeContext, TaskConfig>)registeredTask.Method.CreateDelegate(
+                            typeof(Action<ICakeContext, TaskConfig>));
+                        builder.Does(action2);
+                        break;
+
+                    case 1:
+                        if (parameters[0].ParameterType == typeof(TaskConfig))
+                        {
+                            Action<ICakeContext, TaskConfig> action1 = (_, cfg) =>
+                            {
+                                registeredTask.Method.Invoke(obj: null, new object[] { cfg });
+                            };
+                            builder.Does(action1);
+                        }
+                        else
+                        {
+                            var action1 = (Action<ICakeContext>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext>));
+                            builder.Does(action1);
+                        }
+
+                        break;
+
+                    default:
+                        var action = (Action)registeredTask.Method.CreateDelegate(typeof(Action));
+                        builder.Does(action);
+                        break;
                 }
             }
         }

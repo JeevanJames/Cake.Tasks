@@ -131,7 +131,7 @@ namespace Cake.Tasks.DotNetCore
         }
 
         [AfterPipelineTask(PipelineTask.Test)]
-        public static void ShutDownBuildServer(ICakeContext ctx, TaskConfig cfg)
+        public static void ShutDownBuildServer(ICakeContext ctx)
         {
             ctx.DotNetCoreBuildServerShutdown();
         }
@@ -218,7 +218,7 @@ namespace Cake.Tasks.DotNetCore
         }
 
         [Config]
-        public static void ConfigureDotNetCore(ICakeContext context, TaskConfig config)
+        public static void ConfigureDotNetCore(TaskConfig config)
         {
             var cfg = config.Load<DotNetCoreConfig>();
 
