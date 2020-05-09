@@ -121,11 +121,6 @@
                 is used to ensure that the method is called only once.
             </summary>
         </member>
-        <member name="P:Cake.Tasks.Config.Publisher.Name">
-            <summary>
-                Gets the unique name for this publisher.
-            </summary>
-        </member>
         <member name="P:Cake.Tasks.Config.Publisher.OutputLocation">
             <summary>
                 Gets the directory where the published output is copied to, or the file name of the
@@ -136,6 +131,15 @@
             <summary>
                 Gets whether the published output is a directory of multiple files or a single file.
             </summary>
+        </member>
+        <member name="M:Cake.Tasks.Config.TaskConfig.Load``1">
+            <summary>
+                Loads the subset of configurations for a specific plugin configuration type.
+            </summary>
+            <typeparam name="T">
+                The type of plugin configuration to load the configuration for.
+            </typeparam>
+            <returns>The <see cref="T:Cake.Tasks.Config.PluginConfig"/> instance for the subset of configurations.</returns>
         </member>
         <member name="P:Cake.Tasks.Core.BaseTaskAttribute.CiSystem">
             <summary>

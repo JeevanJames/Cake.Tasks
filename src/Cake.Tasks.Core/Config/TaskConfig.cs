@@ -30,6 +30,13 @@ namespace Cake.Tasks.Config
         {
         }
 
+        /// <summary>
+        ///     Loads the subset of configurations for a specific plugin configuration type.
+        /// </summary>
+        /// <typeparam name="T">
+        ///     The type of plugin configuration to load the configuration for.
+        /// </typeparam>
+        /// <returns>The <see cref="PluginConfig"/> instance for the subset of configurations.</returns>
         public T Load<T>()
             where T : PluginConfig
         {

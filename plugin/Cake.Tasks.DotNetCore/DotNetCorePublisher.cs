@@ -26,15 +26,6 @@ namespace Cake.Tasks.Config
     public abstract class DotNetCorePublisher : Publisher
     {
         protected DotNetCorePublisher(string projectFile)
-            : base()
-        {
-            ProjectFile = Path.GetFullPath(projectFile);
-            if (!File.Exists(ProjectFile))
-                throw new FileNotFoundException($"Cannot find the specified .NET Core solution or project file '{ProjectFile}'.", ProjectFile);
-        }
-
-        protected DotNetCorePublisher(string name, string projectFile)
-            : base(name)
         {
             if (string.IsNullOrWhiteSpace(projectFile))
                 throw new ArgumentException("Specify a valid .NET Core solution or project file to publish.", nameof(projectFile));
@@ -53,22 +44,12 @@ namespace Cake.Tasks.Config
             : base(projectFile)
         {
         }
-
-        public AspNetCorePublisher(string name, string projectFile)
-            : base(name, projectFile)
-        {
-        }
     }
 
-    public sealed class NuGetPublisher : DotNetCorePublisher
+    public class NuGetPublisher : DotNetCorePublisher
     {
         public NuGetPublisher(string projectFile)
             : base(projectFile)
-        {
-        }
-
-        public NuGetPublisher(string name, string projectFile)
-            : base(name, projectFile)
         {
         }
 
@@ -102,7 +83,7 @@ namespace Cake.Tasks.Config
         [Obsolete("Deprecated in favor of overload without the name parameter")]
         public static Publisher AddAspNetCore(this IList<Publisher> publishers, string name, string projectFile)
         {
-            var publisher = new AspNetCorePublisher(name, projectFile);
+            var publisher = new AspNetCorePublisher(projectFile);
             publishers.Add(publisher);
             return publisher;
         }

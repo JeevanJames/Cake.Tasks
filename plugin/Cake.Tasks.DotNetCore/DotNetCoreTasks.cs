@@ -146,7 +146,8 @@ namespace Cake.Tasks.DotNetCore
                 ctx.Log.Information("No .NET Core projects to publish. Specify a publisher.");
             foreach (DotNetCorePublisher publisher in publishers)
             {
-                string publishDirectory = Path.Combine(env.Directories.PublishOutput, publisher.Name);
+                string publishDirectory = Path.Combine(env.Directories.PublishOutput,
+                    publisher.GetType().Name + Guid.NewGuid().ToString("N"));
                 if (!Directory.Exists(publishDirectory))
                     Directory.CreateDirectory(publishDirectory);
                 publisher.SetOutput(publishDirectory);
@@ -197,8 +198,8 @@ namespace Cake.Tasks.DotNetCore
                 IncludeSymbols = true,
             });
 
-            IEnumerable<string> packageFiles = Directory.EnumerateFiles(
-                nuget.OutputLocation, nuget.PublishAsSnupkg ? "*.snupkg" : "*.nupkg");
+            IEnumerable<string> packageFiles = Directory.EnumerateFiles(nuget.OutputLocation,
+                nuget.PublishAsSnupkg ? "*.snupkg" : "*.nupkg");
             foreach (string packageFile in packageFiles)
             {
                 ctx.DotNetCoreNuGetPush(packageFile, new DotNetCoreNuGetPushSettings

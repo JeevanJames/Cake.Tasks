@@ -43,29 +43,6 @@ namespace Cake.Tasks.Config
 
         private PublishOutputType _outputType;
 
-        protected Publisher()
-        {
-            Name = $"{GetType().Name}_{DateTime.Now.Ticks}";
-        }
-
-        protected Publisher(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Specify a valid and unique name for the publisher.", nameof(name));
-
-            // Name must be a valid directory name. The framework will use it as the directory name
-            // to copy the publish output to.
-            if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-                throw new ArgumentException("Specify a valid directory name for the publisher name.", nameof(name));
-
-            Name = name;
-        }
-
-        /// <summary>
-        ///     Gets the unique name for this publisher.
-        /// </summary>
-        public string Name { get; }
-
         /// <summary>
         ///     Gets the directory where the published output is copied to, or the file name of the
         ///     published output, depending on the value of <see cref="OutputType"/>.
