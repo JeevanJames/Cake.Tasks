@@ -21,5 +21,16 @@
                 Gets or sets a value indicating whether to publish in the new SNupkg package format.
             </summary>
         </member>
+        <member name="M:Cake.Tasks.Config.PublisherExtensions.AddNuGetPackage(System.Collections.Generic.IList{Cake.Tasks.Config.Publisher},System.String,System.String,System.String,System.Boolean)">
+            <summary>
+                Publishes the specified project as a NuGet package.
+            </summary>
+            <param name="publishers">The publishers collection.</param>
+            <param name="projectFile">The .NET project file to publish.</param>
+            <param name="source">The NuGet source feed URL to publish to.</param>
+            <param name="apiKey">Optional API key to the NuGet source feed.</param>
+            <param name="publishAsSnupkg">True to publish the package using the new SNUPKG format.</param>
+            <returns>The instance of the created <see cref="T:Cake.Tasks.Config.Publisher"/> class.</returns>
+        </member>
     </members>
 </doc>

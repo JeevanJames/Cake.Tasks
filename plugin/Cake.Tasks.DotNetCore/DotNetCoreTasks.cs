@@ -157,6 +157,13 @@ namespace Cake.Tasks.DotNetCore
                         PublishAspNetCore(ctx, config, aspnet);
                         break;
                     case NuGetPublisher nuget:
+                        DotNetCoreConfig dnc = config.Load<DotNetCoreConfig>();
+                        if (nuget.Source is null)
+                            nuget.Source = dnc.NuGetPublisher.SourceFn;
+                        if (nuget.Source is null)
+                            nuget.Source = _ => "https: //api.nuget.org/v3/index.json";
+                        if (nuget.ApiKey is null)
+                            nuget.ApiKey = dnc.NuGetPublisher.ApiKeyFn;
                         PublishNuGet(ctx, config, nuget);
                         break;
                     default:

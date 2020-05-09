@@ -88,17 +88,28 @@ namespace Cake.Tasks.Config
             return publisher;
         }
 
+        /// <summary>
+        ///     Publishes the specified project as a NuGet package.
+        /// </summary>
+        /// <param name="publishers">The publishers collection.</param>
+        /// <param name="projectFile">The .NET project file to publish.</param>
+        /// <param name="source">The NuGet source feed URL to publish to.</param>
+        /// <param name="apiKey">Optional API key to the NuGet source feed.</param>
+        /// <param name="publishAsSnupkg">True to publish the package using the new SNUPKG format.</param>
+        /// <returns>The instance of the created <see cref="Publisher"/> class.</returns>
         public static Publisher AddNuGetPackage(this IList<Publisher> publishers, string projectFile,
-            string source = "https: //api.nuget.org/v3/index.json",
+            string source = null,
             string apiKey = null,
             bool publishAsSnupkg = false)
         {
             var publisher = new NuGetPublisher(projectFile)
             {
-                Source = _ => source,
-                ApiKey = _ => apiKey,
                 PublishAsSnupkg = publishAsSnupkg,
             };
+            if (source != null)
+                publisher.Source = _ => source;
+            if (apiKey != null)
+                publisher.ApiKey = _ => apiKey;
             publishers.Add(publisher);
             return publisher;
         }
@@ -108,9 +119,6 @@ namespace Cake.Tasks.Config
             Func<string, string> apiKeyFn = null,
             bool publishAsSnupkg = false)
         {
-            if (sourceFn is null)
-                sourceFn = _ => "https: //api.nuget.org/v3/index.json";
-
             var publisher = new NuGetPublisher(projectFile)
             {
                 Source = sourceFn,

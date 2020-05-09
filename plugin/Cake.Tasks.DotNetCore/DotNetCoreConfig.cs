@@ -17,6 +17,7 @@ limitations under the License.
 */
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 namespace Cake.Tasks.Config
@@ -29,6 +30,7 @@ namespace Cake.Tasks.Config
             Build = new BuildConfig(taskConfig);
             Test = new TestConfig(taskConfig);
             Coverage = new CoverageConfig(taskConfig);
+            NuGetPublisher = new NuGetPublisherConfig(taskConfig);
         }
 
         public BuildConfig Build { get; }
@@ -36,6 +38,8 @@ namespace Cake.Tasks.Config
         public TestConfig Test { get; }
 
         public CoverageConfig Coverage { get; }
+
+        public NuGetPublisherConfig NuGetPublisher { get; }
 
         public sealed class BuildConfig : PluginConfig
         {
@@ -103,6 +107,26 @@ namespace Cake.Tasks.Config
             }
         }
 
+        public sealed class NuGetPublisherConfig : PluginConfig
+        {
+            public NuGetPublisherConfig(TaskConfig taskConfig)
+                : base(taskConfig)
+            {
+            }
+
+            public Func<string, string> SourceFn
+            {
+                get => Get<Func<string, string>>(Keys.NuGetPublisherSourceFn);
+                set => Set(Keys.NuGetPublisherSourceFn, value);
+            }
+
+            public Func<string, string> ApiKeyFn
+            {
+                get => Get<Func<string, string>>(Keys.NuGetPublisherApiKeyFn);
+                set => Set(Keys.NuGetPublisherApiKeyFn, value);
+            }
+        }
+
         public static class Keys
         {
             public const string BuildProjectFile = "DotNetCore_Build_ProjectFile";
@@ -114,6 +138,9 @@ namespace Cake.Tasks.Config
 
             public const string CoverageExcludeFilters = "DotNetCore_Coverage_ExcludeFilters";
             public const string CoverageIncludeFilters = "DotNetCore_Coverage_IncludeFilters";
+
+            public const string NuGetPublisherSourceFn = "DotNetCore_NuGetPublisher_SourceFn";
+            public const string NuGetPublisherApiKeyFn = "DotNetCore_NuGetPublisher_ApiKeyFn";
         }
     }
 }
