@@ -74,6 +74,21 @@ namespace Cake.Tasks.Module
                 env.Version.Full = (Func<string>)(() => env.Version.Primary.Resolve());
                 env.Version.Build = (Func<string>)(() => $"{env.Version.Full.Resolve()}+{env.Version.BuildNumber.Resolve()}");
 
+                // Display the subdirectories under the tools/Addins directory.
+                // To verify the versions of the addins and tools installed.
+                // Useful for troubleshooting.
+                //TODO: Make this a configuration
+                ctx.Log.Information("--------------------");
+                ctx.Log.Information("Addin subdirectories");
+                ctx.Log.Information("--------------------");
+                string addinsDir = Path.Combine(env.Directories.Working, "tools", "Addins");
+                if (Directory.Exists(addinsDir))
+                {
+                    string[] subdirectories = Directory.GetDirectories(addinsDir, "*", SearchOption.TopDirectoryOnly);
+                    foreach (string subdirectory in subdirectories)
+                        ctx.Log.Information(Path.GetFileName(subdirectory));
+                }
+
                 return config;
             });
         }
@@ -110,14 +125,20 @@ namespace Cake.Tasks.Module
                 if (registeredTask.AttributeType == typeof(TaskAttribute) && registeredTask.RequiresConfig)
                     builder.IsDependentOn(TaskNames.Config);
 
-                if (registeredTask.Method.GetParameters().Length == 2)
+                int paramCount = registeredTask.Method.GetParameters().Length;
+                if (paramCount == 2)
                 {
                     var action = (Action<ICakeContext, TaskConfig>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext, TaskConfig>));
                     builder.Does(action);
                 }
-                else
+                else if (paramCount == 1)
                 {
                     var action = (Action<ICakeContext>)registeredTask.Method.CreateDelegate(typeof(Action<ICakeContext>));
+                    builder.Does(action);
+                }
+                else
+                {
+                    var action = (Action)registeredTask.Method.CreateDelegate(typeof(Action));
                     builder.Does(action);
                 }
             }
@@ -259,21 +280,6 @@ namespace Cake.Tasks.Module
                     ctx.Log.Information($"{data.Key} = {data.Value?.Dump() ?? "[NULL]"}");
 
                 var env = config.Load<EnvConfig>();
-
-                // Display the subdirectories under the tools/Addins directory.
-                // To verify the versions of the addins and tools installed.
-                // Useful for troubleshooting.
-                //TODO: Make this a configuration
-                ctx.Log.Information("--------------------");
-                ctx.Log.Information("Addin subdirectories");
-                ctx.Log.Information("--------------------");
-                string addinsDir = Path.Combine(env.Directories.Working, "tools", "Addins");
-                if (Directory.Exists(addinsDir))
-                {
-                    string[] subdirectories = Directory.GetDirectories(addinsDir, "*", SearchOption.TopDirectoryOnly);
-                    foreach (string subdirectory in subdirectories)
-                        ctx.Log.Information(Path.GetFileName(subdirectory));
-                }
 
                 // Clean out output directories or create them
                 //TODO: Can these directories be created on-demand? For some project types like Angular,

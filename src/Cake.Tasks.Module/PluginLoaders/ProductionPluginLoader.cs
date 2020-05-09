@@ -42,6 +42,7 @@ namespace Cake.Tasks.Module.PluginLoaders
             string[] cakeTasksDirs = Directory.GetDirectories(PluginsDir, "Cake.Tasks.*", SearchOption.TopDirectoryOnly);
             foreach (string cakeTasksDir in cakeTasksDirs)
             {
+                //TODO: Need to support for framework targets
                 string dllDir = Path.Combine(cakeTasksDir, "lib", "netstandard2.0");
                 if (!Directory.Exists(dllDir))
                     continue;

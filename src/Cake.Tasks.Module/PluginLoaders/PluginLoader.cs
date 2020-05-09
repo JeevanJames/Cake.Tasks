@@ -122,12 +122,12 @@ namespace Cake.Tasks.Module.PluginLoaders
         {
             ParameterInfo[] parameters = method.GetParameters();
 
-            // There can be one or two parameters.
-            if (parameters.Length < 1 || parameters.Length > 2)
+            // There can be 0 to 2 parameters
+            if (parameters.Length > 2)
                 return false;
 
-            // The first parameter should be ICakeContext.
-            if (!typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType))
+            // The first parameter, if specified, should be ICakeContext.
+            if (parameters.Length > 0 && !typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType))
                 return false;
 
             // The second parameter, if specified, should be TaskConfig.
