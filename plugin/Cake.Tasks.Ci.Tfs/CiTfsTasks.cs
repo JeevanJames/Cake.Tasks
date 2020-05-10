@@ -17,17 +17,20 @@ limitations under the License.
 */
 #endregion
 
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+
 using Cake.Common.Build;
 using Cake.Common.Build.TFBuild;
 using Cake.Common.Build.TFBuild.Data;
+using Cake.Common.IO;
 using Cake.Core;
+using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Tasks.Ci.Tfs;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
+
+using IO = System.IO;
 
 [assembly: TaskPlugin(typeof(CiTfsTasks))]
 
@@ -40,17 +43,23 @@ namespace Cake.Tasks.Ci.Tfs
         {
             ITFBuildProvider tfs = ctx.TFBuild();
 
-            EnvConfig env = cfg.Load<EnvConfig>();
+            FilePathCollection trxFiles = ctx.GetFiles("./**/*.trx");
+            for (int i = 0; i < trxFiles.Count; i++)
+            {
+                string sourceFile = trxFiles.ElementAt(i).FullPath;
+                string directory = IO.Path.GetDirectoryName(sourceFile);
+                string renamedFile = IO.Path.Combine(directory, $"TestResults{i}.trx");
+                IO.File.Move(sourceFile, renamedFile);
+            }
 
-            List<FilePath> testResultsFiles = Directory
-                .GetFiles(env.Directories.TestOutput, "*.trx", SearchOption.AllDirectories)
-                .Select(f => FilePath.FromString(f))
-                .ToList();
+            FilePathCollection testResultsFiles = ctx.GetFiles("./**/*.trx");
+            foreach (FilePath filePath in testResultsFiles)
+                ctx.Log.Information(filePath.ToString());
 
             tfs.Commands.PublishTestResults(new TFBuildPublishTestResultsData
             {
-                Configuration = env.Configuration,
-                TestResultsFiles = testResultsFiles,
+                TestRunner = TFTestRunnerType.VSTest,
+                TestResultsFiles = testResultsFiles.ToList(),
                 MergeTestResults = true,
             });
         }
