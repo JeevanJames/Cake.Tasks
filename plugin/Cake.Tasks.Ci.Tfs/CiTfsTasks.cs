@@ -39,17 +39,24 @@ namespace Cake.Tasks.Ci.Tfs
     public static class CiTfsTasks
     {
         [AfterPipelineTask(PipelineTask.Test, CiSystem = "tfs", ContinueOnError = true)]
-        public static void PublishTestResults(ICakeContext ctx, TaskConfig cfg)
+        public static void PublishTestResults(ICakeContext ctx)
         {
             ITFBuildProvider tfs = ctx.TFBuild();
+            if (!tfs.IsRunningOnAzurePipelines)
+                return;
 
             FilePathCollection trxFiles = ctx.GetFiles("./**/*.trx");
-            for (int i = 0; i < trxFiles.Count; i++)
+            if (trxFiles.Count == 0)
+                return;
+
+            int index = 0;
+            foreach (FilePath trxFile in trxFiles)
             {
-                string sourceFile = trxFiles.ElementAt(i).FullPath;
+                string sourceFile = trxFile.FullPath;
                 string directory = IO.Path.GetDirectoryName(sourceFile);
-                string renamedFile = IO.Path.Combine(directory, $"TestResults{i}.trx");
+                string renamedFile = IO.Path.Combine(directory, $"TestResults{index}.trx");
                 IO.File.Move(sourceFile, renamedFile);
+                index++;
             }
 
             FilePathCollection testResultsFiles = ctx.GetFiles("./**/*.trx");
