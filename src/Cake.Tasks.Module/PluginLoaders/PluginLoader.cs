@@ -21,6 +21,7 @@ limitations under the License.
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 using Cake.Core;
@@ -57,63 +58,72 @@ namespace Cake.Tasks.Module.PluginLoaders
             {
                 Type taskPluginType = taskPlugin.PluginType;
                 Log.Verbose($"[Plugin Class] {taskPluginType.FullName}");
+
+                // Get all public static methods from the task plugin type.
                 MethodInfo[] methods = taskPluginType.GetMethods(BindingFlags.Static | BindingFlags.Public);
                 foreach (MethodInfo method in methods)
                 {
-                    BaseTaskAttribute taskAttribute = method.GetCustomAttribute<BaseTaskAttribute>(inherit: true);
-                    if (taskAttribute is null)
+                    // Gets any task attributes on the method.
+                    IEnumerable<BaseTaskAttribute> taskAttributes = method.GetCustomAttributes<BaseTaskAttribute>(inherit: true);
+                    if (!taskAttributes.Any())
                         continue;
+
+                    // Method signature should match a valid task method.
                     if (!IsValidPluginMethod(method))
                     {
-                        Log.Warning($"Method {taskPluginType.FullName}.{method.Name} is decorated with a task attribute ({taskAttribute.GetType().Name}), but does not have the correct signature, so it will not be considered. A valid task method should be a static or instance method that returns void and accepts a first parameter of type {typeof(ICakeContext).FullName} and an optional second parameter of type {typeof(TaskConfig).FullName}.");
+                        Log.Warning($"Method {taskPluginType.FullName}.{method.Name} is decorated with one or more task attributes, but does not have the correct signature, so it will not be considered. A valid task method should be a static or instance method that returns void and accepts a first parameter of type {typeof(ICakeContext).FullName} and an optional second parameter of type {typeof(TaskConfig).FullName}.");
                         continue;
                     }
 
                     Log.Verbose($"[Plugin Method] {taskPluginType.FullName}.{method.Name}");
 
-                    var registeredTask = new RegisteredTask
+                    // Go through each task attribute and create a RegisteredTask object
+                    foreach (BaseTaskAttribute taskAttribute in taskAttributes)
                     {
-                        AttributeType = taskAttribute.GetType(),
-                        Method = method,
-                        CiSystem = taskAttribute.CiSystem,
-                        ContinueOnError = taskAttribute.ContinueOnError,
-                    };
+                        var registeredTask = new RegisteredTask
+                        {
+                            AttributeType = taskAttribute.GetType(),
+                            Method = method,
+                            CiSystem = taskAttribute.CiSystem,
+                            ContinueOnError = taskAttribute.ContinueOnError,
+                        };
 
-                    string envSuffix = taskAttribute.CiSystem is null ? string.Empty : $"-{taskAttribute.CiSystem}";
-                    string methodDetails = $"{registeredTask.Method.DeclaringType.FullName}.{registeredTask.Method.Name} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})";
+                        string envSuffix = taskAttribute.CiSystem is null ? string.Empty : $"-{taskAttribute.CiSystem}";
+                        string methodDetails = $"{registeredTask.Method.DeclaringType.FullName}.{registeredTask.Method.Name} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})";
 
-                    switch (taskAttribute)
-                    {
-                        case PipelineTaskAttribute attr:
-                            registeredTask.CoreTask = attr.PipelineTask;
-                            registeredTask.Name = $"_{attr.PipelineTask}-{method.Name}{envSuffix}";
-                            registeredTask.Description = $"{attr.PipelineTask} task - {methodDetails}";
-                            break;
-                        case BeforePipelineTaskAttribute attr:
-                            registeredTask.CoreTask = attr.PipelineTask;
-                            registeredTask.EventType = TaskEventType.BeforeTask;
-                            registeredTask.Name = $"_Before{attr.PipelineTask}-{method.Name}{envSuffix}";
-                            registeredTask.Description = $"Before {attr.PipelineTask} task - {methodDetails}";
-                            break;
-                        case AfterPipelineTaskAttribute attr:
-                            registeredTask.CoreTask = attr.PipelineTask;
-                            registeredTask.EventType = TaskEventType.AfterTask;
-                            registeredTask.Name = $"_After{attr.PipelineTask}-{method.Name}{envSuffix}";
-                            registeredTask.Description = $"After {attr.PipelineTask} task - {methodDetails}";
-                            break;
-                        case ConfigAttribute attr:
-                            registeredTask.Name = $"_Config-{method.Name}{envSuffix}";
-                            registeredTask.Description = $"Config task - {methodDetails}";
-                            registeredTask.Order = attr.Order;
-                            break;
-                        case TaskAttribute attr:
-                            registeredTask.Name = method.Name;
-                            registeredTask.Description = $"{attr.Description}{envSuffix} - {methodDetails}";
-                            registeredTask.RequiresConfig = attr.RequiresConfig;
-                            break;
+                        switch (taskAttribute)
+                        {
+                            case PipelineTaskAttribute attr:
+                                registeredTask.CoreTask = attr.PipelineTask;
+                                registeredTask.Name = $"_{attr.PipelineTask}-{method.Name}{envSuffix}";
+                                registeredTask.Description = $"{attr.PipelineTask} task - {methodDetails}";
+                                break;
+                            case BeforePipelineTaskAttribute attr:
+                                registeredTask.CoreTask = attr.PipelineTask;
+                                registeredTask.EventType = TaskEventType.BeforeTask;
+                                registeredTask.Name = $"_Before{attr.PipelineTask}-{method.Name}{envSuffix}";
+                                registeredTask.Description = $"Before {attr.PipelineTask} task - {methodDetails}";
+                                break;
+                            case AfterPipelineTaskAttribute attr:
+                                registeredTask.CoreTask = attr.PipelineTask;
+                                registeredTask.EventType = TaskEventType.AfterTask;
+                                registeredTask.Name = $"_After{attr.PipelineTask}-{method.Name}{envSuffix}";
+                                registeredTask.Description = $"After {attr.PipelineTask} task - {methodDetails}";
+                                break;
+                            case ConfigAttribute attr:
+                                registeredTask.Name = $"_Config-{method.Name}{envSuffix}";
+                                registeredTask.Description = $"Config task - {methodDetails}";
+                                registeredTask.Order = attr.Order;
+                                break;
+                            case TaskAttribute attr:
+                                registeredTask.Name = method.Name;
+                                registeredTask.Description = $"{attr.Description}{envSuffix} - {methodDetails}";
+                                registeredTask.RequiresConfig = attr.RequiresConfig;
+                                break;
+                        }
+
+                        yield return registeredTask;
                     }
-
-                    yield return registeredTask;
                 }
             }
         }
