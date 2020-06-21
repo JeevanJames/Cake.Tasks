@@ -159,8 +159,13 @@ namespace Cake.Tasks.Module
             }
         }
 
+        /// <summary>
+        ///     Registers built-in utility tasks that can be used to display various details about the
+        ///     Cake tasks, such as listing environments, tasks and configurations.
+        /// </summary>
         private void RegisterBuiltInTasks()
         {
+            // The Default task lists all available public tasks (tasks not prefixed with underscore).
             void RegisterDefaultTask()
             {
                 RegisterTask("Default")
@@ -182,6 +187,8 @@ namespace Cake.Tasks.Module
                     });
             }
 
+            // The ListEnvs task goes through all available tasks and identifies all the available
+            // environments.
             void RegisterListEnvsTask()
             {
                 RegisterTask(TaskNames.ListEnvs)
@@ -206,6 +213,9 @@ namespace Cake.Tasks.Module
                     });
             }
 
+            // The ListConfigs task lists the final values of all configuration values. It depends on
+            // the _Config task, as it needs to execute all the config tasks first, before it can get
+            // the final vakues.
             void RegisterListConfigsTask()
             {
                 CakeTaskBuilder listConfigsTask = RegisterTask(TaskNames.ListConfigs)
@@ -217,6 +227,8 @@ namespace Cake.Tasks.Module
                 listConfigsTask.IsDependentOn(TaskNames.Config);
             }
 
+            // The ListTasks tasks lists all tasks including private tasks (which are prefixed with an
+            // underscore).
             void RegisterListTasksTask()
             {
                 RegisterTask(TaskNames.ListTasks)
@@ -243,6 +255,35 @@ namespace Cake.Tasks.Module
             RegisterListTasksTask();
         }
 
+        /// <summary>
+        ///     Registers the built-in pipeline tasks, which are:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <term>Build</term>
+        ///             <description>Builds the project.</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>Test</term>
+        ///             <description>Executes the project's unit tests.</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>Deploy</term>
+        ///             <description>Packages and deploys the project.</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>IntegrationTest</term>
+        ///             <description>Executes the project's integration tests.</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>CI</term>
+        ///             <description>Runs Build + Test</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>CICD</term>
+        ///             <description>Runs CI + Deploy</description>
+        ///         </item>
+        ///     </list>
+        /// </summary>
         private void RegisterPipelineTasks()
         {
             IReadOnlyList<RegisteredTask> envTasks = GetTasksForCiEnvironment();
@@ -252,6 +293,7 @@ namespace Cake.Tasks.Module
             RegisterTestTask(envTasks);
             RegisterCiTask();
             RegisterCicdTask(envTasks);
+            RegisterIntegrationTestTask(envTasks);
         }
 
         private void RegisterConfigTask(IReadOnlyList<RegisteredTask> envTasks)
@@ -370,7 +412,7 @@ namespace Cake.Tasks.Module
         private void RegisterCicdTask(IReadOnlyList<RegisteredTask> envTasks)
         {
             CakeTaskBuilder task = RegisterTask("CICD")
-                .Description("Performs CD/CD (Build, test and deploy)")
+                .Description("Performs CI/CD (Build, test and deploy)")
                 .IsDependentOn("CI");
 
             IEnumerable<RegisteredTask> preDeployTasks = envTasks
@@ -389,16 +431,37 @@ namespace Cake.Tasks.Module
                 task.IsDependentOn(postDeployTask.Name);
         }
 
+        private void RegisterIntegrationTestTask(IReadOnlyList<RegisteredTask> envTasks)
+        {
+            CakeTaskBuilder task = RegisterTask(TaskNames.IntegrationTest)
+                .Description("Performs integration tests")
+                .IsDependentOn("Build");
+
+            IEnumerable<RegisteredTask> preIntegrationTestTasks = envTasks
+                .Where(t => t.AttributeType == typeof(BeforePipelineTaskAttribute) && t.CoreTask == PipelineTask.IntegrationTest);
+            foreach (RegisteredTask preIntegrationTestTask in preIntegrationTestTasks)
+                task.IsDependentOn(preIntegrationTestTask.Name);
+
+            IEnumerable<RegisteredTask> integrationTestTasks = envTasks
+                .Where(t => t.AttributeType == typeof(PipelineTaskAttribute) && t.CoreTask == PipelineTask.IntegrationTest);
+            foreach (RegisteredTask integrationTestTask in integrationTestTasks)
+                task.IsDependentOn(integrationTestTask.Name);
+
+            IEnumerable<RegisteredTask> postIntegrationTestTasks = envTasks
+                .Where(t => t.AttributeType == typeof(AfterPipelineTaskAttribute) && t.CoreTask == PipelineTask.IntegrationTest);
+            foreach (RegisteredTask postIntegrationTestTask in postIntegrationTestTasks)
+                task.IsDependentOn(postIntegrationTestTask.Name);
+        }
+
         private IReadOnlyList<RegisteredTask> GetTasksForCiEnvironment()
         {
             string ciEnv = Context.Arguments.GetArgument("ci");
             if (!string.IsNullOrEmpty(ciEnv))
                 Log.Information($"CI Environment specified: {ciEnv}");
 
-            List<RegisteredTask> envTasks = string.IsNullOrEmpty(ciEnv)
+            return string.IsNullOrEmpty(ciEnv)
                 ? _registeredTasks.Where(rt => rt.CiSystem is null).ToList()
                 : _registeredTasks.Where(rt => rt.CiSystem is null || rt.CiSystem.Equals(ciEnv, StringComparison.OrdinalIgnoreCase)).ToList();
-            return envTasks;
         }
 
         internal static class TaskNames
@@ -408,10 +471,11 @@ namespace Cake.Tasks.Module
             internal const string ListEnvs = "List-Envs";
             internal const string ListTasks = "List-Tasks";
 
-            internal const string Build = "Build";
-            internal const string Test = "Test";
+            internal const string Build = nameof(Build);
+            internal const string Test = nameof(Test);
             internal const string Ci = "CI";
             internal const string CiCd = "CICD";
+            internal const string IntegrationTest = nameof(IntegrationTest);
         }
     }
 }

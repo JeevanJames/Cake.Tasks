@@ -51,5 +51,42 @@
                 Creates an actual Cake task from the internal <see cref="T:Cake.Tasks.Module.RegisteredTask"/> structure.
             </summary>
         </member>
+        <member name="M:Cake.Tasks.Module.TasksEngine.RegisterBuiltInTasks">
+            <summary>
+                Registers built-in utility tasks that can be used to display various details about the
+                Cake tasks, such as listing environments, tasks and configurations.
+            </summary>
+        </member>
+        <member name="M:Cake.Tasks.Module.TasksEngine.RegisterPipelineTasks">
+            <summary>
+                Registers the built-in pipeline tasks, which are:
+                <list type="bullet">
+                    <item>
+                        <term>Build</term>
+                        <description>Builds the project.</description>
+                    </item>
+                    <item>
+                        <term>Test</term>
+                        <description>Executes the project's unit tests.</description>
+                    </item>
+                    <item>
+                        <term>Deploy</term>
+                        <description>Packages and deploys the project.</description>
+                    </item>
+                    <item>
+                        <term>IntegrationTest</term>
+                        <description>Executes the project's integration tests.</description>
+                    </item>
+                    <item>
+                        <term>CI</term>
+                        <description>Runs Build + Test</description>
+                    </item>
+                    <item>
+                        <term>CICD</term>
+                        <description>Runs CI + Deploy</description>
+                    </item>
+                </list>
+            </summary>
+        </member>
     </members>
 </doc>

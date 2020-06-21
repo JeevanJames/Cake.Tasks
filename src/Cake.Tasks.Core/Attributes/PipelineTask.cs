@@ -24,5 +24,6 @@ namespace Cake.Tasks.Core
         Build,
         Test,
         Deploy,
+        IntegrationTest,
     }
 }
