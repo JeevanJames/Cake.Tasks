@@ -47,9 +47,10 @@ namespace Cake.Tasks.DotNetCore
         [BeforePipelineTask(PipelineTask.Build)]
         public static void CleanDotNetCoreSolution(ICakeContext context, TaskConfig config)
         {
+            context.LogInfo("Shutting down .NET Core build server");
             context.DotNetCoreBuildServerShutdown();
 
-            var cfg = config.Load<DotNetCoreConfig>();
+            DotNetCoreConfig cfg = config.Load<DotNetCoreConfig>();
             string cleanProjectFile = cfg.Build.ProjectFile.Resolve();
             if (cleanProjectFile is null)
                 throw new TaskConfigException("Build solution or project file not specified.");
@@ -63,13 +64,13 @@ namespace Cake.Tasks.DotNetCore
         [PipelineTask(PipelineTask.Build)]
         public static void BuildDotNetCoreSolution(ICakeContext context, TaskConfig config)
         {
-            var build = config.Load<DotNetCoreConfig>().Build;
+            DotNetCoreConfig.BuildConfig build = config.Load<DotNetCoreConfig>().Build;
 
             string buildProjectFile = build.ProjectFile;
             if (buildProjectFile is null)
                 throw new TaskConfigException("Build solution or project file not specified.");
 
-            var env = config.Load<EnvConfig>();
+            EnvConfig env = config.Load<EnvConfig>();
 
             string outputDirectory = Path.Combine(env.Directories.BinaryOutput, "__build");
 
@@ -84,17 +85,17 @@ namespace Cake.Tasks.DotNetCore
         [PipelineTask(PipelineTask.Test)]
         public static void TestDotNetCoreProjects(ICakeContext context, TaskConfig config)
         {
-            var dotNetCoreConfig = config.Load<DotNetCoreConfig>();
+            DotNetCoreConfig dotNetCoreConfig = config.Load<DotNetCoreConfig>();
             DotNetCoreConfig.TestConfig test = dotNetCoreConfig.Test;
             DotNetCoreConfig.CoverageConfig coverage = dotNetCoreConfig.Coverage;
 
             if (test.Skip)
             {
-                context.Log.Information("Skipping tests.");
+                context.LogInfo("Skipping tests.");
                 return;
             }
 
-            var env = config.Load<EnvConfig>();
+            EnvConfig env = config.Load<EnvConfig>();
 
             string testProjectFile = test.ProjectFile;
             if (testProjectFile is null)
@@ -139,11 +140,11 @@ namespace Cake.Tasks.DotNetCore
         [BeforePipelineTask(PipelineTask.Deploy)]
         public static void PublishDotNetProjects(ICakeContext ctx, TaskConfig config)
         {
-            var env = config.Load<EnvConfig>();
+            EnvConfig env = config.Load<EnvConfig>();
 
             IList<DotNetCorePublisher> publishers = env.Publishers.OfType<DotNetCorePublisher>().ToList();
             if (publishers.Count == 0)
-                ctx.Log.Information("No .NET Core projects to publish. Specify a publisher.");
+                ctx.LogInfo("No .NET Core projects to publish. Specify a publisher.");
             foreach (DotNetCorePublisher publisher in publishers)
             {
                 string publishDirectory = Path.Combine(env.Directories.PublishOutput,
@@ -174,7 +175,7 @@ namespace Cake.Tasks.DotNetCore
 
         private static void PublishAspNetCore(ICakeContext ctx, TaskConfig cfg, AspNetCorePublisher publisher)
         {
-            var env = cfg.Load<EnvConfig>();
+            EnvConfig env = cfg.Load<EnvConfig>();
 
             ctx.DotNetCorePublish(publisher.ProjectFile, new DotNetCorePublishSettings
             {
@@ -187,7 +188,7 @@ namespace Cake.Tasks.DotNetCore
 
         private static void PublishNuGet(ICakeContext ctx, TaskConfig cfg, NuGetPublisher nuget)
         {
-            var env = cfg.Load<EnvConfig>();
+            EnvConfig env = cfg.Load<EnvConfig>();
 
             ctx.DotNetCorePack(nuget.ProjectFile, new DotNetCorePackSettings
             {
@@ -220,9 +221,9 @@ namespace Cake.Tasks.DotNetCore
         [Config]
         public static void ConfigureDotNetCore(TaskConfig config)
         {
-            var cfg = config.Load<DotNetCoreConfig>();
+            DotNetCoreConfig cfg = config.Load<DotNetCoreConfig>();
 
-            var env = config.Load<EnvConfig>();
+            EnvConfig env = config.Load<EnvConfig>();
             string workingDirectory = env.Directories.Working ?? Directory.GetCurrentDirectory();
 
             cfg.Build.ProjectFile = (Func<string>)(() => GetBuildProjectFile(workingDirectory));

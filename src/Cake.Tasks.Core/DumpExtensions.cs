@@ -39,7 +39,7 @@ namespace Cake.Tasks.Core
                 dump.Append(obj.ToString());
             else if (obj is IEnumerable objEnumerable)
             {
-                var first = true;
+                bool first = true;
                 foreach (object o in objEnumerable)
                 {
                     if (first)
@@ -69,10 +69,10 @@ namespace Cake.Tasks.Core
 
             foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(obj))
             {
-                var propertyType = descriptor.PropertyType;
-                var value = descriptor.GetValue(obj);
+                Type propertyType = descriptor.PropertyType;
+                object value = descriptor.GetValue(obj);
 
-                var enumerableType = propertyType.GetInterface("IEnumerable");
+                Type enumerableType = propertyType.GetInterface("IEnumerable");
 
                 if (enumerableType != null && propertyType != typeof(string))
                 {
@@ -92,13 +92,13 @@ namespace Cake.Tasks.Core
             if (!(value is IEnumerable enumerable))
                 return;
 
-            var first = true;
+            bool first = true;
             sb.Append($"\t{descriptor.Name}:\t[ ");
-            foreach (var val in enumerable)
+            foreach (object val in enumerable)
             {
                 if (val == null)
                     continue;
-                var printVal = IsSimpleType(val.GetType()) ? $"\"{val}\"" : val.Dump().Replace("\r\n", "\r\n\t");
+                string printVal = IsSimpleType(val.GetType()) ? $"\"{val}\"" : val.Dump().Replace("\r\n", "\r\n\t");
                 if (first)
                 {
                     sb.Append(printVal);

@@ -3,7 +3,6 @@ using System.IO;
 using System.Text.RegularExpressions;
 
 using Cake.Core;
-using Cake.Core.Diagnostics;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
 using Cake.Tasks.Git;
@@ -22,14 +21,14 @@ namespace Cake.Tasks.Git
             string gitDir = Path.Combine(env.Directories.Working, ".git");
             if (!Directory.Exists(gitDir))
             {
-                ctx.Log.Information($"[{nameof(ConfigureProjectNameFromGitRepoUrl)}] Working directory '{env.Directories.Working}' is not a Git repository. Cannot calculate project name from it.");
+                ctx.LogInfo($"Working directory '{env.Directories.Working}' is not a Git repository. Cannot calculate project name from it.");
                 return;
             }
 
             string fetchHeadFile = Path.Combine(gitDir, "FETCH_HEAD");
             if (!File.Exists(fetchHeadFile))
             {
-                ctx.Log.Information($"[{nameof(ConfigureProjectNameFromGitRepoUrl)}] Cannot retrieve remote URL for current repo.");
+                ctx.LogInfo("Cannot retrieve remote URL for current repo.");
                 return;
             }
 
@@ -38,14 +37,14 @@ namespace Cake.Tasks.Git
             Match match = RemoteUrlPattern.Match(firstLine);
             if (!match.Success)
             {
-                ctx.Log.Information($"[{nameof(ConfigureProjectNameFromGitRepoUrl)}] Cannot retrieve remote URL for current repo.");
+                ctx.LogInfo("Cannot retrieve remote URL for current repo.");
                 return;
             }
 
             string matchedRemoteUri = match.Groups[1].Value;
             if (!Uri.TryCreate(matchedRemoteUri, UriKind.Absolute, out Uri remoteUri))
             {
-                ctx.Log.Information($"[{nameof(ConfigureProjectNameFromGitRepoUrl)}] Cannot retrieve remote URL for current repo.");
+                ctx.LogInfo("Cannot retrieve remote URL for current repo.");
                 return;
             }
 
@@ -54,7 +53,7 @@ namespace Cake.Tasks.Git
             if (lastSegment.EndsWith(ignoreExtension, StringComparison.OrdinalIgnoreCase))
                 lastSegment = lastSegment.Substring(0, lastSegment.Length - ignoreExtension.Length);
 
-            ctx.Log.Information($"[{nameof(ConfigureProjectNameFromGitRepoUrl)}] Setting project name to {lastSegment}.");
+            ctx.LogInfo($"Setting project name to {lastSegment}.");
             env.Name = lastSegment;
         }
 
