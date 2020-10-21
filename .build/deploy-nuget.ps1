@@ -18,6 +18,10 @@ dotnet nuget push ./src/Cake.Tasks.Module/bin/Release/Cake.Tasks.Module.$Version
 dotnet pack ./src/Cake.Tasks.Core/Cake.Tasks.Core.csproj --include-symbols --include-source -c Release /p:Version=$Version
 dotnet nuget push ./src/Cake.Tasks.Core/bin/Release/Cake.Tasks.Core.$Version.nupkg -s https://api.nuget.org/v3/index.json
 
+# Cake Tasks Git plugin
+dotnet pack ./plugin/Cake.Tasks.Git/Cake.Tasks.Git.csproj --include-symbols --include-source -c Release /p:Version=$Version
+dotnet nuget push ./plugin/Cake.Tasks.Git/bin/Release/Cake.Tasks.Git.$Version.nupkg -s https://api.nuget.org/v3/index.json
+
 # Cake Tasks GitVersion plugin
 dotnet pack ./plugin/Cake.Tasks.GitVersion/Cake.Tasks.GitVersion.csproj --include-symbols --include-source -c Release /p:Version=$Version
 dotnet nuget push ./plugin/Cake.Tasks.GitVersion/bin/Release/Cake.Tasks.GitVersion.$Version.nupkg -s https://api.nuget.org/v3/index.json

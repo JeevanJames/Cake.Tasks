@@ -328,7 +328,7 @@ namespace Cake.Tasks.Module
                 }
 
                 // Override configurations from command line arguments
-                List<string> keys = config.Data.Keys.ToList();
+                var keys = config.Data.Keys.ToList();
                 foreach (string key in keys)
                 {
                     if (ctx.Arguments.HasArgument(key))
@@ -338,10 +338,10 @@ namespace Cake.Tasks.Module
                 // Display the final configuration values
                 ctx.Log.Information("Final Configurations");
                 ctx.Log.Information("--------------------");
-                foreach (var data in config.Data.OrderBy(kvp => kvp.Key))
+                foreach (KeyValuePair<string, object> data in config.Data.OrderBy(kvp => kvp.Key))
                     ctx.Log.Information($"{data.Key} = {data.Value?.Dump() ?? "[NULL]"}");
 
-                var env = config.Load<EnvConfig>();
+                EnvConfig env = config.Load<EnvConfig>();
 
                 // Clean out output directories or create them
                 //TODO: Can these directories be created on-demand? For some project types like Angular,

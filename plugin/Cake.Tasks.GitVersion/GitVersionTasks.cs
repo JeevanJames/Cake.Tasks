@@ -33,11 +33,11 @@ namespace Cake.Tasks.GitVersion
         public static void ConfigureGitVersion(ICakeContext ctx, TaskConfig cfg)
         {
             // Update the GitVersion config
-            var gitVersion = cfg.Load<GitVersionConfig>();
+            GitVersionConfig gitVersion = cfg.Load<GitVersionConfig>();
             Common.Tools.GitVersion.GitVersion version = ctx.GitVersion();
             gitVersion.Version = version;
 
-            var env = cfg.Load<EnvConfig>();
+            EnvConfig env = cfg.Load<EnvConfig>();
 
             // Update branch name
             env.Branch = version.BranchName;

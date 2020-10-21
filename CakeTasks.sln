@@ -23,6 +23,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.JeevanJames", "p
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Git", "plugin\Cake.Tasks.Git\Cake.Tasks.Git.csproj", "{75200965-153F-4236-90CF-495ADDAD9FC5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B0241FCD-E498-4BC9-AB52-874D4CFB3786}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.build\deploy-nuget.ps1 = .build\deploy-nuget.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

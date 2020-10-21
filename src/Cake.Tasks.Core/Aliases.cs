@@ -54,7 +54,7 @@ namespace Cake.Tasks.Config
 
             ConfigureTasks(ctx, config =>
             {
-                var cfg = config.Load<TConfig>();
+                TConfig cfg = config.Load<TConfig>();
                 setter(cfg);
             });
         }
@@ -71,7 +71,7 @@ namespace Cake.Tasks.Config
 
             ConfigureTasks(ctx, config =>
             {
-                var cfg = config.Load<TConfig>();
+                TConfig cfg = config.Load<TConfig>();
                 setter(cfg, config);
             });
         }

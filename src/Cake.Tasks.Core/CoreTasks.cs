@@ -41,9 +41,9 @@ namespace Cake.Tasks.Core
         [BeforePipelineTask(PipelineTask.Build)]
         public static void SetDirectoryPublisherOutputs(ICakeContext ctx, TaskConfig cfg)
         {
-            var env = cfg.Load<EnvConfig>();
+            EnvConfig env = cfg.Load<EnvConfig>();
 
-            List<DirectoryPublisher> directoryPublishers = env.Publishers.OfType<DirectoryPublisher>().ToList();
+            var directoryPublishers = env.Publishers.OfType<DirectoryPublisher>().ToList();
             foreach (DirectoryPublisher publisher in directoryPublishers)
             {
                 publisher.ValidateDirectory();
