@@ -58,6 +58,11 @@ namespace Cake.Tasks.Module
                 TaskConfig config = TaskConfig.Current;
 
                 EnvConfig env = config.Load<EnvConfig>();
+                env.Name = Path.GetFileName(ctx.Environment.WorkingDirectory.FullPath)
+                    .Replace('.', '-')
+                    .Replace(' ', '-')
+                    .Replace('_', '-')
+                    .Trim();
                 env.Configuration = ctx.Arguments.GetArgument("Configuration") ?? "Release";
                 env.IsCi = false;
                 env.Branch = null;

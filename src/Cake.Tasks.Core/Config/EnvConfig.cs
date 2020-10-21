@@ -35,6 +35,12 @@ namespace Cake.Tasks.Config
             Version = new VersionConfig(taskConfig);
         }
 
+        public ConfigValue<string> Name
+        {
+            get => GetValue<string>(Keys.Name);
+            set => Set(Keys.Name, value);
+        }
+
         /// <summary>
         ///     Gets or sets the build configuration, such as Debug or Release.
         /// </summary>
@@ -219,26 +225,29 @@ namespace Cake.Tasks.Config
 
         public static class Keys
         {
-            public const string Configuration = "Env_Configuration";
-            public const string IsCi = "Env_IsCI";
-            public const string Branch = "Env_Branch";
+            public const string Name = Prefix + nameof(Name);
+            public const string Configuration = Prefix + nameof(Configuration);
+            public const string IsCi = Prefix + nameof(IsCi);
+            public const string Branch = Prefix + nameof(Branch);
 
-            public const string PublishProfiles = "Env_PublishProfiles";
-            public const string Publishers = "Env_Publishers";
+            public const string PublishProfiles = Prefix + nameof(PublishProfiles);
+            public const string Publishers = Prefix + nameof(Publishers);
 
-            public const string CiArtifacts = "Env_CI_Artifacts";
-            public const string CiTestArtifacts = "Env_CI_TestArtifacts";
+            public const string CiArtifacts = Prefix + nameof(CiArtifacts);
+            public const string CiTestArtifacts = Prefix + nameof(CiTestArtifacts);
 
-            public const string DirectoryWorking = "Env_Directory_Working";
-            public const string DirectoryArtifacts = "Env_Directory_Artifacts";
-            public const string DirectoryBinaryOutput = "Env_Directory_BinaryOutput";
-            public const string DirectoryPublishOutput = "Env_Directory_PublishOutput";
-            public const string DirectoryTestOutput = "Env_Directory_TestOutput";
+            public const string DirectoryWorking = Prefix + nameof(DirectoryWorking);
+            public const string DirectoryArtifacts = Prefix + nameof(DirectoryArtifacts);
+            public const string DirectoryBinaryOutput = Prefix + nameof(DirectoryBinaryOutput);
+            public const string DirectoryPublishOutput = Prefix + nameof(DirectoryPublishOutput);
+            public const string DirectoryTestOutput = Prefix + nameof(DirectoryTestOutput);
 
-            public const string VersionBuildNumber = "Env_Version_BuildNumber";
-            public const string VersionPrimary = "Env_Version_Primary";
-            public const string VersionFull = "Env_Version_Full";
-            public const string VersionBuild = "Env_Version_Build";
+            public const string VersionBuildNumber = Prefix + nameof(VersionBuildNumber);
+            public const string VersionPrimary = Prefix + nameof(VersionPrimary);
+            public const string VersionFull = Prefix + nameof(VersionFull);
+            public const string VersionBuild = Prefix + nameof(VersionBuild);
+
+            private const string Prefix = "Env_";
         }
     }
 }
