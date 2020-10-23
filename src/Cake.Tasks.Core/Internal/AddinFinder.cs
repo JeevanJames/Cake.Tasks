@@ -24,11 +24,11 @@ using System.Text.RegularExpressions;
 
 using Semver;
 
-namespace Cake.Tasks.Module.PluginLoaders
+namespace Cake.Tasks.Core.Internal
 {
-    internal static class AddinFinder
+    public static class AddinFinder
     {
-        internal static IEnumerable<string> Find(string addinsBaseDir)
+        public static IEnumerable<string> Find(string addinsBaseDir)
         {
             return Directory
                 .EnumerateDirectories(addinsBaseDir, "Cake.Tasks.*", SearchOption.TopDirectoryOnly)

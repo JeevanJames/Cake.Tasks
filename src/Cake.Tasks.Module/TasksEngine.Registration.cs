@@ -30,6 +30,7 @@ using Cake.Core;
 using Cake.Core.Diagnostics;
 using Cake.Tasks.Config;
 using Cake.Tasks.Core;
+using Cake.Tasks.Core.Internal;
 using Cake.Tasks.Module.PluginLoaders;
 
 namespace Cake.Tasks.Module

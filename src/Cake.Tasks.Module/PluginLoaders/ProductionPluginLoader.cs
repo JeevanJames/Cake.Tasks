@@ -24,7 +24,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+
 using Cake.Core.Diagnostics;
+using Cake.Tasks.Core.Internal;
 
 namespace Cake.Tasks.Module.PluginLoaders
 {
