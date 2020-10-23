@@ -83,15 +83,19 @@ namespace Cake.Tasks.Module
                 // To verify the versions of the addins and tools installed.
                 // Useful for troubleshooting.
                 //TODO: Make this a configuration
-                ctx.Log.Information("--------------------");
-                ctx.Log.Information("Addin subdirectories");
-                ctx.Log.Information("--------------------");
-                string addinsDir = Path.Combine(env.Directories.Working, "tools", "Addins");
-                if (Directory.Exists(addinsDir))
+                ctx.LogHighlight("--------------------");
+                ctx.LogHighlight("Addin subdirectories");
+                ctx.LogHighlight("--------------------");
+                string addinsBaseDir = Path.Combine(env.Directories.Working, "tools", "Addins");
+                if (Directory.Exists(addinsBaseDir))
                 {
-                    string[] subdirectories = Directory.GetDirectories(addinsDir, "*", SearchOption.TopDirectoryOnly);
-                    foreach (string subdirectory in subdirectories)
-                        ctx.Log.Information(Path.GetFileName(subdirectory));
+                    IEnumerable<string> addinsDirs = AddinFinder.Find(addinsBaseDir);
+                    IEnumerable<string> otherDirs = Directory.EnumerateDirectories(addinsBaseDir, "*", SearchOption.TopDirectoryOnly)
+                        .Except(addinsDirs, StringComparer.OrdinalIgnoreCase);
+                    foreach (string addinsDir in addinsDirs)
+                        ctx.LogHighlight(Path.GetFileName(addinsDir));
+                    foreach (string otherDir in otherDirs)
+                        ctx.Log.Information(Path.GetFileName(otherDir));
                 }
 
                 return config;
@@ -301,10 +305,23 @@ namespace Cake.Tasks.Module
             RegisterIntegrationTestTask(envTasks);
         }
 
+        /// <summary>
+        ///     Registers a task that performs final setup of configuration after all plugin-specific
+        ///     config tasks have been run.
+        ///     <para/>
+        ///     This includes:
+        ///     1. Runs all configuration lambdas from the <c>ConfigureTask</c> methods in the
+        ///     build.cake file.
+        ///     2. Override configurations with any matching values from the environment.
+        ///     3. Override configurations with any matching values from the command line.
+        /// </summary>
+        /// <param name="envTasks">List of all plugin tasks for the current CI environment.</param>
         private void RegisterConfigTask(IReadOnlyList<RegisteredTask> envTasks)
         {
-            CakeTaskBuilder task = RegisterTask(TaskNames.Config);
+            CakeTaskBuilder task = RegisterTask(TaskNames.Config)
+                .Description("Finalizes configurations and displays final configuration values.");
 
+            // Create dependency on all plugin configuration tasks.
             IEnumerable<RegisteredTask> configTasks = envTasks
                 .Where(t => t.AttributeType == typeof(ConfigAttribute))
                 .OrderBy(t => t.Order);
@@ -336,55 +353,57 @@ namespace Cake.Tasks.Module
                 }
 
                 // Display the final configuration values
-                ctx.Log.Information("Final Configurations");
-                ctx.Log.Information("--------------------");
+                ctx.LogHighlight("Final Configurations");
+                ctx.LogHighlight("--------------------");
                 foreach (KeyValuePair<string, object> data in config.Data.OrderBy(kvp => kvp.Key))
-                    ctx.Log.Information($"{data.Key} = {data.Value?.Dump() ?? "[NULL]"}");
+                    ctx.LogHighlight($"{data.Key} = {data.Value?.Dump() ?? "[NULL]"}");
 
                 EnvConfig env = config.Load<EnvConfig>();
 
                 // Clean out output directories or create them
                 //TODO: Can these directories be created on-demand? For some project types like Angular,
                 //these folders are ignored and the dist folder is used.
-                if (ctx.DirectoryExists(env.Directories.Artifacts))
-                    ctx.CleanDirectory(env.Directories.Artifacts);
-                else
-                    ctx.CreateDirectory(env.Directories.Artifacts);
-
-                if (ctx.DirectoryExists(env.Directories.BinaryOutput))
-                    ctx.CleanDirectory(env.Directories.BinaryOutput);
-                else
-                    ctx.CreateDirectory(env.Directories.BinaryOutput);
-
-                if (ctx.DirectoryExists(env.Directories.TestOutput))
-                    ctx.CleanDirectory(env.Directories.TestOutput);
-                else
-                    ctx.CreateDirectory(env.Directories.TestOutput);
+                ctx.EnsureDirectoryExists(env.Directories.Artifacts);
+                ctx.EnsureDirectoryExists(env.Directories.BinaryOutput);
+                ctx.EnsureDirectoryExists(env.Directories.TestOutput);
             });
         }
 
+        /// <summary>
+        ///     Registers a build task that depends on a sequence of pre-build tasks, build tasks and
+        ///     post-build tasks.
+        /// </summary>
+        /// <param name="envTasks">List of all plugin tasks for the current CI environment.</param>
         private void RegisterBuildTask(IReadOnlyList<RegisteredTask> envTasks)
         {
             CakeTaskBuilder task = RegisterTask(TaskNames.Build)
                 .Description("Builds the solution.")
                 .IsDependentOn(TaskNames.Config);
 
+            // Add pre-build tasks.
             IEnumerable<RegisteredTask> preBuildTasks = envTasks
                 .Where(t => t.AttributeType == typeof(BeforePipelineTaskAttribute) && t.CoreTask == PipelineTask.Build);
             foreach (RegisteredTask preBuildTask in preBuildTasks)
                 task.IsDependentOn(preBuildTask.Name);
 
+            // Add build tasks.
             IEnumerable<RegisteredTask> buildTasks = envTasks
                 .Where(t => t.AttributeType == typeof(PipelineTaskAttribute) && t.CoreTask == PipelineTask.Build);
             foreach (RegisteredTask buildTask in buildTasks)
                 task.IsDependentOn(buildTask.Name);
 
+            // Add post-build tasks.
             IEnumerable<RegisteredTask> postBuildTasks = envTasks
                 .Where(t => t.AttributeType == typeof(AfterPipelineTaskAttribute) && t.CoreTask == PipelineTask.Build);
             foreach (RegisteredTask postBuildTask in postBuildTasks)
                 task.IsDependentOn(postBuildTask.Name);
         }
 
+        /// <summary>
+        ///     Registers a test task that depends on a sequence of pre-test tasks, test tasks and
+        ///     post-test tasks.
+        /// </summary>
+        /// <param name="envTasks">List of all plugin tasks for the current CI environment.</param>
         private void RegisterTestTask(IReadOnlyList<RegisteredTask> envTasks)
         {
             CakeTaskBuilder task = RegisterTask(TaskNames.Test)
@@ -407,6 +426,9 @@ namespace Cake.Tasks.Module
                 task.IsDependentOn(postTestTask.Name);
         }
 
+        /// <summary>
+        ///     Registers the CI task that runs both the Build and Test tasks.
+        /// </summary>
         private void RegisterCiTask()
         {
             RegisterTask(TaskNames.Ci)

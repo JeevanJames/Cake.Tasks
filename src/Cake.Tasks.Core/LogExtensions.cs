@@ -41,6 +41,11 @@ namespace Cake.Tasks.Core
             ctx.Log.Verbose($"{VerbosePrefix}{caller}{Reset} {Verbose}{message}{Reset}");
         }
 
+        public static void LogHighlight(this ICakeContext ctx, string message)
+        {
+            ctx.Log.Information($"{Highlight}{message}{Reset}");
+        }
+
         private const string Escape = "\u001b[";
 
         private const string Reset = Escape + "0m";
@@ -62,5 +67,8 @@ namespace Cake.Tasks.Core
         private const string VerbosePrefix = VerbosePrefixFg + VerbosePrefixBg;
         private const string VerboseFg = Escape + "36;1m"; // Bright cyan fg
         private const string Verbose = VerboseFg;
+
+        private const string HighlightFg = Escape + "32;1m"; // Bright green fg
+        private const string Highlight = HighlightFg;
     }
 }

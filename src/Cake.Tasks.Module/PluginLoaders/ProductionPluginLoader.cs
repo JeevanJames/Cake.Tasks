@@ -39,7 +39,7 @@ namespace Cake.Tasks.Module.PluginLoaders
         {
             AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
 
-            string[] cakeTasksDirs = Directory.GetDirectories(PluginsDir, "Cake.Tasks.*", SearchOption.TopDirectoryOnly);
+            IEnumerable<string> cakeTasksDirs = AddinFinder.Find(PluginsDir);
             foreach (string cakeTasksDir in cakeTasksDirs)
             {
                 //TODO: Need to support for framework targets
@@ -52,7 +52,7 @@ namespace Cake.Tasks.Module.PluginLoaders
                 foreach (string dllFile in dllFiles)
                 {
                     IEnumerable<RegisteredTask> dllPlugins = FindPlugins(dllFile);
-                    foreach (var dllPlugin in dllPlugins)
+                    foreach (RegisteredTask dllPlugin in dllPlugins)
                         yield return dllPlugin;
                 }
             }

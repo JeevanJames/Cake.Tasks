@@ -88,5 +88,37 @@
                 </list>
             </summary>
         </member>
+        <member name="M:Cake.Tasks.Module.TasksEngine.RegisterConfigTask(System.Collections.Generic.IReadOnlyList{Cake.Tasks.Module.RegisteredTask})">
+            <summary>
+                Registers a task that performs final setup of configuration after all plugin-specific
+                config tasks have been run.
+                <para/>
+                This includes:
+                1. Runs all configuration lambdas from the <c>ConfigureTask</c> methods in the
+                build.cake file.
+                2. Override configurations with any matching values from the environment.
+                3. Override configurations with any matching values from the command line.
+            </summary>
+            <param name="envTasks">List of all plugin tasks for the current CI environment.</param>
+        </member>
+        <member name="M:Cake.Tasks.Module.TasksEngine.RegisterBuildTask(System.Collections.Generic.IReadOnlyList{Cake.Tasks.Module.RegisteredTask})">
+            <summary>
+                Registers a build task that depends on a sequence of pre-build tasks, build tasks and
+                post-build tasks.
+            </summary>
+            <param name="envTasks">List of all plugin tasks for the current CI environment.</param>
+        </member>
+        <member name="M:Cake.Tasks.Module.TasksEngine.RegisterTestTask(System.Collections.Generic.IReadOnlyList{Cake.Tasks.Module.RegisteredTask})">
+            <summary>
+                Registers a test task that depends on a sequence of pre-test tasks, test tasks and
+                post-test tasks.
+            </summary>
+            <param name="envTasks">List of all plugin tasks for the current CI environment.</param>
+        </member>
+        <member name="M:Cake.Tasks.Module.TasksEngine.RegisterCiTask">
+            <summary>
+                Registers the CI task that runs both the Build and Test tasks.
+            </summary>
+        </member>
     </members>
 </doc>
