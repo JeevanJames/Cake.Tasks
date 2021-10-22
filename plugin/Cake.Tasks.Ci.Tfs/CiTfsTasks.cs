@@ -20,8 +20,8 @@ limitations under the License.
 using System.Linq;
 
 using Cake.Common.Build;
-using Cake.Common.Build.TFBuild;
-using Cake.Common.Build.TFBuild.Data;
+using Cake.Common.Build.AzurePipelines;
+using Cake.Common.Build.AzurePipelines.Data;
 using Cake.Common.IO;
 using Cake.Core;
 using Cake.Core.Diagnostics;
@@ -41,8 +41,8 @@ namespace Cake.Tasks.Ci.Tfs
         [AfterPipelineTask(PipelineTask.Test, CiSystem = "tfs", ContinueOnError = true)]
         public static void PublishTestResults(ICakeContext ctx)
         {
-            ITFBuildProvider tfs = ctx.TFBuild();
-            if (!tfs.IsRunningOnAzurePipelines)
+            IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
+            if (!azurePipelines.IsRunningOnAzurePipelines || !azurePipelines.IsRunningOnAzurePipelinesHosted)
                 return;
 
             FilePathCollection trxFiles = ctx.GetFiles("./**/*.trx");
@@ -63,9 +63,9 @@ namespace Cake.Tasks.Ci.Tfs
             foreach (FilePath filePath in testResultsFiles)
                 ctx.Log.Information(filePath.ToString());
 
-            tfs.Commands.PublishTestResults(new TFBuildPublishTestResultsData
+            azurePipelines.Commands.PublishTestResults(new AzurePipelinesPublishTestResultsData
             {
-                TestRunner = TFTestRunnerType.VSTest,
+                TestRunner = AzurePipelinesTestRunnerType.VSTest,
                 TestResultsFiles = testResultsFiles.ToList(),
                 MergeTestResults = true,
             });
@@ -74,17 +74,16 @@ namespace Cake.Tasks.Ci.Tfs
         [Config(CiSystem = "tfs", Order = ConfigTaskOrder.CiSystem)]
         public static void ConfigureTfsEnvironment(ICakeContext ctx, TaskConfig cfg)
         {
-            ITFBuildProvider tfs = ctx.TFBuild();
-            if (!tfs.IsRunningOnAzurePipelines)
-                throw new TaskConfigException("Not running in TFS");
+            IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
+            if (!azurePipelines.IsRunningOnAzurePipelines || !azurePipelines.IsRunningOnAzurePipelinesHosted)
+                throw new TaskConfigException("Not running in Azure Pipelines");
 
-            var env = cfg.Load<EnvConfig>();
+            EnvConfig env = cfg.Load<EnvConfig>();
             env.IsCi = true;
 
             // If the build number is configured as an integer, use it. Otherwise use the build ID.
             // Basically, we need something unique.
-            env.Version.BuildNumber = int.TryParse(tfs.Environment.Build.Number, out int buildNum)
-                ? buildNum : tfs.Environment.Build.Id;
+            env.Version.BuildNumber = azurePipelines.Environment.Build.Number;
         }
     }
 }

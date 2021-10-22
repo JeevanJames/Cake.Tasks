@@ -78,7 +78,9 @@ namespace Cake.Tasks.Config
             Type dataType = type.GetGenericArguments()[0];
             object data = FromString(str, dataType);
 
+#pragma warning disable S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
             value = (T)Activator.CreateInstance(type, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { data }, null);
+#pragma warning restore S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
             return true;
         }
 

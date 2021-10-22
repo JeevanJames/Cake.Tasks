@@ -38,10 +38,10 @@ namespace Cake.Tasks.Ci.AppVeyor
             if (!appveyor.IsRunningOnAppVeyor)
                 throw new TaskConfigException("Not running in AppVeyor");
 
-            var env = cfg.Load<EnvConfig>();
+            EnvConfig env = cfg.Load<EnvConfig>();
             env.IsCi = true;
 
-            env.Version.BuildNumber = appveyor.Environment.Build.Number;
+            env.Version.BuildNumber = appveyor.Environment.Build.Number.ToString();
             env.Version.Build = $"{env.Version.Primary}-build.{env.Version.BuildNumber}";
         }
     }
