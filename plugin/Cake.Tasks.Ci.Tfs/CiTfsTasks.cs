@@ -75,8 +75,10 @@ namespace Cake.Tasks.Ci.Tfs
         public static void ConfigureTfsEnvironment(ICakeContext ctx, TaskConfig cfg)
         {
             IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
-            if (!azurePipelines.IsRunningOnAzurePipelines || !azurePipelines.IsRunningOnAzurePipelinesHosted)
-                throw new TaskConfigException("Not running in Azure Pipelines");
+            ctx.LogInfo(azurePipelines.Dump());
+
+            //if (!azurePipelines.IsRunningOnAzurePipelines || !azurePipelines.IsRunningOnAzurePipelinesHosted)
+            //    throw new TaskConfigException("Not running in Azure Pipelines");
 
             EnvConfig env = cfg.Load<EnvConfig>();
             env.IsCi = true;
