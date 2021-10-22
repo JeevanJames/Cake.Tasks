@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-      <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-      <AssemblyName>Cake.Tasks.Git</AssemblyName>
-      <RootNamespace>$(AssemblyName)</RootNamespace>
-      <DocumentationFile>Properties\$(AssemblyName).xml</DocumentationFile>
-      <Description>Cake Tasks - Git tasks and configuration.</Description>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+        <AssemblyName>Cake.Tasks.Git</AssemblyName>
+        <RootNamespace>$(AssemblyName)</RootNamespace>
+        <DocumentationFile>Properties\$(AssemblyName).xml</DocumentationFile>
+        <Description>Cake Tasks - Git tasks and configuration.</Description>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
+    </ItemGroup>
 
 </Project>

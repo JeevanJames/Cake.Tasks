@@ -19,6 +19,7 @@ limitations under the License.
 
 using System.Collections.Generic;
 
+// ReSharper disable once CheckNamespace
 namespace Cake.Tasks.Config
 {
     /// <summary>
@@ -171,9 +172,9 @@ namespace Cake.Tasks.Config
             /// <summary>
             ///     Gets or sets an unique build number for the build execution.
             /// </summary>
-            public ConfigValue<int> BuildNumber
+            public ConfigValue<string> BuildNumber
             {
-                get => GetValue<int>(Keys.VersionBuildNumber);
+                get => GetValue<string>(Keys.VersionBuildNumber);
                 set => Set(Keys.VersionBuildNumber, value);
             }
 

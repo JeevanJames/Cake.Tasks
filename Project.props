@@ -1,0 +1,12 @@
+<Project>
+
+    <PropertyGroup>
+        <CakeVersion>0.38.5</CakeVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Cake.Common" Version="$(CakeVersion)" />
+        <PackageReference Include="Cake.Core" Version="$(CakeVersion)" />
+    </ItemGroup>
+
+</Project>

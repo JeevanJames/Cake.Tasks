@@ -45,26 +45,26 @@ namespace Cake.Tasks.Module
 
         public event EventHandler<SetupEventArgs> Setup
         {
-            add { _engine.Setup += value; }
-            remove { _engine.Setup -= value; }
+            add => _engine.Setup += value;
+            remove => _engine.Setup -= value;
         }
 
         public event EventHandler<TeardownEventArgs> Teardown
         {
-            add { _engine.Teardown += value; }
-            remove { _engine.Teardown -= value; }
+            add => _engine.Teardown += value;
+            remove => _engine.Teardown -= value;
         }
 
         public event EventHandler<TaskSetupEventArgs> TaskSetup
         {
-            add { _engine.TaskSetup += value; }
-            remove { _engine.TaskSetup -= value; }
+            add => _engine.TaskSetup += value;
+            remove => _engine.TaskSetup -= value;
         }
 
         public event EventHandler<TaskTeardownEventArgs> TaskTeardown
         {
-            add { _engine.TaskTeardown += value; }
-            remove { _engine.TaskTeardown -= value; }
+            add => _engine.TaskTeardown += value;
+            remove => _engine.TaskTeardown -= value;
         }
 
         public void RegisterSetupAction(Action<ISetupContext> action)

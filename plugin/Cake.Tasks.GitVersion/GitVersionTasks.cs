@@ -47,12 +47,9 @@ namespace Cake.Tasks.GitVersion
             env.Version.Full = version.SemVer;
 
             // Update build number
-            if (version.CommitsSinceVersionSource.HasValue)
-                env.Version.BuildNumber = version.CommitsSinceVersionSource.Value;
-            else if (int.TryParse(version.BuildMetaData, out int buildMetadata))
-                env.Version.BuildNumber = buildMetadata;
-            else
-                env.Version.BuildNumber = 1;
+            env.Version.BuildNumber = version.CommitsSinceVersionSource.HasValue
+                ? version.CommitsSinceVersionSource.Value.ToString()
+                : version.BuildMetaData;
         }
     }
 }

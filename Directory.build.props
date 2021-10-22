@@ -1,5 +1,7 @@
 <Project>
 
+    <Import Project="Project.props" />
+
     <PropertyGroup>
         <!-- Build properties -->
         <LangVersion>latest</LangVersion>
@@ -12,7 +14,7 @@
         <Authors>Jeevan James</Authors>
         <Company>Jeevan James</Company>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Copyright>Copyright (c) 2019 Jeevan James</Copyright>
+        <Copyright>Copyright (c) 2019-2021 Jeevan James</Copyright>
         <PackageProjectUrl>https://github.com/JeevanJames/Cake.Tasks/</PackageProjectUrl>
         <RepositoryUrl>https://github.com/JeevanJames/Cake.Tasks.git</RepositoryUrl>
         <RepositoryType>Git</RepositoryType>
@@ -25,12 +27,12 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-      
-        <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CakeTasks.ruleset</CodeAnalysisRuleSet>
+        <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)shared/CakeTasks.ruleset</CodeAnalysisRuleSet>
     </PropertyGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
+        <Compile Include="$(MSBuildThisFileDirectory)shared/GlobalSuppressions.cs" Link="Properties/GlobalSuppressions.cs" />
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)shared/stylecop.json" Link="Properties/stylecop.json" />
     </ItemGroup>
 
     <ItemGroup>
@@ -38,17 +40,18 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.14.0.22654">
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="8.30.0.37606">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Roslynator.Analyzers" Version="3.0.0">
+        <PackageReference Include="Roslynator.Analyzers" Version="3.2.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
+
 </Project>

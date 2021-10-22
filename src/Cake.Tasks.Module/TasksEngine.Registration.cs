@@ -75,7 +75,7 @@ namespace Cake.Tasks.Module
                 env.Directories.PublishOutput = Path.Combine(outputDirectory, "publish");
                 env.Directories.TestOutput = Path.Combine(outputDirectory, "testresults");
 
-                env.Version.BuildNumber = 1;
+                env.Version.BuildNumber = "1";
                 env.Version.Primary = (Func<string>)(() => $"0.{env.Version.BuildNumber.Resolve()}.0");
                 env.Version.Full = (Func<string>)(() => env.Version.Primary.Resolve());
                 env.Version.Build = (Func<string>)(() => $"{env.Version.Full.Resolve()}+{env.Version.BuildNumber.Resolve()}");
@@ -439,7 +439,7 @@ namespace Cake.Tasks.Module
 
         private void RegisterCicdTask(IReadOnlyList<RegisteredTask> envTasks)
         {
-            CakeTaskBuilder task = RegisterTask("CICD")
+            CakeTaskBuilder task = RegisterTask(TaskNames.CiCd)
                 .Description("Performs CI/CD (Build, test and deploy)")
                 .IsDependentOn("CI");
 
