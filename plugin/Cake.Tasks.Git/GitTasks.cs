@@ -25,6 +25,8 @@ namespace Cake.Tasks.Git
                 return;
             }
 
+            ctx.LogInfo($"Git directory found '{gitDir}'");
+
             string fetchHeadFile = Path.Combine(gitDir, "FETCH_HEAD");
             if (!File.Exists(fetchHeadFile))
             {
@@ -32,8 +34,18 @@ namespace Cake.Tasks.Git
                 return;
             }
 
+            ctx.LogInfo($"FETCH_HEAD file found '{fetchHeadFile}'");
+
             using StreamReader reader = File.OpenText(fetchHeadFile);
             string firstLine = reader.ReadLine();
+            if (string.IsNullOrWhiteSpace(firstLine))
+            {
+                ctx.LogInfo("No content in FETCH_HEAD file");
+                return;
+            }
+
+            ctx.LogInfo($"First line of FETCH_HEAD file: '{firstLine}'");
+
             Match match = RemoteUrlPattern.Match(firstLine);
             if (!match.Success)
             {
@@ -42,9 +54,10 @@ namespace Cake.Tasks.Git
             }
 
             string matchedRemoteUri = match.Groups[1].Value;
+            ctx.LogInfo($"URL portion: '{matchedRemoteUri}'");
             if (!Uri.TryCreate(matchedRemoteUri, UriKind.Absolute, out Uri remoteUri))
             {
-                ctx.LogInfo("Cannot retrieve remote URL for current repo.");
+                ctx.LogInfo($"The URL portion '{matchedRemoteUri}' is not a valid URL.");
                 return;
             }
 
@@ -57,6 +70,7 @@ namespace Cake.Tasks.Git
             env.Name = lastSegment;
         }
 
-        private static readonly Regex RemoteUrlPattern = new Regex(@"\s+branch '.+' of (.+)$", RegexOptions.Compiled);
+        private static readonly Regex RemoteUrlPattern = new(@"\s+branch '.+' of (.+)$", RegexOptions.Compiled,
+            TimeSpan.FromSeconds(1));
     }
 }
