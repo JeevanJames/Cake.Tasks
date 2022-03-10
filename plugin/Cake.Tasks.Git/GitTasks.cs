@@ -16,48 +16,10 @@ namespace Cake.Tasks.Git
         [Config(Order = ConfigTaskOrder.Priority)]
         public static void ConfigureProjectNameFromGitRepoUrl(ICakeContext ctx, TaskConfig cfg)
         {
-            EnvConfig env = cfg.Load<EnvConfig>();
-
-            string gitDir = Path.Combine(env.Directories.Working, ".git");
-            if (!Directory.Exists(gitDir))
+            string errorMessage = TryGetRemoteUrl(ctx, cfg, out Uri remoteUri);
+            if (errorMessage is not null)
             {
-                ctx.LogInfo($"Working directory '{env.Directories.Working}' is not a Git repository. Cannot calculate project name from it.");
-                return;
-            }
-
-            ctx.LogInfo($"Git directory found '{gitDir}'");
-
-            string fetchHeadFile = Path.Combine(gitDir, "FETCH_HEAD");
-            if (!File.Exists(fetchHeadFile))
-            {
-                ctx.LogInfo("Cannot retrieve remote URL for current repo.");
-                return;
-            }
-
-            ctx.LogInfo($"FETCH_HEAD file found '{fetchHeadFile}'");
-
-            using StreamReader reader = File.OpenText(fetchHeadFile);
-            string firstLine = reader.ReadLine();
-            if (string.IsNullOrWhiteSpace(firstLine))
-            {
-                ctx.LogInfo("No content in FETCH_HEAD file");
-                return;
-            }
-
-            ctx.LogInfo($"First line of FETCH_HEAD file: '{firstLine}'");
-
-            Match match = RemoteUrlPattern.Match(firstLine);
-            if (!match.Success)
-            {
-                ctx.LogInfo("Cannot retrieve remote URL for current repo.");
-                return;
-            }
-
-            string matchedRemoteUri = match.Groups[1].Value;
-            ctx.LogInfo($"URL portion: '{matchedRemoteUri}'");
-            if (!Uri.TryCreate(matchedRemoteUri, UriKind.Absolute, out Uri remoteUri))
-            {
-                ctx.LogInfo($"The URL portion '{matchedRemoteUri}' is not a valid URL.");
+                ctx.LogInfo(errorMessage);
                 return;
             }
 
@@ -67,10 +29,54 @@ namespace Cake.Tasks.Git
                 lastSegment = lastSegment.Substring(0, lastSegment.Length - ignoreExtension.Length);
 
             ctx.LogInfo($"Setting project name to {lastSegment}.");
+
+            EnvConfig env = cfg.Load<EnvConfig>();
             env.Name = lastSegment;
         }
 
-        private static readonly Regex RemoteUrlPattern = new(@"\s+branch '.+' of (.+)$", RegexOptions.Compiled,
+        private static string TryGetRemoteUrl(ICakeContext ctx, TaskConfig cfg, out Uri remoteUri)
+        {
+            remoteUri = null;
+
+            EnvConfig env = cfg.Load<EnvConfig>();
+
+            string gitDir = Path.Combine(env.Directories.Working, ".git");
+            if (!Directory.Exists(gitDir))
+                return $"Working directory '{env.Directories.Working}' is not a Git directory. Could not find the .git directory.";
+
+            string configFile = Path.Combine(gitDir, "config");
+            if (!File.Exists(configFile))
+                return $"Could not find config file under '{gitDir}'.";
+
+            string[] configLines = File.ReadAllLines(configFile);
+            for (int i = 0; i < configLines.Length; i++)
+            {
+                string configLine = configLines[i];
+
+                Match remoteMatch = RemotePattern.Match(configLine);
+                if (!remoteMatch.Success)
+                    continue;
+
+                string remoteName = remoteMatch.Groups[1].Value;
+                ctx.LogInfo($"Found remote {remoteName}");
+
+                Match urlMatch = UrlPattern.Match(configLines[i + 1]);
+                if (!urlMatch.Success)
+                    return $"Could not find the URL for the remote {remoteName}";
+
+                if (!Uri.TryCreate(urlMatch.Groups[1].Value, UriKind.Absolute, out remoteUri))
+                    return $"The URL for remote {remoteName} - {urlMatch.Groups[1].Value} - is not a valid URI.";
+
+                return null;
+            }
+
+            return "Could not find any remotes.";
+        }
+
+        private static readonly Regex RemotePattern = new(@"^\[remote ""(\w+)""\]$", RegexOptions.Compiled,
+            TimeSpan.FromSeconds(1));
+
+        private static readonly Regex UrlPattern = new(@"^\s*url\s*=\s*(.+)$", RegexOptions.Compiled,
             TimeSpan.FromSeconds(1));
     }
 }

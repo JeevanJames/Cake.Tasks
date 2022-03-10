@@ -5,8 +5,8 @@
         public const int Default = 0;
 
         /// <summary>
-        ///     Priority config tasks should run after all the normal config tasks, but before any CI
-        ///     system tasks.
+        ///     Priority config tasks should run after all the normal config tasks, but before any
+        ///     CI system tasks.
         /// </summary>
         public const int Priority = 100;
 

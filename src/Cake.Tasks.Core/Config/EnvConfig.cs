@@ -68,6 +68,15 @@ namespace Cake.Tasks.Config
             set => Set(Keys.Branch, value);
         }
 
+        /// <summary>
+        ///     Gets or sets the identifier of the current commit in the version control system.
+        /// </summary>
+        public string Commit
+        {
+            get => Get<string>(Keys.Commit);
+            set => Set(Keys.Commit, value);
+        }
+
         public IList<Publisher> Publishers
         {
             get => Get(Keys.Publishers, new List<Publisher>());
@@ -222,6 +231,7 @@ namespace Cake.Tasks.Config
             public const string Configuration = Prefix + nameof(Configuration);
             public const string IsCi = Prefix + nameof(IsCi);
             public const string Branch = Prefix + nameof(Branch);
+            public const string Commit = Prefix + nameof(Commit);
 
             public const string PublishProfiles = Prefix + nameof(PublishProfiles);
             public const string Publishers = Prefix + nameof(Publishers);
