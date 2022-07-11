@@ -17,6 +17,7 @@ limitations under the License.
 */
 #endregion
 
+using System.Collections.Generic;
 using System.Linq;
 
 using Cake.Common.Build;
@@ -39,13 +40,18 @@ namespace Cake.Tasks.Ci.Tfs
     public static class CiTfsTasks
     {
         [AfterPipelineTask(PipelineTask.Test, CiSystem = "tfs", ContinueOnError = true)]
-        public static void PublishTestResults(ICakeContext ctx)
+        public static void PublishTestResults(ICakeContext ctx, TaskConfig cfg)
         {
             IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
             if (!azurePipelines.IsRunningOnAzurePipelines || !azurePipelines.IsRunningOnAzurePipelinesHosted)
                 return;
 
+            EnvConfig env = cfg.Load<EnvConfig>();
+            string[] ioTrxFiles = IO.Directory.GetFiles(env.Directories.Working, "*.trx", IO.SearchOption.AllDirectories);
+            ctx.LogInfo($"TRX test result files found (via IO): {ioTrxFiles.Length}");
+
             FilePathCollection trxFiles = ctx.GetFiles("./**/*.trx");
+            ctx.LogInfo($"TRX test result files found: {trxFiles.Count}");
             if (trxFiles.Count == 0)
                 return;
 
@@ -77,14 +83,8 @@ namespace Cake.Tasks.Ci.Tfs
             IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
             ctx.LogInfo(azurePipelines.Dump());
 
-            //if (!azurePipelines.IsRunningOnAzurePipelines || !azurePipelines.IsRunningOnAzurePipelinesHosted)
-            //    throw new TaskConfigException("Not running in Azure Pipelines");
-
             EnvConfig env = cfg.Load<EnvConfig>();
             env.IsCi = true;
-
-            // If the build number is configured as an integer, use it. Otherwise use the build ID.
-            // Basically, we need something unique.
             env.Version.BuildNumber = azurePipelines.Environment.Build.Number;
         }
     }
