@@ -82,6 +82,7 @@ namespace Cake.Tasks.Ci.Tfs
         {
             IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
             ctx.LogInfo(azurePipelines.Dump());
+            ctx.LogInfo(azurePipelines.Environment.Repository.Dump());
 
             EnvConfig env = cfg.Load<EnvConfig>();
             env.IsCi = true;

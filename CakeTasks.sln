@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29306.81
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1F25E712-9FA5-4F2D-B255-BC961FE32C14}"
 EndProject
@@ -21,12 +21,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.Ci.AppVeyor", "p
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.JeevanJames", "plugin\Cake.Tasks.JeevanJames\Cake.Tasks.JeevanJames.csproj", "{5141E4E5-2AA1-4334-B7AA-B74F5546E017}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.Tasks.Git", "plugin\Cake.Tasks.Git\Cake.Tasks.Git.csproj", "{75200965-153F-4236-90CF-495ADDAD9FC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.Tasks.Git", "plugin\Cake.Tasks.Git\Cake.Tasks.Git.csproj", "{75200965-153F-4236-90CF-495ADDAD9FC5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B0241FCD-E498-4BC9-AB52-874D4CFB3786}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.build\deploy-nuget.ps1 = .build\deploy-nuget.ps1
+		Directory.build.props = Directory.build.props
+		Project.props = Project.props
 	EndProjectSection
 EndProject
 Global
