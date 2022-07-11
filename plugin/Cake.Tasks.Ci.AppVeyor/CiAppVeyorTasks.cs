@@ -41,6 +41,11 @@ namespace Cake.Tasks.Ci.AppVeyor
             EnvConfig env = cfg.Load<EnvConfig>();
             env.IsCi = true;
 
+            env.Repository.Name = appveyor.Environment.Repository.Name;
+            env.Repository.Type = appveyor.Environment.Repository.Scm;
+            env.Repository.Branch = appveyor.Environment.Repository.Branch;
+            env.Repository.Commit = appveyor.Environment.Repository.Commit.Id;
+
             env.Version.BuildNumber = appveyor.Environment.Build.Number.ToString();
             env.Version.Build = $"{env.Version.Primary}-build.{env.Version.BuildNumber}";
         }
