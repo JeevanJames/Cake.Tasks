@@ -22,8 +22,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+// ReSharper disable once CheckNamespace
 namespace Cake.Tasks.Config
 {
+    /// <summary>
+    ///     Represents a configuration list of values as either a static value, a static list of values
+    ///     or a factory delegate that can instantiate the list.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the list.</typeparam>
     public sealed class ConfigList<T>
     {
         private readonly T _value;
@@ -43,32 +49,33 @@ namespace Cake.Tasks.Config
 
         private ConfigList(Func<T> valueFunc)
         {
-            if (valueFunc is null)
-                throw new ArgumentNullException(nameof(valueFunc));
-            _valueFunc = valueFunc;
+            _valueFunc = valueFunc ?? throw new ArgumentNullException(nameof(valueFunc));
         }
 
         private ConfigList(Func<IList<T>> listFunc)
         {
-            if (listFunc is null)
-                throw new ArgumentNullException(nameof(listFunc));
-            _listFunc = listFunc;
+            _listFunc = listFunc ?? throw new ArgumentNullException(nameof(listFunc));
         }
 
+        /// <summary>
+        ///     Resolves the configuration list from either its fixed value, or from the factory delegate,
+        ///     depending on how it was setup.
+        /// </summary>
+        /// <returns>The final value of the configuration list.</returns>
         public IList<T> Resolve()
         {
-            if (_listFunc != null)
+            if (_listFunc is not null)
                 return _listFunc();
-            if (_list != null)
+            if (_list is not null)
                 return _list;
-            T value = _valueFunc != null ? _valueFunc() : _value;
-            return new T[] { value };
+            T value = _valueFunc is not null ? _valueFunc() : _value;
+            return new[] { value };
         }
 
         public override string ToString()
         {
             IList<T> values = Resolve();
-            if (values is null || !values.Any())
+            if (values is null || values.Count == 0)
                 return "[]";
             StringBuilder builder = values.Aggregate(new StringBuilder("["),
                 (sb, value) =>
@@ -82,15 +89,15 @@ namespace Cake.Tasks.Config
             return builder.ToString();
         }
 
-        public static implicit operator ConfigList<T>(T value) => new ConfigList<T>(value);
+        public static implicit operator ConfigList<T>(T value) => new(value);
 
-        public static implicit operator ConfigList<T>(Func<T> valueFunc) => new ConfigList<T>(valueFunc);
+        public static implicit operator ConfigList<T>(Func<T> valueFunc) => new(valueFunc);
 
-        public static implicit operator ConfigList<T>(T[] list) => new ConfigList<T>(list);
+        public static implicit operator ConfigList<T>(T[] list) => new(list);
 
-        public static implicit operator ConfigList<T>(List<T> list) => new ConfigList<T>(list);
+        public static implicit operator ConfigList<T>(List<T> list) => new(list);
 
-        public static implicit operator ConfigList<T>(Func<IList<T>> listFunc) => new ConfigList<T>(listFunc);
+        public static implicit operator ConfigList<T>(Func<IList<T>> listFunc) => new(listFunc);
 
         public static implicit operator List<T>(ConfigList<T> instance) => instance.Resolve().ToList();
     }

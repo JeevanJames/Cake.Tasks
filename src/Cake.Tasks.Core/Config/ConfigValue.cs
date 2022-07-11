@@ -19,8 +19,14 @@ limitations under the License.
 
 using System;
 
+// ReSharper disable once CheckNamespace
 namespace Cake.Tasks.Config
 {
+    /// <summary>
+    ///     Represents a configuration value as either a static value or as a factory delegate that
+    ///     can instantiate the value.
+    /// </summary>
+    /// <typeparam name="T">The type of the configuration value.</typeparam>
     public sealed class ConfigValue<T>
     {
         private readonly T _value;
@@ -38,9 +44,14 @@ namespace Cake.Tasks.Config
             _func = func;
         }
 
+        /// <summary>
+        ///     Resolves the value of the configuration from either its fixed value, or from the factory
+        ///     delegate, depending on how it was setup.
+        /// </summary>
+        /// <returns>The final value of the configuration value.</returns>
         public T Resolve()
         {
-            return _func != null ? _func() : _value;
+            return _func is not null ? _func() : _value;
         }
 
         public override string ToString()
@@ -49,9 +60,9 @@ namespace Cake.Tasks.Config
             return value?.ToString() ?? "[NULL]";
         }
 
-        public static implicit operator ConfigValue<T>(T value) => new ConfigValue<T>(value);
+        public static implicit operator ConfigValue<T>(T value) => new(value);
 
-        public static implicit operator ConfigValue<T>(Func<T> func) => new ConfigValue<T>(func);
+        public static implicit operator ConfigValue<T>(Func<T> func) => new(func);
 
         public static implicit operator T(ConfigValue<T> instance)
         {

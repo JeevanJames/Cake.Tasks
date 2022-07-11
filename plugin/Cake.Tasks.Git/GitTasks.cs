@@ -32,6 +32,11 @@ namespace Cake.Tasks.Git
 
             EnvConfig env = cfg.Load<EnvConfig>();
             env.Name = lastSegment;
+            env.Repository.Name = lastSegment;
+            env.Repository.Url = remoteUri.ToString();
+            env.Repository.Type = "git";
+
+            //TODO: Get the branch and commit details here
         }
 
         private static string TryGetRemoteUrl(ICakeContext ctx, TaskConfig cfg, out Uri remoteUri)

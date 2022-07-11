@@ -66,7 +66,6 @@ namespace Cake.Tasks.Module
                     .Trim();
                 env.Configuration = ctx.Arguments.GetArgument("Configuration") ?? "Release";
                 env.IsCi = false;
-                env.Branch = null;
 
                 env.Directories.Working = ctx.Environment.WorkingDirectory.FullPath;
                 string outputDirectory = Path.Combine(env.Directories.Working, ".ci");
@@ -74,6 +73,12 @@ namespace Cake.Tasks.Module
                 env.Directories.BinaryOutput = Path.Combine(outputDirectory, "binaries");
                 env.Directories.PublishOutput = Path.Combine(outputDirectory, "publish");
                 env.Directories.TestOutput = Path.Combine(outputDirectory, "testresults");
+
+                env.Repository.Name = env.Name;
+                env.Repository.Url = null;
+                env.Repository.Type = null;
+                env.Repository.Branch = null;
+                env.Repository.Commit = null;
 
                 env.Version.BuildNumber = "1";
                 env.Version.Primary = (Func<string>)(() => $"0.{env.Version.BuildNumber.Resolve()}.0");

@@ -212,8 +212,8 @@ namespace Cake.Tasks.DotNetCore
             {
                 ctx.DotNetCoreNuGetPush(packageFile, new DotNetCoreNuGetPushSettings
                 {
-                    Source = nuget.Source(env.Branch),
-                    ApiKey = nuget.ApiKey?.Invoke(env.Branch),
+                    Source = nuget.Source(env.Repository.Branch),
+                    ApiKey = nuget.ApiKey?.Invoke(env.Repository.Branch),
                 });
             }
         }

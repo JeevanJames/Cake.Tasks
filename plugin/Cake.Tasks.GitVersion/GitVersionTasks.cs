@@ -39,9 +39,9 @@ namespace Cake.Tasks.GitVersion
 
             EnvConfig env = cfg.Load<EnvConfig>();
 
-            // Update branch name
-            env.Branch = version.BranchName;
-            env.Commit = version.Sha;
+            // Update repository details
+            env.Repository.Branch = version.BranchName;
+            env.Repository.Commit = version.Sha;
 
             // Update primary and full versions
             env.Version.Primary = version.MajorMinorPatch;

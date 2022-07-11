@@ -32,6 +32,7 @@ namespace Cake.Tasks.Config
         {
             Ci = new CiConfig(taskConfig);
             Directories = new DirectoryConfig(taskConfig);
+            Repository = new RepositoryConfig(taskConfig);
             Version = new VersionConfig(taskConfig);
         }
 
@@ -59,24 +60,6 @@ namespace Cake.Tasks.Config
             set => Set(Keys.IsCi, value);
         }
 
-        /// <summary>
-        ///     Gets or sets the version control branch that this build is running from.
-        /// </summary>
-        public string Branch
-        {
-            get => Get<string>(Keys.Branch);
-            set => Set(Keys.Branch, value);
-        }
-
-        /// <summary>
-        ///     Gets or sets the identifier of the current commit in the version control system.
-        /// </summary>
-        public string Commit
-        {
-            get => Get<string>(Keys.Commit);
-            set => Set(Keys.Commit, value);
-        }
-
         public IList<Publisher> Publishers
         {
             get => Get(Keys.Publishers, new List<Publisher>());
@@ -92,6 +75,11 @@ namespace Cake.Tasks.Config
         ///     Gets the configuration for the location of common directories used during a build.
         /// </summary>
         public DirectoryConfig Directories { get; }
+
+        /// <summary>
+        ///     Gets the configuration for the source control repository.
+        /// </summary>
+        public RepositoryConfig Repository { get; }
 
         /// <summary>
         ///     Gets the configuration for version-related information.
@@ -171,6 +159,59 @@ namespace Cake.Tasks.Config
             }
         }
 
+        public sealed class RepositoryConfig : PluginConfig
+        {
+            public RepositoryConfig(TaskConfig taskConfig)
+                : base(taskConfig)
+            {
+            }
+
+            /// <summary>
+            ///     Gets or sets an identifier that represents the name of the source control repository.
+            /// </summary>
+            public ConfigValue<string> Name
+            {
+                get => GetValue<string>(Keys.RepositoryName);
+                set => Set(Keys.RepositoryName, value);
+            }
+
+            /// <summary>
+            ///     Gets or sets the URL of the source control repository.
+            /// </summary>
+            public ConfigValue<string> Url
+            {
+                get => GetValue<string>(Keys.RepositoryUrl);
+                set => Set(Keys.RepositoryUrl, value);
+            }
+
+            /// <summary>
+            ///     Gets or sets the type of the source control repository.
+            /// </summary>
+            public ConfigValue<string> Type
+            {
+                get => GetValue<string>(Keys.RepositoryType);
+                set => Set(Keys.RepositoryType, value);
+            }
+
+            /// <summary>
+            ///     Gets or sets the source control branch that this build is running from.
+            /// </summary>
+            public string Branch
+            {
+                get => Get<string>(Keys.Branch);
+                set => Set(Keys.Branch, value);
+            }
+
+            /// <summary>
+            ///     Gets or sets the identifier of the current commit in the source control repository.
+            /// </summary>
+            public string Commit
+            {
+                get => Get<string>(Keys.Commit);
+                set => Set(Keys.Commit, value);
+            }
+        }
+
         public sealed class VersionConfig : PluginConfig
         {
             public VersionConfig(TaskConfig taskConfig)
@@ -244,6 +285,10 @@ namespace Cake.Tasks.Config
             public const string DirectoryBinaryOutput = Prefix + nameof(DirectoryBinaryOutput);
             public const string DirectoryPublishOutput = Prefix + nameof(DirectoryPublishOutput);
             public const string DirectoryTestOutput = Prefix + nameof(DirectoryTestOutput);
+
+            public const string RepositoryName = Prefix + nameof(RepositoryName);
+            public const string RepositoryUrl = Prefix + nameof(RepositoryUrl);
+            public const string RepositoryType = Prefix + nameof(RepositoryType);
 
             public const string VersionBuildNumber = Prefix + nameof(VersionBuildNumber);
             public const string VersionPrimary = Prefix + nameof(VersionPrimary);
