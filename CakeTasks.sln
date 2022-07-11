@@ -26,6 +26,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B0241FCD-E498-4BC9-AB52-874D4CFB3786}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		CakeTasks.sln.licenseheader = CakeTasks.sln.licenseheader
 		.build\deploy-nuget.ps1 = .build\deploy-nuget.ps1
 		Directory.build.props = Directory.build.props
 		Project.props = Project.props
