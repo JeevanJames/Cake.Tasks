@@ -7,83 +7,85 @@ using System;
 using System.ComponentModel;
 using System.Reflection;
 
-namespace Cake.Tasks.Config
+// ReSharper disable once CheckNamespace
+namespace Cake.Tasks.Config;
+
+/// <summary>
+///     Represents the config object for a Cake.Task plugin.
+///     <para/>
+///     Plugins should create a class that derives from this class, if they want to have
+///     configuration.
+/// </summary>
+/// <example><see cref="EnvConfig"/>.</example>
+public abstract class PluginConfig
 {
-    /// <summary>
-    ///     Represents the config object for a Cake.Task plugin.
-    ///     <para/>
-    ///     Plugins should create a class that derives from this class, if they want to have
-    ///     configuration.
-    /// </summary>
-    /// <example><see cref="EnvConfig"/>.</example>
-    public abstract class PluginConfig
+    private readonly TaskConfig _taskConfig;
+
+    protected PluginConfig(TaskConfig taskConfig)
     {
-        private readonly TaskConfig _taskConfig;
+        _taskConfig = taskConfig;
+    }
 
-        protected PluginConfig(TaskConfig taskConfig)
+    protected T Get<T>(string name, T defaultValue = default)
+    {
+        if (!_taskConfig.Data.TryGetValue(name, out object value))
         {
-            _taskConfig = taskConfig;
+            _taskConfig.Data.Add(name, defaultValue);
+            return defaultValue;
         }
 
-        protected T Get<T>(string name, T defaultValue = default)
+        if (value is null)
+            return defaultValue;
+        if (value is string str && typeof(T) != typeof(string))
         {
-            if (!_taskConfig.Data.TryGetValue(name, out object value))
-            {
-                _taskConfig.Data.Add(name, defaultValue);
-                return defaultValue;
-            }
-
-            if (value is null)
-                return defaultValue;
-            if (value is string str && typeof(T) != typeof(string))
-            {
-                if (TryFromConfigValue<T>(str, out T fovValue))
-                    return fovValue;
-                return (T)FromString(str, typeof(T));
-            }
-
-            return (T)value;
+            if (TryFromConfigValue(str, out T fovValue))
+                return fovValue;
+            return (T)FromString(str, typeof(T));
         }
 
-        protected ConfigList<T> GetList<T>(string name) =>
-            Get<ConfigList<T>>(name);
+        return (T)value;
+    }
 
-        protected T GetValue<T>(string name) =>
-            Get<ConfigValue<T>>(name);
+    protected ConfigList<T> GetList<T>(string name)
+    {
+        return Get<ConfigList<T>>(name);
+    }
 
-        private bool TryFromConfigValue<T>(string str, out T value)
-        {
-            value = default;
-            Type type = typeof(T);
-            if (!type.IsGenericType)
-                return false;
-            Type genericTypeDef = type.GetGenericTypeDefinition();
-            if (genericTypeDef != typeof(ConfigValue<>))
-                return false;
+    protected T GetValue<T>(string name)
+    {
+        return Get<ConfigValue<T>>(name);
+    }
 
-            Type dataType = type.GetGenericArguments()[0];
-            object data = FromString(str, dataType);
+    private static bool TryFromConfigValue<T>(string str, out T value)
+    {
+        value = default;
+        Type type = typeof(T);
+        if (!type.IsGenericType)
+            return false;
+        Type genericTypeDef = type.GetGenericTypeDefinition();
+        if (genericTypeDef != typeof(ConfigValue<>))
+            return false;
+
+        Type dataType = type.GetGenericArguments()[0];
+        object data = FromString(str, dataType);
 
 #pragma warning disable S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
-            value = (T)Activator.CreateInstance(type, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { data }, null);
+        value = (T)Activator.CreateInstance(type, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { data }, null);
 #pragma warning restore S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
-            return true;
-        }
+        return true;
+    }
 
-        private static object FromString(string str, Type type)
-        {
-            TypeConverter converter = TypeDescriptor.GetConverter(type);
-            if (!converter.CanConvertFrom(typeof(string)))
-                return default;
-            return converter.ConvertFromString(str);
-        }
+    private static object FromString(string str, Type type)
+    {
+        TypeConverter converter = TypeDescriptor.GetConverter(type);
+        return converter.CanConvertFrom(typeof(string)) ? converter.ConvertFromString(str) : default;
+    }
 
-        protected void Set<T>(string name, T value)
-        {
-            if (_taskConfig.Data.ContainsKey(name))
-                _taskConfig.Data[name] = value;
-            else
-                _taskConfig.Data.Add(name, value);
-        }
+    protected void Set<T>(string name, T value)
+    {
+        if (_taskConfig.Data.ContainsKey(name))
+            _taskConfig.Data[name] = value;
+        else
+            _taskConfig.Data.Add(name, value);
     }
 }

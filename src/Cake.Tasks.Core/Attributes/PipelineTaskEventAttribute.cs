@@ -3,37 +3,36 @@
 // This file is licensed to you under the Apache License, Version 2.0.
 // See the LICENSE file in the project root for more information.
 
-namespace Cake.Tasks.Core
+namespace Cake.Tasks.Core;
+
+public abstract class PipelineTaskEventAttribute : BasePipelineTaskAttribute
 {
-    public abstract class PipelineTaskEventAttribute : BasePipelineTaskAttribute
+    protected PipelineTaskEventAttribute(PipelineTask pipelineTask)
     {
-        protected PipelineTaskEventAttribute(PipelineTask pipelineTask)
-        {
-            PipelineTask = pipelineTask;
-        }
-
-        public PipelineTask PipelineTask { get; }
+        PipelineTask = pipelineTask;
     }
 
-    public sealed class BeforePipelineTaskAttribute : PipelineTaskEventAttribute
-    {
-        public BeforePipelineTaskAttribute(PipelineTask pipelineTask)
-            : base(pipelineTask)
-        {
-        }
-    }
+    public PipelineTask PipelineTask { get; }
+}
 
-    public sealed class AfterPipelineTaskAttribute : PipelineTaskEventAttribute
+public sealed class BeforePipelineTaskAttribute : PipelineTaskEventAttribute
+{
+    public BeforePipelineTaskAttribute(PipelineTask pipelineTask)
+        : base(pipelineTask)
     {
-        public AfterPipelineTaskAttribute(PipelineTask pipelineTask)
-            : base(pipelineTask)
-        {
-        }
     }
+}
 
-    internal enum TaskEventType
+public sealed class AfterPipelineTaskAttribute : PipelineTaskEventAttribute
+{
+    public AfterPipelineTaskAttribute(PipelineTask pipelineTask)
+        : base(pipelineTask)
     {
-        BeforeTask,
-        AfterTask,
     }
+}
+
+internal enum TaskEventType
+{
+    BeforeTask,
+    AfterTask,
 }

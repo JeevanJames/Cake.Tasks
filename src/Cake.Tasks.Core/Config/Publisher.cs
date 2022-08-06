@@ -7,70 +7,70 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Cake.Tasks.Config
+// ReSharper disable once CheckNamespace
+namespace Cake.Tasks.Config;
+
+/// <summary>
+///     Represents an item that can be published from the current build.
+/// </summary>
+public abstract class Publisher
 {
     /// <summary>
-    ///     Represents an item that can be published from the current build.
+    ///     Additional properties that can be set on the publisher to control the behavior of
+    ///     specific tasks.
     /// </summary>
-    public abstract class Publisher
+    private readonly IDictionary<string, object> _properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    ///     Indicates whether the output properties - <see cref="OutputLocation"/> and
+    ///     <see cref="OutputType"/> have been set using the <see cref="SetOutput"/> method. This
+    ///     is used to ensure that the method is called only once.
+    /// </summary>
+    private bool _outputSet;
+
+    private PublishOutputType _outputType;
+
+    /// <summary>
+    ///     Gets the directory where the published output is copied to, or the file name of the
+    ///     published output, depending on the value of <see cref="OutputType"/>.
+    /// </summary>
+    public string OutputLocation { get; private set; }
+
+    /// <summary>
+    ///     Gets whether the published output is a directory of multiple files or a single file.
+    /// </summary>
+    public virtual PublishOutputType OutputType => _outputType;
+
+    public void SetOutput(string location, PublishOutputType type = PublishOutputType.Directory)
     {
-        /// <summary>
-        ///     Additional properties that can be set on the publisher to control the behavior of
-        ///     specific tasks.
-        /// </summary>
-        private readonly IDictionary<string, object> _properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        if (_outputSet)
+            throw new InvalidOperationException("The output is already set for this publisher. Cannot set it again.");
 
-        /// <summary>
-        ///     Indicates whether the output properties - <see cref="OutputLocation"/> and
-        ///     <see cref="OutputType"/> have been set using the <see cref="SetOutput"/> method. This
-        ///     is used to ensure that the method is called only once.
-        /// </summary>
-        private bool _outputSet;
+        if (type == PublishOutputType.Directory && !Directory.Exists(location))
+            throw new DirectoryNotFoundException($"The specified output directory '{location ?? string.Empty}' does not exist.");
+        if (type == PublishOutputType.File && !File.Exists(location))
+            throw new FileNotFoundException($"The specified output file does not exist.", location ?? string.Empty);
 
-        private PublishOutputType _outputType;
+        OutputLocation = location;
+        _outputType = type;
 
-        /// <summary>
-        ///     Gets the directory where the published output is copied to, or the file name of the
-        ///     published output, depending on the value of <see cref="OutputType"/>.
-        /// </summary>
-        public string OutputLocation { get; private set; }
-
-        /// <summary>
-        ///     Gets whether the published output is a directory of multiple files or a single file.
-        /// </summary>
-        public virtual PublishOutputType OutputType => _outputType;
-
-        public void SetOutput(string location, PublishOutputType type = PublishOutputType.Directory)
-        {
-            if (_outputSet)
-                throw new InvalidOperationException("The output is already set for this publisher. Cannot set it again.");
-
-            if (type == PublishOutputType.Directory && !Directory.Exists(location))
-                throw new DirectoryNotFoundException($"The specified output directory '{location ?? string.Empty}' does not exist.");
-            if (type == PublishOutputType.File && !File.Exists(location))
-                throw new FileNotFoundException($"The specified output file does not exist.", location ?? string.Empty);
-
-            OutputLocation = location;
-            _outputType = type;
-
-            _outputSet = true;
-        }
-
-        public T GetProperty<T>(string name)
-        {
-            return _properties.TryGetValue(name, out object obj) ? (T)obj : default;
-        }
-
-        public Publisher SetProperty<T>(string name, T value)
-        {
-            _properties.Add(name, value);
-            return this;
-        }
+        _outputSet = true;
     }
 
-    public enum PublishOutputType
+    public T GetProperty<T>(string name)
     {
-        Directory,
-        File,
+        return _properties.TryGetValue(name, out object obj) ? (T)obj : default;
     }
+
+    public Publisher SetProperty<T>(string name, T value)
+    {
+        _properties.Add(name, value);
+        return this;
+    }
+}
+
+public enum PublishOutputType
+{
+    Directory,
+    File,
 }

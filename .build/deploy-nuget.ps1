@@ -7,6 +7,7 @@ if (-Not $Version) {
 	Write-Host -ForegroundColor Red "Please specify the version to publish"
 	Write-Host -ForegroundColor Cyan -NoNewLine "USAGE: "
 	Write-Host "deploy-nuget.ps1 -version <version>"
+    nuget list Cake.Tasks.Core
 	exit -1
 }
 

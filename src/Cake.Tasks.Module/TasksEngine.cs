@@ -10,102 +10,108 @@ using System.Threading.Tasks;
 using Cake.Core;
 using Cake.Core.Diagnostics;
 
-namespace Cake.Tasks.Module
+namespace Cake.Tasks.Module;
+
+/// <summary>
+///     Custom <see cref="ICakeEngine"/> implementation that delegates all behavior to the default
+///     <see cref="CakeEngine"/> implementation, but performs Cake.Tasks-related initialization
+///     in the <see cref="RunTargetAsync"/> method.
+///     <para/>
+///     See the partial class for the custom implementation details.
+/// </summary>
+public sealed partial class TasksEngine : ICakeEngine
 {
-    public sealed partial class TasksEngine : ICakeEngine
+    private readonly ICakeEngine _engine;
+
+    private ICakeLog Log { get; }
+
+    private ICakeContext Context { get; }
+
+    public TasksEngine(ICakeDataService dataService, ICakeLog log, ICakeContext context)
     {
-        private readonly ICakeEngine _engine;
+        _engine = new CakeEngine(dataService, log);
+        Log = log;
+        Context = context;
+    }
 
-        private ICakeLog Log { get; }
+    public IReadOnlyList<ICakeTaskInfo> Tasks => _engine.Tasks;
 
-        private ICakeContext Context { get; }
+    public event EventHandler<SetupEventArgs> Setup
+    {
+        add => _engine.Setup += value;
+        remove => _engine.Setup -= value;
+    }
 
-        public TasksEngine(ICakeDataService dataService, ICakeLog log, ICakeContext context)
-        {
-            _engine = new CakeEngine(dataService, log);
-            Log = log;
-            Context = context;
-        }
+    public event EventHandler<TeardownEventArgs> Teardown
+    {
+        add => _engine.Teardown += value;
+        remove => _engine.Teardown -= value;
+    }
 
-        public IReadOnlyList<ICakeTaskInfo> Tasks => _engine.Tasks;
+    public event EventHandler<TaskSetupEventArgs> TaskSetup
+    {
+        add => _engine.TaskSetup += value;
+        remove => _engine.TaskSetup -= value;
+    }
 
-        public event EventHandler<SetupEventArgs> Setup
-        {
-            add => _engine.Setup += value;
-            remove => _engine.Setup -= value;
-        }
+    public event EventHandler<TaskTeardownEventArgs> TaskTeardown
+    {
+        add => _engine.TaskTeardown += value;
+        remove => _engine.TaskTeardown -= value;
+    }
 
-        public event EventHandler<TeardownEventArgs> Teardown
-        {
-            add => _engine.Teardown += value;
-            remove => _engine.Teardown -= value;
-        }
+    public void RegisterSetupAction(Action<ISetupContext> action)
+    {
+        _engine.RegisterSetupAction(action);
+    }
 
-        public event EventHandler<TaskSetupEventArgs> TaskSetup
-        {
-            add => _engine.TaskSetup += value;
-            remove => _engine.TaskSetup -= value;
-        }
+    public void RegisterSetupAction<TData>(Func<ISetupContext, TData> action)
+        where TData : class
+    {
+        _engine.RegisterSetupAction(action);
+    }
 
-        public event EventHandler<TaskTeardownEventArgs> TaskTeardown
-        {
-            add => _engine.TaskTeardown += value;
-            remove => _engine.TaskTeardown -= value;
-        }
+    public CakeTaskBuilder RegisterTask(string name)
+    {
+        return _engine.RegisterTask(name);
+    }
 
-        public void RegisterSetupAction(Action<ISetupContext> action)
-        {
-            _engine.RegisterSetupAction(action);
-        }
+    public void RegisterTaskSetupAction(Action<ITaskSetupContext> action)
+    {
+        _engine.RegisterTaskSetupAction(action);
+    }
 
-        public void RegisterSetupAction<TData>(Func<ISetupContext, TData> action)
-            where TData : class
-        {
-            _engine.RegisterSetupAction(action);
-        }
+    public void RegisterTaskSetupAction<TData>(Action<ITaskSetupContext, TData> action)
+        where TData : class
+    {
+        _engine.RegisterTaskSetupAction(action);
+    }
 
-        public CakeTaskBuilder RegisterTask(string name)
-        {
-            return _engine.RegisterTask(name);
-        }
+    public void RegisterTaskTeardownAction(Action<ITaskTeardownContext> action)
+    {
+        _engine.RegisterTaskTeardownAction(action);
+    }
 
-        public void RegisterTaskSetupAction(Action<ITaskSetupContext> action)
-        {
-            _engine.RegisterTaskSetupAction(action);
-        }
+    public void RegisterTaskTeardownAction<TData>(Action<ITaskTeardownContext, TData> action)
+        where TData : class
+    {
+        _engine.RegisterTaskTeardownAction(action);
+    }
 
-        public void RegisterTaskSetupAction<TData>(Action<ITaskSetupContext, TData> action)
-            where TData : class
-        {
-            _engine.RegisterTaskSetupAction(action);
-        }
+    public void RegisterTeardownAction(Action<ITeardownContext> action)
+    {
+        _engine.RegisterTeardownAction(action);
+    }
 
-        public void RegisterTaskTeardownAction(Action<ITaskTeardownContext> action)
-        {
-            _engine.RegisterTaskTeardownAction(action);
-        }
+    public void RegisterTeardownAction<TData>(Action<ITeardownContext, TData> action)
+        where TData : class
+    {
+        _engine.RegisterTeardownAction(action);
+    }
 
-        public void RegisterTaskTeardownAction<TData>(Action<ITaskTeardownContext, TData> action)
-            where TData : class
-        {
-            _engine.RegisterTaskTeardownAction(action);
-        }
-
-        public void RegisterTeardownAction(Action<ITeardownContext> action)
-        {
-            _engine.RegisterTeardownAction(action);
-        }
-
-        public void RegisterTeardownAction<TData>(Action<ITeardownContext, TData> action)
-            where TData : class
-        {
-            _engine.RegisterTeardownAction(action);
-        }
-
-        public Task<CakeReport> RunTargetAsync(ICakeContext context, IExecutionStrategy strategy, ExecutionSettings settings)
-        {
-            InitializeCakeTasksSystem();
-            return _engine.RunTargetAsync(context, strategy, settings);
-        }
+    public Task<CakeReport> RunTargetAsync(ICakeContext context, IExecutionStrategy strategy, ExecutionSettings settings)
+    {
+        InitializeCakeTasksSystem();
+        return _engine.RunTargetAsync(context, strategy, settings);
     }
 }

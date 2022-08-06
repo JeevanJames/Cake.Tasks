@@ -5,23 +5,22 @@
 
 using System;
 
-namespace Cake.Tasks.Core
-{
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public abstract class BaseTaskAttribute : Attribute
-    {
-        /// <summary>
-        ///     Gets or sets the name of the CI system in which this task can be executed (TFS,
-        ///     AppVeyor, etc.).
-        ///     <para/>
-        ///     If not specified, this task will always be executed.
-        /// </summary>
-        public string CiSystem { get; set; }
+namespace Cake.Tasks.Core;
 
-        /// <summary>
-        ///     Gets or sets a value indicating whether the task should swallow any exceptions and
-        ///     continue running.
-        /// </summary>
-        public bool ContinueOnError { get; set; }
-    }
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public abstract class BaseTaskAttribute : Attribute
+{
+    /// <summary>
+    ///     Gets or sets the name of the CI system in which this task can be executed (TFS,
+    ///     AppVeyor, etc.).
+    ///     <para/>
+    ///     If not specified, this task will always be executed.
+    /// </summary>
+    public string CiSystem { get; set; }
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether the task should swallow any exceptions and
+    ///     continue running.
+    /// </summary>
+    public bool ContinueOnError { get; set; }
 }

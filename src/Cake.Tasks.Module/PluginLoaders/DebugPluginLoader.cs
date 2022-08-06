@@ -13,35 +13,33 @@ using System.Reflection;
 
 using Cake.Core.Diagnostics;
 
-namespace Cake.Tasks.Module.PluginLoaders
+namespace Cake.Tasks.Module.PluginLoaders;
+
+public sealed class DebugPluginLoader : PluginLoader
 {
-    public sealed class DebugPluginLoader : PluginLoader
+    public DebugPluginLoader(string pluginsDir, ICakeLog log)
+        : base(pluginsDir, log)
     {
-        public DebugPluginLoader(string pluginsDir, ICakeLog log)
-            : base(pluginsDir, log)
-        {
-        }
+    }
 
-        internal override IEnumerable<RegisteredTask> LoadPlugins()
-        {
-            string[] dllFiles = Directory.GetFiles(PluginsDir, "Cake.Tasks.*.dll", SearchOption.TopDirectoryOnly);
+    internal override IEnumerable<RegisteredTask> LoadPlugins()
+    {
+        string[] dllFiles = Directory.GetFiles(PluginsDir, "Cake.Tasks.*.dll", SearchOption.TopDirectoryOnly);
 
-            foreach (string dllFile in dllFiles)
-            {
-                IEnumerable<RegisteredTask> dllPlugins = FindPlugins(dllFile);
-                foreach (var dllPlugin in dllPlugins)
-                    yield return dllPlugin;
-            }
-        }
-
-        protected override Assembly ResolveAssembly(object sender, ResolveEventArgs args)
+        foreach (string dllFile in dllFiles)
         {
-            var assemblyName = new AssemblyName(args.Name);
-            string assemblyPath = Directory
-                .GetFiles(PluginsDir, $"{assemblyName.Name}.dll", SearchOption.TopDirectoryOnly)
-                .FirstOrDefault();
-            Log.Verbose($"[Assembly Lookup] {assemblyName.Name}.dll");
-            return Assembly.LoadFile(assemblyPath);
+            foreach (RegisteredTask dllPlugin in FindPlugins(dllFile))
+                yield return dllPlugin;
         }
+    }
+
+    protected override Assembly ResolveAssembly(object sender, ResolveEventArgs args)
+    {
+        var assemblyName = new AssemblyName(args.Name);
+        string assemblyPath = Directory
+            .GetFiles(PluginsDir, $"{assemblyName.Name}.dll", SearchOption.TopDirectoryOnly)
+            .FirstOrDefault();
+        Log.Verbose($"[Assembly Lookup] {assemblyName.Name}.dll");
+        return Assembly.LoadFile(assemblyPath);
     }
 }

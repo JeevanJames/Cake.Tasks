@@ -10,13 +10,12 @@ using Cake.Tasks.Module;
 
 [assembly: CakeModule(typeof(TasksModule))]
 
-namespace Cake.Tasks.Module
+namespace Cake.Tasks.Module;
+
+public sealed class TasksModule : ICakeModule
 {
-    public sealed class TasksModule : ICakeModule
+    public void Register(ICakeContainerRegistrar registrar)
     {
-        public void Register(ICakeContainerRegistrar registrar)
-        {
-            registrar.RegisterType<TasksEngine>().As<ICakeEngine>().Singleton();
-        }
+        registrar.RegisterType<TasksEngine>().As<ICakeEngine>().Singleton();
     }
 }

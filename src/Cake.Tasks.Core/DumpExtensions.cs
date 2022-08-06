@@ -22,7 +22,7 @@ public static class DumpExtensions
 
         var dump = new StringBuilder();
         if (IsSimpleType(obj.GetType()))
-            dump.Append(obj.ToString());
+            dump.Append(obj);
         else if (obj is IEnumerable objEnumerable)
         {
             bool first = true;
@@ -101,7 +101,7 @@ public static class DumpExtensions
     {
         return
             type.IsPrimitive ||
-            new Type[]
+            new[]
             {
                 typeof(Enum),
                 typeof(string),

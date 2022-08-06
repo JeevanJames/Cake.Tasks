@@ -5,32 +5,32 @@
 
 using System.Collections.Generic;
 
-namespace Cake.Tasks.Config
+// ReSharper disable once CheckNamespace
+namespace Cake.Tasks.Config;
+
+public class DirectoryPublisher : Publisher
 {
-    public class DirectoryPublisher : Publisher
+    public DirectoryPublisher(string directory)
     {
-        public DirectoryPublisher(string directory)
-        {
-            Directory = directory;
-        }
-
-        public string Directory { get; }
-
-        public override PublishOutputType OutputType => PublishOutputType.Directory;
-
-        public virtual void ValidateDirectory()
-        {
-            // No validation, by default
-        }
+        Directory = directory;
     }
 
-    public static class DirectoryPublisherExtensions
+    public string Directory { get; }
+
+    public override PublishOutputType OutputType => PublishOutputType.Directory;
+
+    public virtual void ValidateDirectory()
     {
-        public static Publisher AddDirectory(this IList<Publisher> publishers, string directory)
-        {
-            var publisher = new DirectoryPublisher(directory);
-            publishers.Add(publisher);
-            return publisher;
-        }
+        // No validation, by default
+    }
+}
+
+public static class DirectoryPublisherExtensions
+{
+    public static Publisher AddDirectory(this IList<Publisher> publishers, string directory)
+    {
+        var publisher = new DirectoryPublisher(directory);
+        publishers.Add(publisher);
+        return publisher;
     }
 }

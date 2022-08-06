@@ -6,49 +6,66 @@
 using System;
 using System.Collections.Generic;
 
-namespace Cake.Tasks.Config
+// ReSharper disable once CheckNamespace
+namespace Cake.Tasks.Config;
+
+public sealed class TaskConfig
 {
-    public sealed class TaskConfig
+    public static TaskConfig Current { get; } = new();
+
+    private TaskConfig()
     {
-        public static TaskConfig Current { get; } = new TaskConfig();
+    }
 
-        private TaskConfig()
+    /// <summary>
+    ///     Loads the subset of configurations for a specific plugin configuration type.
+    /// </summary>
+    /// <typeparam name="T">
+    ///     The type of plugin configuration to load the configuration for.
+    /// </typeparam>
+    /// <returns>The <see cref="PluginConfig"/> instance for the subset of configurations.</returns>
+    public T Load<T>()
+        where T : PluginConfig
+    {
+        return (T)Activator.CreateInstance(typeof(T), this);
+    }
+
+    /// <summary>
+    ///     Gets the internal structure that maintains all task configurations.
+    /// </summary>
+    internal IDictionary<string, object> Data { get; } =
+        new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+    private List<Action<TaskConfig>> _deferredSetups;
+
+    /// <summary>
+    ///     For any calls to <c>ConfigureTasks</c> or <c>ConfigureTask</c> in the .cake file, the
+    ///     specified lambdas are stored in a list so that they can be executed at the last possible
+    ///     time. This will enable the .cake configurations to override anything else.
+    ///     <para/>
+    ///     At the appropriate point in the framework, it will call the <see cref="PerformDeferredSetup"/>
+    ///     method to execute the lambdas.
+    /// </summary>
+    /// <param name="setup">
+    ///     The delegate passed to the <c>ConfigureTasks</c> or <c>ConfigureTask</c> methods.
+    /// </param>
+    internal void SetDeferredSetup(Action<TaskConfig> setup)
+    {
+        if (setup is null)
+            throw new ArgumentNullException(nameof(setup));
+        _deferredSetups ??= new List<Action<TaskConfig>>();
+        _deferredSetups.Add(setup);
+    }
+
+    /// <summary>
+    ///     Executes any deferred delegates set up from the .cake file.
+    /// </summary>
+    internal void PerformDeferredSetup()
+    {
+        if (_deferredSetups is not null)
         {
-        }
-
-        /// <summary>
-        ///     Loads the subset of configurations for a specific plugin configuration type.
-        /// </summary>
-        /// <typeparam name="T">
-        ///     The type of plugin configuration to load the configuration for.
-        /// </typeparam>
-        /// <returns>The <see cref="PluginConfig"/> instance for the subset of configurations.</returns>
-        public T Load<T>()
-            where T : PluginConfig
-        {
-            var config = (T)Activator.CreateInstance(typeof(T), this);
-            return config;
-        }
-
-        internal IDictionary<string, object> Data { get; } =
-            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-
-        private List<Action<TaskConfig>> _deferredSetups;
-
-        internal void SetDeferredSetup(Action<TaskConfig> setup)
-        {
-            if (_deferredSetups is null)
-                _deferredSetups = new List<Action<TaskConfig>>();
-            _deferredSetups.Add(setup);
-        }
-
-        internal void PerformDeferredSetup()
-        {
-            if (_deferredSetups != null)
-            {
-                foreach (Action<TaskConfig> deferredSetup in _deferredSetups)
-                    deferredSetup(this);
-            }
+            foreach (Action<TaskConfig> deferredSetup in _deferredSetups)
+                deferredSetup(this);
         }
     }
 }

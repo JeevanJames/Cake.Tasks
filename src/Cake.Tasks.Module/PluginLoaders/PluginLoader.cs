@@ -36,7 +36,7 @@ namespace Cake.Tasks.Module.PluginLoaders
 
         internal IEnumerable<RegisteredTask> FindPlugins(string dllFile)
         {
-            var assembly = Assembly.LoadFile(dllFile);
+            Assembly assembly = Assembly.LoadFile(dllFile);
 
             IEnumerable<TaskPluginAttribute> taskPlugins = assembly.GetCustomAttributes<TaskPluginAttribute>();
 
@@ -50,7 +50,8 @@ namespace Cake.Tasks.Module.PluginLoaders
                 foreach (MethodInfo method in methods)
                 {
                     // Gets any task attributes on the method.
-                    IEnumerable<BaseTaskAttribute> taskAttributes = method.GetCustomAttributes<BaseTaskAttribute>(inherit: true);
+                    IEnumerable<BaseTaskAttribute> taskAttributes = method.GetCustomAttributes<BaseTaskAttribute>(
+                        inherit: true);
                     if (!taskAttributes.Any())
                         continue;
 
@@ -66,7 +67,7 @@ namespace Cake.Tasks.Module.PluginLoaders
                     // Go through each task attribute and create a RegisteredTask object
                     foreach (BaseTaskAttribute taskAttribute in taskAttributes)
                     {
-                        var registeredTask = new RegisteredTask
+                        RegisteredTask registeredTask = new()
                         {
                             AttributeType = taskAttribute.GetType(),
                             Method = method,

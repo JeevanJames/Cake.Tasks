@@ -3,18 +3,17 @@
 // This file is licensed to you under the Apache License, Version 2.0.
 // See the LICENSE file in the project root for more information.
 
-namespace Cake.Tasks.Core
-{
-    public sealed class TaskAttribute : BaseTaskAttribute
-    {
-        /// <summary>
-        ///     Gets or sets a value indicating whether to run the config tasks before this task is run.
-        /// </summary>
-        public bool RequiresConfig { get; set; }
+namespace Cake.Tasks.Core;
 
-        /// <summary>
-        ///     Gets or sets the description of this task.
-        /// </summary>
-        public string Description { get; set; }
-    }
+public sealed class TaskAttribute : BaseTaskAttribute
+{
+    /// <summary>
+    ///     Gets or sets a value indicating whether to run the config tasks before this task is run.
+    /// </summary>
+    public bool RequiresConfig { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the description of this task.
+    /// </summary>
+    public string Description { get; set; }
 }

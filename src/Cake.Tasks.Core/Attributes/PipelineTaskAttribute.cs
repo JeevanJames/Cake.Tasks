@@ -3,15 +3,14 @@
 // This file is licensed to you under the Apache License, Version 2.0.
 // See the LICENSE file in the project root for more information.
 
-namespace Cake.Tasks.Core
-{
-    public sealed class PipelineTaskAttribute : BasePipelineTaskAttribute
-    {
-        public PipelineTaskAttribute(PipelineTask coreTask)
-        {
-            PipelineTask = coreTask;
-        }
+namespace Cake.Tasks.Core;
 
-        public PipelineTask PipelineTask { get; }
+public sealed class PipelineTaskAttribute : BasePipelineTaskAttribute
+{
+    public PipelineTaskAttribute(PipelineTask coreTask)
+    {
+        PipelineTask = coreTask;
     }
+
+    public PipelineTask PipelineTask { get; }
 }

@@ -27,8 +27,7 @@ namespace Cake.Tasks.Module.PluginLoaders
         {
             AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
 
-            IEnumerable<string> cakeTasksDirs = AddinFinder.Find(PluginsDir);
-            foreach (string cakeTasksDir in cakeTasksDirs)
+            foreach (string cakeTasksDir in AddinFinder.Find(PluginsDir))
             {
                 //TODO: Need to support for framework targets
                 string dllDir = Path.Combine(cakeTasksDir, "lib", "netstandard2.0");
@@ -39,8 +38,7 @@ namespace Cake.Tasks.Module.PluginLoaders
 
                 foreach (string dllFile in dllFiles)
                 {
-                    IEnumerable<RegisteredTask> dllPlugins = FindPlugins(dllFile);
-                    foreach (RegisteredTask dllPlugin in dllPlugins)
+                    foreach (RegisteredTask dllPlugin in FindPlugins(dllFile))
                         yield return dllPlugin;
                 }
             }
@@ -48,7 +46,7 @@ namespace Cake.Tasks.Module.PluginLoaders
 
         protected override Assembly ResolveAssembly(object sender, ResolveEventArgs args)
         {
-            var assemblyName = new AssemblyName(args.Name);
+            AssemblyName assemblyName = new(args.Name);
             string assemblyPath = Directory
                 .GetFiles(PluginsDir, $"{assemblyName.Name}.dll", SearchOption.AllDirectories)
                 .FirstOrDefault();
