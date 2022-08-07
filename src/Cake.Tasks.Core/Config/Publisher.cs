@@ -19,7 +19,7 @@ public abstract class Publisher
     ///     Additional properties that can be set on the publisher to control the behavior of
     ///     specific tasks.
     /// </summary>
-    private readonly IDictionary<string, object> _properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, object> _properties = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     ///     Indicates whether the output properties - <see cref="OutputLocation"/> and

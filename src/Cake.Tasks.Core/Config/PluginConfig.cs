@@ -25,6 +25,8 @@ public abstract class PluginConfig
 
     protected PluginConfig(TaskConfig taskConfig)
     {
+        if (taskConfig is null)
+            throw new ArgumentNullException(nameof(taskConfig));
         _taskConfig = taskConfig;
     }
 
@@ -51,6 +53,8 @@ public abstract class PluginConfig
         // create a new ConfigValue<> instance with the dictionary value as its underlying value.
         if (TryReadAsConfigValue(value, out T configValue))
             return configValue;
+
+        //TODO: Should we read ConfigList<> values also?
 
         if (value is string str && typeof(T) != typeof(string))
         {

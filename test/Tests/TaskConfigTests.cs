@@ -1,5 +1,3 @@
-using Shouldly;
-
 namespace Cake.Tasks.Tests;
 
 public sealed class TaskConfigTests
