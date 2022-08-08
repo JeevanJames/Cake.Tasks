@@ -11,9 +11,9 @@ using System.Text.RegularExpressions;
 
 using Semver;
 
-namespace Cake.Tasks.Core.Internal;
+namespace Cake.Tasks.Module.Internal;
 
-public static class AddinFinder
+internal static class AddinFinder
 {
     /// <summary>
     ///     Finds all add-in directories given a base directory for add-ins.
@@ -25,7 +25,7 @@ public static class AddinFinder
     /// </summary>
     /// <param name="addinsBaseDir">The base directory to search under.</param>
     /// <returns>Collection of directories containing Cake.Task add-ins.</returns>
-    public static IEnumerable<string> Find(string addinsBaseDir)
+    internal static IEnumerable<string> Find(string addinsBaseDir)
     {
         return Directory
             .EnumerateDirectories(addinsBaseDir, "Cake.Tasks.*", SearchOption.TopDirectoryOnly)
