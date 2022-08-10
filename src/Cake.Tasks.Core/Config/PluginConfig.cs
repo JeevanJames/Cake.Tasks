@@ -44,8 +44,8 @@ public abstract class PluginConfig
             return defaultValue;
 
         // If the value's type is the same as the property type (T), then just cast and return.
-        if (typeof(T) == value.GetType())
-            return (T)value;
+        if (value is T typedValue)
+            return typedValue;
 
         // If the property type (T) is a ConfigValue<>, but the underlying dictionary value is equal
         // to the ConfigValue's generic type, it means that someone set the dictionary value directly
