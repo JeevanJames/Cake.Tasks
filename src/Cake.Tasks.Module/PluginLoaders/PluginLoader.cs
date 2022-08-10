@@ -98,7 +98,7 @@ public abstract class PluginLoader
                             registeredTask.Description = $"After {attr.PipelineTask} task - {methodDetails}";
                             break;
                         case ConfigAttribute attr:
-                            registeredTask.Name = $"_Config-{method.Name}{envSuffix}";
+                            registeredTask.Name = $"_Config-{attr.Order}-{method.Name}{envSuffix}";
                             registeredTask.Description = $"Config task - {methodDetails}";
                             registeredTask.Order = attr.Order;
                             break;

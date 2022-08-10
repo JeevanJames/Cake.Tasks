@@ -10,5 +10,9 @@ namespace Cake.Tasks.Core;
 /// </summary>
 public sealed class ConfigAttribute : BaseTaskAttribute
 {
-    public int Order { get; set; }
+    /// <summary>
+    ///     Gets or sets the order in which the configuration tasks are executed. Tasks with lower
+    ///     values are executed before tasks with higher values.
+    /// </summary>
+    public int Order { get; set; } = 50;
 }

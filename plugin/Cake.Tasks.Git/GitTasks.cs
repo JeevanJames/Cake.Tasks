@@ -18,7 +18,7 @@ namespace Cake.Tasks.Git;
 
 public static class GitTasks
 {
-    [Config(Order = ConfigTaskOrder.Priority)]
+    [Config]
     public static void ConfigureProjectNameFromGitRepoUrl(ICakeContext ctx, TaskConfig cfg)
     {
         string errorMessage = TryGetRemoteUrl(ctx, cfg, out Uri remoteUri);

@@ -15,7 +15,7 @@ namespace Cake.Tasks.GitVersion
 {
     public static class GitVersionTasks
     {
-        [Config(Order = ConfigTaskOrder.Priority)]
+        [Config]
         public static void ConfigureGitVersion(ICakeContext ctx, TaskConfig cfg)
         {
             // Update the GitVersion config

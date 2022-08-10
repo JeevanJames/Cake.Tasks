@@ -70,7 +70,7 @@ public sealed partial class TasksEngine
             env.Version.Build = (Func<string>)(() => $"{env.Version.Full.Resolve()}+{env.Version.BuildNumber.Resolve()}");
 
             // Display the subdirectories under the tools/Addins directory.
-            // To verify the versions of the addins and tools installed. 
+            // To verify the versions of the addins and tools installed.
             // Useful for troubleshooting.
             //TODO: Make this a configuration
             ctx.LogHighlight("--------------------");
