@@ -7,13 +7,17 @@ namespace Cake.Tasks.Core;
 
 public static class ConfigTaskOrder
 {
-    public const int Default = 0;
+    /// <summary>
+    ///     The default priority, if none is specified. This is non-zero, because we want to allow
+    ///     configuration tasks that can run earlier.
+    /// </summary>
+    public const int Default = 100;
 
     /// <summary>
     ///     Priority config tasks should run after all the normal config tasks, but before any
     ///     CI system tasks.
     /// </summary>
-    public const int Priority = 100;
+    public const int Priority = 500;
 
     /// <summary>
     ///     Config tasks for CI systems should run after all the normal and priority tasks, but
