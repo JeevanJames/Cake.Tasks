@@ -38,9 +38,7 @@ public abstract class PluginLoader
     {
         Assembly assembly = Assembly.LoadFile(dllFile);
 
-        IEnumerable<TaskPluginAttribute> taskPlugins = assembly.GetCustomAttributes<TaskPluginAttribute>();
-
-        foreach (TaskPluginAttribute taskPlugin in taskPlugins)
+        foreach (TaskPluginAttribute taskPlugin in assembly.GetCustomAttributes<TaskPluginAttribute>())
         {
             Type taskPluginType = taskPlugin.PluginType;
             Log.Verbose($"[Plugin Class] {taskPluginType.FullName}");
@@ -50,64 +48,72 @@ public abstract class PluginLoader
             foreach (MethodInfo method in methods)
             {
                 // Gets any task attributes on the method.
-                IEnumerable<BaseTaskAttribute> taskAttributes = method.GetCustomAttributes<BaseTaskAttribute>(
-                    inherit: true);
+                IEnumerable<BaseTaskAttribute> taskAttributes = method
+                    .GetCustomAttributes<BaseTaskAttribute>(inherit: true);
                 if (!taskAttributes.Any())
                     continue;
 
                 // Method signature should match a valid task method.
                 if (!IsValidPluginMethod(method))
                 {
-                    Log.Warning($"Method {taskPluginType.FullName}.{method.Name} is decorated with one or more task attributes, but does not have the correct signature, so it will not be considered. A valid task method should be a static or instance method that returns void and accepts a first parameter of type {typeof(ICakeContext).FullName} and an optional second parameter of type {typeof(TaskConfig).FullName}.");
+                    string message = string.Join(" ",
+                        $"Method {taskPluginType.FullName}.{method.Name} is decorated with one or more task attributes, but does not have the correct signature, so it will not be considered.",
+                        $"A valid task method should be a static or instance method that returns void and accepts a first parameter of type {typeof(ICakeContext).FullName} and an optional second parameter of type {typeof(TaskConfig).FullName}.");
+                    Log.Warning(message);
                     continue;
                 }
+
+                if (method.DeclaringType is null)
+                    throw new InvalidOperationException($"Task plugin method {method.Name} does not have a declaring type.");
 
                 Log.Verbose($"[Plugin Method] {taskPluginType.FullName}.{method.Name}");
 
                 // Go through each task attribute and create a RegisteredTask object
                 foreach (BaseTaskAttribute taskAttribute in taskAttributes)
                 {
-                    RegisteredTask registeredTask = new()
+                    string envSuffix = taskAttribute.CiSystem is null ? string.Empty : $"-{taskAttribute.CiSystem}";
+                    string methodDetails = $"{method.DeclaringType.FullName}.{method.Name} ({method.DeclaringType.Assembly.GetName().Name})";
+
+                    RegisteredTask registeredTask = taskAttribute switch
                     {
-                        AttributeType = taskAttribute.GetType(),
-                        Method = method,
-                        CiSystem = taskAttribute.CiSystem,
-                        ContinueOnError = taskAttribute.ContinueOnError,
+                        PipelineTaskAttribute attr => new RegisteredPipelineTask
+                        {
+                            Name = $"_{attr.PipelineTask}-{method.Name}{envSuffix}",
+                            Description = $"{attr.PipelineTask} task - {methodDetails}",
+                            CoreTask = attr.PipelineTask,
+                        },
+                        BeforePipelineTaskAttribute attr => new RegisteredBeforeAfterPipelineTask
+                        {
+                            Name = $"_Before{attr.PipelineTask}-{method.Name}{envSuffix}",
+                            Description = $"Before {attr.PipelineTask} task - {methodDetails}",
+                            CoreTask = attr.PipelineTask,
+                            EventType = TaskEventType.BeforeTask,
+                        },
+                        AfterPipelineTaskAttribute attr => new RegisteredBeforeAfterPipelineTask
+                        {
+                            Name = $"_After{attr.PipelineTask}-{method.Name}{envSuffix}",
+                            Description = $"After {attr.PipelineTask} task - {methodDetails}",
+                            CoreTask = attr.PipelineTask,
+                            EventType = TaskEventType.AfterTask,
+                        },
+                        ConfigAttribute attr => new RegisteredConfigTask
+                        {
+                            Name = $"_Config-{attr.Order}-{method.Name}{envSuffix}",
+                            Description = $"Config task - {methodDetails}",
+                            Order = attr.Order,
+                        },
+                        TaskAttribute attr => new RegisteredRegularTask
+                        {
+                            Name = method.Name,
+                            Description = $"{attr.Description}{envSuffix} - {methodDetails}",
+                            RequiresConfig = attr.RequiresConfig,
+                        },
+                        _ => throw new NotSupportedException($"Unknown task attribute - {taskAttribute.GetType()}."),
                     };
 
-                    string envSuffix = taskAttribute.CiSystem is null ? string.Empty : $"-{taskAttribute.CiSystem}";
-                    string methodDetails = $"{registeredTask.Method.DeclaringType.FullName}.{registeredTask.Method.Name} ({registeredTask.Method.DeclaringType.Assembly.GetName().Name})";
-
-                    switch (taskAttribute)
-                    {
-                        case PipelineTaskAttribute attr:
-                            registeredTask.CoreTask = attr.PipelineTask;
-                            registeredTask.Name = $"_{attr.PipelineTask}-{method.Name}{envSuffix}";
-                            registeredTask.Description = $"{attr.PipelineTask} task - {methodDetails}";
-                            break;
-                        case BeforePipelineTaskAttribute attr:
-                            registeredTask.CoreTask = attr.PipelineTask;
-                            registeredTask.EventType = TaskEventType.BeforeTask;
-                            registeredTask.Name = $"_Before{attr.PipelineTask}-{method.Name}{envSuffix}";
-                            registeredTask.Description = $"Before {attr.PipelineTask} task - {methodDetails}";
-                            break;
-                        case AfterPipelineTaskAttribute attr:
-                            registeredTask.CoreTask = attr.PipelineTask;
-                            registeredTask.EventType = TaskEventType.AfterTask;
-                            registeredTask.Name = $"_After{attr.PipelineTask}-{method.Name}{envSuffix}";
-                            registeredTask.Description = $"After {attr.PipelineTask} task - {methodDetails}";
-                            break;
-                        case ConfigAttribute attr:
-                            registeredTask.Name = $"_Config-{attr.Order}-{method.Name}{envSuffix}";
-                            registeredTask.Description = $"Config task - {methodDetails}";
-                            registeredTask.Order = attr.Order;
-                            break;
-                        case TaskAttribute attr:
-                            registeredTask.Name = method.Name;
-                            registeredTask.Description = $"{attr.Description}{envSuffix} - {methodDetails}";
-                            registeredTask.RequiresConfig = attr.RequiresConfig;
-                            break;
-                    }
+                    registeredTask.Method = method;
+                    registeredTask.CiSystem = taskAttribute.CiSystem;
+                    registeredTask.ContinueOnError = taskAttribute.ContinueOnError;
 
                     yield return registeredTask;
                 }
@@ -117,23 +123,21 @@ public abstract class PluginLoader
 
     protected bool IsValidPluginMethod(MethodInfo method)
     {
-        ParameterInfo[] parameters = method.GetParameters();
-
-        // There can be 0 to 2 parameters
-        if (parameters.Length > 2)
-            return false;
-
         // The method should return void.
         if (method.ReturnType != typeof(void))
             return false;
 
+        ParameterInfo[] parameters = method.GetParameters();
+
+        // The method should have zero to two parameters.
         return parameters.Length switch
         {
             2 => typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType)
                 && parameters[1].ParameterType == typeof(TaskConfig),
             1 => typeof(ICakeContext).IsAssignableFrom(parameters[0].ParameterType)
                 || parameters[0].ParameterType == typeof(TaskConfig),
-            _ => true,
+            0 => true,
+            _ => false,
         };
     }
 

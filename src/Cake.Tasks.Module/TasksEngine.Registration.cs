@@ -121,7 +121,7 @@ public sealed partial class TasksEngine
             if (registeredTask.ContinueOnError)
                 builder.ContinueOnError();
 
-            if (registeredTask.AttributeType == typeof(TaskAttribute) && registeredTask.RequiresConfig)
+            if (registeredTask is RegisteredRegularTask { RequiresConfig: true })
                 builder.IsDependentOn(TaskNames.Config);
 
             ParameterInfo[] parameters = registeredTask.Method.GetParameters();
@@ -219,9 +219,7 @@ public sealed partial class TasksEngine
         {
             CakeTaskBuilder listConfigsTask = RegisterTask(TaskNames.ListConfigs)
                 .Description("Lists all available configurations.");
-            IEnumerable<RegisteredTask> configTasks = GetTasksForCiEnvironment()
-                .Where(rt => rt.AttributeType == typeof(ConfigAttribute));
-            foreach (RegisteredTask configTask in configTasks)
+            foreach (RegisteredConfigTask configTask in GetTasksForCiEnvironment().OfType<RegisteredConfigTask>())
                 listConfigsTask = listConfigsTask.IsDependentOn(configTask.Name);
             listConfigsTask.IsDependentOn(TaskNames.Config);
         }
@@ -313,7 +311,7 @@ public sealed partial class TasksEngine
 
         // Create dependency on all plugin configuration tasks.
         IEnumerable<RegisteredTask> configTasks = envTasks
-            .Where(t => t.AttributeType == typeof(ConfigAttribute))
+            .OfType<RegisteredConfigTask>()
             .OrderBy(t => t.Order);
 
         foreach (RegisteredTask configTask in configTasks)
@@ -420,19 +418,22 @@ public sealed partial class TasksEngine
 
         // Add pre-build tasks.
         IEnumerable<RegisteredTask> preBuildTasks = envTasks
-            .Where(t => t.AttributeType == typeof(BeforePipelineTaskAttribute) && t.CoreTask == PipelineTask.Build);
+            .OfType<RegisteredBeforeAfterPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.Build && t.EventType == TaskEventType.BeforeTask);
         foreach (RegisteredTask preBuildTask in preBuildTasks)
             task.IsDependentOn(preBuildTask.Name);
 
         // Add build tasks.
         IEnumerable<RegisteredTask> buildTasks = envTasks
-            .Where(t => t.AttributeType == typeof(PipelineTaskAttribute) && t.CoreTask == PipelineTask.Build);
+            .OfType<RegisteredPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.Build);
         foreach (RegisteredTask buildTask in buildTasks)
             task.IsDependentOn(buildTask.Name);
 
         // Add post-build tasks.
         IEnumerable<RegisteredTask> postBuildTasks = envTasks
-            .Where(t => t.AttributeType == typeof(AfterPipelineTaskAttribute) && t.CoreTask == PipelineTask.Build);
+            .OfType<RegisteredBeforeAfterPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.Build && t.EventType == TaskEventType.AfterTask);
         foreach (RegisteredTask postBuildTask in postBuildTasks)
             task.IsDependentOn(postBuildTask.Name);
     }
@@ -449,17 +450,20 @@ public sealed partial class TasksEngine
             .IsDependentOn(TaskNames.Build);
 
         IEnumerable<RegisteredTask> preTestTasks = envTasks
-            .Where(t => t.AttributeType == typeof(BeforePipelineTaskAttribute) && t.CoreTask == PipelineTask.Test);
+            .OfType<RegisteredBeforeAfterPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.Test && t.EventType == TaskEventType.BeforeTask);
         foreach (RegisteredTask preTestTask in preTestTasks)
             task.IsDependentOn(preTestTask.Name);
 
         IEnumerable<RegisteredTask> testTasks = envTasks
-            .Where(t => t.AttributeType == typeof(PipelineTaskAttribute) && t.CoreTask == PipelineTask.Test);
+            .OfType<RegisteredPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.Test);
         foreach (RegisteredTask testTask in testTasks)
             task.IsDependentOn(testTask.Name);
 
         IEnumerable<RegisteredTask> postTestTasks = envTasks
-            .Where(t => t.AttributeType == typeof(AfterPipelineTaskAttribute) && t.CoreTask == PipelineTask.Test);
+            .OfType<RegisteredBeforeAfterPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.Test && t.EventType == TaskEventType.AfterTask);
         foreach (RegisteredTask postTestTask in postTestTasks)
             task.IsDependentOn(postTestTask.Name);
     }
@@ -481,17 +485,20 @@ public sealed partial class TasksEngine
             .IsDependentOn("CI");
 
         IEnumerable<RegisteredTask> preDeployTasks = envTasks
-            .Where(t => t.AttributeType == typeof(BeforePipelineTaskAttribute) && t.CoreTask == PipelineTask.Deploy);
+            .OfType<RegisteredBeforeAfterPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.Deploy && t.EventType == TaskEventType.BeforeTask);
         foreach (RegisteredTask preDeployTask in preDeployTasks)
             task.IsDependentOn(preDeployTask.Name);
 
         IEnumerable<RegisteredTask> deployTasks = envTasks
-            .Where(t => t.AttributeType == typeof(PipelineTaskAttribute) && t.CoreTask == PipelineTask.Deploy);
+            .OfType<RegisteredPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.Deploy);
         foreach (RegisteredTask deployTask in deployTasks)
             task.IsDependentOn(deployTask.Name);
 
         IEnumerable<RegisteredTask> postDeployTasks = envTasks
-            .Where(t => t.AttributeType == typeof(AfterPipelineTaskAttribute) && t.CoreTask == PipelineTask.Deploy);
+            .OfType<RegisteredBeforeAfterPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.Deploy && t.EventType == TaskEventType.AfterTask);
         foreach (RegisteredTask postDeployTask in postDeployTasks)
             task.IsDependentOn(postDeployTask.Name);
     }
@@ -503,17 +510,20 @@ public sealed partial class TasksEngine
             .IsDependentOn("Build");
 
         IEnumerable<RegisteredTask> preIntegrationTestTasks = envTasks
-            .Where(t => t.AttributeType == typeof(BeforePipelineTaskAttribute) && t.CoreTask == PipelineTask.IntegrationTest);
+            .OfType<RegisteredBeforeAfterPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.IntegrationTest && t.EventType == TaskEventType.BeforeTask);
         foreach (RegisteredTask preIntegrationTestTask in preIntegrationTestTasks)
             task.IsDependentOn(preIntegrationTestTask.Name);
 
         IEnumerable<RegisteredTask> integrationTestTasks = envTasks
-            .Where(t => t.AttributeType == typeof(PipelineTaskAttribute) && t.CoreTask == PipelineTask.IntegrationTest);
+            .OfType<RegisteredPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.IntegrationTest);
         foreach (RegisteredTask integrationTestTask in integrationTestTasks)
             task.IsDependentOn(integrationTestTask.Name);
 
         IEnumerable<RegisteredTask> postIntegrationTestTasks = envTasks
-            .Where(t => t.AttributeType == typeof(AfterPipelineTaskAttribute) && t.CoreTask == PipelineTask.IntegrationTest);
+            .OfType<RegisteredBeforeAfterPipelineTask>()
+            .Where(t => t.CoreTask == PipelineTask.IntegrationTest && t.EventType == TaskEventType.AfterTask);
         foreach (RegisteredTask postIntegrationTestTask in postIntegrationTestTasks)
             task.IsDependentOn(postIntegrationTestTask.Name);
     }
