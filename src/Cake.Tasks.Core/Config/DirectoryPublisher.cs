@@ -29,7 +29,7 @@ public static class DirectoryPublisherExtensions
 {
     public static Publisher AddDirectory(this IList<Publisher> publishers, string directory)
     {
-        var publisher = new DirectoryPublisher(directory);
+        DirectoryPublisher publisher = new(directory);
         publishers.Add(publisher);
         return publisher;
     }

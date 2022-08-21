@@ -25,9 +25,7 @@ public abstract class PluginConfig
 
     protected PluginConfig(TaskConfig taskConfig)
     {
-        if (taskConfig is null)
-            throw new ArgumentNullException(nameof(taskConfig));
-        _taskConfig = taskConfig;
+         _taskConfig = taskConfig ?? throw new ArgumentNullException(nameof(taskConfig));
     }
 
     protected T Get<T>(string name, T defaultValue = default)
@@ -51,6 +49,8 @@ public abstract class PluginConfig
         // to the ConfigValue's generic type, it means that someone set the dictionary value directly
         // to a value of the ConfigValue's generic type. In this case, we need to use reflection to
         // create a new ConfigValue<> instance with the dictionary value as its underlying value.
+        // Note: We do this logic to support the ci.vars file, where we can only provide the underlying
+        // type's value.
         if (TryReadAsConfigValue(value, out T configValue))
             return configValue;
 

@@ -11,7 +11,7 @@ using System.IO;
 namespace Cake.Tasks.Config;
 
 /// <summary>
-///     Represents an item that can be published from the current build.
+///     Represents an item that can be published or deployed from the current build.
 /// </summary>
 public abstract class Publisher
 {
@@ -26,7 +26,7 @@ public abstract class Publisher
     ///     <see cref="OutputType"/> have been set using the <see cref="SetOutput"/> method. This
     ///     is used to ensure that the method is called only once.
     /// </summary>
-    private bool _outputSet;
+    private bool _isOutputSet;
 
     private PublishOutputType _outputType;
 
@@ -43,18 +43,18 @@ public abstract class Publisher
 
     public void SetOutput(string location, PublishOutputType type = PublishOutputType.Directory)
     {
-        if (_outputSet)
+        if (_isOutputSet)
             throw new InvalidOperationException("The output is already set for this publisher. Cannot set it again.");
 
         if (type == PublishOutputType.Directory && !Directory.Exists(location))
             throw new DirectoryNotFoundException($"The specified output directory '{location ?? string.Empty}' does not exist.");
         if (type == PublishOutputType.File && !File.Exists(location))
-            throw new FileNotFoundException($"The specified output file does not exist.", location ?? string.Empty);
+            throw new FileNotFoundException("The specified output file does not exist.", location ?? string.Empty);
 
         OutputLocation = location;
         _outputType = type;
 
-        _outputSet = true;
+        _isOutputSet = true;
     }
 
     public T GetProperty<T>(string name)
