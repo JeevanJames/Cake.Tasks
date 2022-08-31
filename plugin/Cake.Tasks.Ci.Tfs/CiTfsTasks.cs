@@ -3,6 +3,7 @@
 // This file is licensed to you under the Apache License, Version 2.0.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Linq;
 
 using Cake.Common.Build;
@@ -28,7 +29,7 @@ public static class CiTfsTasks
     public static void PublishTestResults(ICakeContext ctx, TaskConfig cfg)
     {
         IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
-        if (!azurePipelines.IsRunningOnAzurePipelines || !azurePipelines.IsRunningOnAzurePipelinesHosted)
+        if (!azurePipelines.IsRunningOnAzurePipelines && !azurePipelines.IsRunningOnAzurePipelinesHosted)
             return;
 
         EnvConfig env = cfg.Load<EnvConfig>();
@@ -60,6 +61,36 @@ public static class CiTfsTasks
             TestResultsFiles = testResultsFiles.ToList(),
             MergeTestResults = true,
         });
+    }
+
+    [AfterPipelineTask(PipelineTask.Test, CiSystem = "tfs", Order = int.MaxValue)]
+    public static void PublishArtifacts(ICakeContext ctx, TaskConfig cfg)
+    {
+        IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
+        if (!azurePipelines.IsRunningOnAzurePipelines && !azurePipelines.IsRunningOnAzurePipelinesHosted)
+            return;
+
+        EnvConfig env = cfg.Load<EnvConfig>();
+        if (!IO.Directory.Exists(env.Directories.Artifacts))
+            return;
+
+        IEnumerable<string> artifactDirs = IO.Directory
+            .EnumerateDirectories(env.Directories.Artifacts, "*", IO.SearchOption.TopDirectoryOnly);
+        foreach (string artifactDir in artifactDirs)
+        {
+            string artifactName = IO.Path.GetFileName(artifactDir);
+            ctx.LogInfo($"Uploading artifact directory {artifactDir} as {artifactName}");
+            azurePipelines.Commands.UploadArtifactDirectory(artifactDir, artifactName);
+        }
+
+        IEnumerable<string> artifactFiles = IO.Directory
+            .EnumerateFiles(env.Directories.Artifacts, "*", IO.SearchOption.TopDirectoryOnly);
+        foreach (string artifactFile in artifactFiles)
+        {
+            string artifactName = IO.Path.GetFileName(artifactFile);
+            ctx.LogInfo($"Uploading artifact file {artifactFile} as {artifactName}");
+            azurePipelines.Commands.UploadArtifact("__artifacts", artifactFile, artifactName);
+        }
     }
 
     [Config(CiSystem = "tfs", Order = ConfigTaskOrder.CiSystem)]

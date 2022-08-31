@@ -419,7 +419,8 @@ public sealed partial class TasksEngine
         // Add pre-build tasks.
         IEnumerable<RegisteredTask> preBuildTasks = envTasks
             .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Build && t.EventType == TaskEventType.BeforeTask);
+            .Where(t => t.CoreTask == PipelineTask.Build && t.EventType == TaskEventType.BeforeTask)
+            .OrderBy(t => t.Order);
         foreach (RegisteredTask preBuildTask in preBuildTasks)
             task.IsDependentOn(preBuildTask.Name);
 
@@ -433,7 +434,8 @@ public sealed partial class TasksEngine
         // Add post-build tasks.
         IEnumerable<RegisteredTask> postBuildTasks = envTasks
             .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Build && t.EventType == TaskEventType.AfterTask);
+            .Where(t => t.CoreTask == PipelineTask.Build && t.EventType == TaskEventType.AfterTask)
+            .OrderBy(t => t.Order);
         foreach (RegisteredTask postBuildTask in postBuildTasks)
             task.IsDependentOn(postBuildTask.Name);
     }
@@ -451,7 +453,8 @@ public sealed partial class TasksEngine
 
         IEnumerable<RegisteredTask> preTestTasks = envTasks
             .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Test && t.EventType == TaskEventType.BeforeTask);
+            .Where(t => t.CoreTask == PipelineTask.Test && t.EventType == TaskEventType.BeforeTask)
+            .OrderBy(t => t.Order);
         foreach (RegisteredTask preTestTask in preTestTasks)
             task.IsDependentOn(preTestTask.Name);
 
@@ -463,7 +466,8 @@ public sealed partial class TasksEngine
 
         IEnumerable<RegisteredTask> postTestTasks = envTasks
             .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Test && t.EventType == TaskEventType.AfterTask);
+            .Where(t => t.CoreTask == PipelineTask.Test && t.EventType == TaskEventType.AfterTask)
+            .OrderBy(t => t.Order);
         foreach (RegisteredTask postTestTask in postTestTasks)
             task.IsDependentOn(postTestTask.Name);
     }
@@ -486,7 +490,8 @@ public sealed partial class TasksEngine
 
         IEnumerable<RegisteredTask> preDeployTasks = envTasks
             .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Deploy && t.EventType == TaskEventType.BeforeTask);
+            .Where(t => t.CoreTask == PipelineTask.Deploy && t.EventType == TaskEventType.BeforeTask)
+            .OrderBy(t => t.Order);
         foreach (RegisteredTask preDeployTask in preDeployTasks)
             task.IsDependentOn(preDeployTask.Name);
 
@@ -498,7 +503,8 @@ public sealed partial class TasksEngine
 
         IEnumerable<RegisteredTask> postDeployTasks = envTasks
             .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Deploy && t.EventType == TaskEventType.AfterTask);
+            .Where(t => t.CoreTask == PipelineTask.Deploy && t.EventType == TaskEventType.AfterTask)
+            .OrderBy(t => t.Order);
         foreach (RegisteredTask postDeployTask in postDeployTasks)
             task.IsDependentOn(postDeployTask.Name);
     }
@@ -511,7 +517,8 @@ public sealed partial class TasksEngine
 
         IEnumerable<RegisteredTask> preIntegrationTestTasks = envTasks
             .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.IntegrationTest && t.EventType == TaskEventType.BeforeTask);
+            .Where(t => t.CoreTask == PipelineTask.IntegrationTest && t.EventType == TaskEventType.BeforeTask)
+            .OrderBy(t => t.Order);
         foreach (RegisteredTask preIntegrationTestTask in preIntegrationTestTasks)
             task.IsDependentOn(preIntegrationTestTask.Name);
 
@@ -523,7 +530,8 @@ public sealed partial class TasksEngine
 
         IEnumerable<RegisteredTask> postIntegrationTestTasks = envTasks
             .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.IntegrationTest && t.EventType == TaskEventType.AfterTask);
+            .Where(t => t.CoreTask == PipelineTask.IntegrationTest && t.EventType == TaskEventType.AfterTask)
+            .OrderBy(t => t.Order);
         foreach (RegisteredTask postIntegrationTestTask in postIntegrationTestTasks)
             task.IsDependentOn(postIntegrationTestTask.Name);
     }

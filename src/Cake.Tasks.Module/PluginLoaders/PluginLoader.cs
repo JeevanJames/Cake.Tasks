@@ -84,17 +84,19 @@ public abstract class PluginLoader
                         },
                         BeforePipelineTaskAttribute attr => new RegisteredBeforeAfterPipelineTask
                         {
-                            Name = $"_Before{attr.PipelineTask}-{method.Name}{envSuffix}",
+                            Name = $"_Before{attr.PipelineTask}-{attr.Order}-{method.Name}{envSuffix}",
                             Description = $"Before {attr.PipelineTask} task - {methodDetails}",
                             CoreTask = attr.PipelineTask,
                             EventType = TaskEventType.BeforeTask,
+                            Order = attr.Order,
                         },
                         AfterPipelineTaskAttribute attr => new RegisteredBeforeAfterPipelineTask
                         {
-                            Name = $"_After{attr.PipelineTask}-{method.Name}{envSuffix}",
+                            Name = $"_After{attr.PipelineTask}-{attr.Order}-{method.Name}{envSuffix}",
                             Description = $"After {attr.PipelineTask} task - {methodDetails}",
                             CoreTask = attr.PipelineTask,
                             EventType = TaskEventType.AfterTask,
+                            Order = attr.Order,
                         },
                         ConfigAttribute attr => new RegisteredConfigTask
                         {

@@ -13,6 +13,8 @@ public abstract class PipelineTaskEventAttribute : BasePipelineTaskAttribute
     }
 
     public PipelineTask PipelineTask { get; }
+
+    public int Order { get; set; } = 50;
 }
 
 public sealed class BeforePipelineTaskAttribute : PipelineTaskEventAttribute

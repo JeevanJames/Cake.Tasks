@@ -41,6 +41,11 @@ internal abstract class RegisteredTask
     ///     continue running.
     /// </summary>
     internal bool ContinueOnError { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the order of execution of configuration tasks.
+    /// </summary>
+    internal int Order { get; set; }
 }
 
 internal sealed class RegisteredPipelineTask : RegisteredTask
@@ -57,10 +62,6 @@ internal sealed class RegisteredBeforeAfterPipelineTask : RegisteredTask
 
 internal sealed class RegisteredConfigTask : RegisteredTask
 {
-    /// <summary>
-    ///     Gets or sets the order of execution of configuration tasks.
-    /// </summary>
-    internal int Order { get; set; }
 }
 
 internal sealed class RegisteredRegularTask : RegisteredTask
