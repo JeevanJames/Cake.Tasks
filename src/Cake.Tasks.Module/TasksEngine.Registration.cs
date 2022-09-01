@@ -291,6 +291,7 @@ public sealed partial class TasksEngine
         RegisterCiTask();
         RegisterCicdTask(envTasks);
         RegisterIntegrationTestTask(envTasks);
+        RegisterTeardownTask(envTasks);
     }
 
     /// <summary>
@@ -534,6 +535,21 @@ public sealed partial class TasksEngine
             .OrderBy(t => t.Order);
         foreach (RegisteredTask postIntegrationTestTask in postIntegrationTestTasks)
             task.IsDependentOn(postIntegrationTestTask.Name);
+    }
+
+    private void RegisterTeardownTask(IReadOnlyList<RegisteredTask> envTasks)
+    {
+        RegisterTeardownAction<TaskConfig>((ctx, cfg) =>
+        {
+            IEnumerable<RegisteredTeardownTask> teardownTasks = envTasks
+                .OfType<RegisteredTeardownTask>()
+                .OrderBy(t => t.Order);
+
+            foreach (RegisteredTeardownTask teardownTask in teardownTasks)
+            {
+                teardownTask.Method.Invoke(null, new object[] { ctx, cfg });
+            }
+        });
     }
 
     private IReadOnlyList<RegisteredTask> GetTasksForCiEnvironment()

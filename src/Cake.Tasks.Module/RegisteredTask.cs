@@ -64,6 +64,10 @@ internal sealed class RegisteredConfigTask : RegisteredTask
 {
 }
 
+internal sealed class RegisteredTeardownTask : RegisteredTask
+{
+}
+
 internal sealed class RegisteredRegularTask : RegisteredTask
 {
     /// <summary>

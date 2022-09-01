@@ -98,6 +98,12 @@ public abstract class PluginLoader
                             EventType = TaskEventType.AfterTask,
                             Order = attr.Order,
                         },
+                        TeardownTaskAttribute attr => new RegisteredTeardownTask
+                        {
+                            Name = $"_Teardown-{attr.Order}-{method.Name}{envSuffix}",
+                            Description = $"Teardown task - {methodDetails}",
+                            Order = attr.Order,
+                        },
                         ConfigAttribute attr => new RegisteredConfigTask
                         {
                             Name = $"_Config-{attr.Order}-{method.Name}{envSuffix}",
