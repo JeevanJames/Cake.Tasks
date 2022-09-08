@@ -1,20 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <AssemblyName>Cake.Tasks.Ci.AppVeyor</AssemblyName>
-    <RootNamespace>$(AssemblyName)</RootNamespace>
-    <DocumentationFile>Properties\$(AssemblyName).xml</DocumentationFile>
-    <Description>Cake AppVeyor CI tasks</Description>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+        <AssemblyName>Cake.Tasks.Ci.AppVeyor</AssemblyName>
+        <RootNamespace>$(AssemblyName)</RootNamespace>
+        <DocumentationFile>Properties\$(AssemblyName).xml</DocumentationFile>
+        <Description>Cake AppVeyor CI tasks</Description>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Cake.Common" Version="0.38.5" />
-    <PackageReference Include="Cake.Core" Version="0.38.5" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Cake.Tasks.Core\Cake.Tasks.Core.csproj" />
+    </ItemGroup>
 
 </Project>

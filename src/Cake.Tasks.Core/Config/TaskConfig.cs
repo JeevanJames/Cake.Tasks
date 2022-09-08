@@ -30,6 +30,39 @@ public sealed class TaskConfig
         return (T)Activator.CreateInstance(typeof(T), this);
     }
 
+    public T Get<TConfig, T>(Func<TConfig, T> func)
+        where TConfig : PluginConfig
+    {
+        TConfig config = Load<TConfig>();
+        return func(config);
+    }
+
+    public T Get<T>(string key, T defaultValue = default)
+    {
+        return Data.TryGetValue(key, out object value) ? (T)value : defaultValue;
+    }
+
+    public T GetValue<T>(string key, T defaultValue = default)
+    {
+        if (!Data.TryGetValue(key, out object value))
+            return defaultValue;
+
+        return value switch
+        {
+            ConfigValue<T> configValue => configValue.Resolve(),
+            T typedValue => typedValue,
+            _ => throw new InvalidCastException($"Cannot cast config key '{key}' object to type '{typeof(T)}'."),
+        };
+    }
+
+    public TaskConfig For<TConfig>(Action<TConfig> action)
+        where TConfig : PluginConfig
+    {
+        TConfig config = Load<TConfig>();
+        action(config);
+        return this;
+    }
+
     /// <summary>
     ///     Gets the internal structure that maintains all task configurations.
     /// </summary>
