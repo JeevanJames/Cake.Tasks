@@ -25,7 +25,7 @@ namespace Cake.Tasks.Ci.Tfs;
 
 public static class CiTfsTasks
 {
-    [TeardownTask(CiSystem = "tfs", ContinueOnError = true)]
+    [TeardownTask(CiSystem = CiSystem.AzureDevOps, ContinueOnError = true)]
     public static void PublishTestResults(ICakeContext ctx, TaskConfig cfg)
     {
         IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
@@ -63,7 +63,7 @@ public static class CiTfsTasks
         });
     }
 
-    [TeardownTask(CiSystem = "tfs", ContinueOnError = true)]
+    [TeardownTask(CiSystem = CiSystem.AzureDevOps, ContinueOnError = true)]
     public static void PublishArtifacts(ICakeContext ctx, TaskConfig cfg)
     {
         IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
@@ -93,7 +93,7 @@ public static class CiTfsTasks
         }
     }
 
-    [Config(CiSystem = "tfs", Order = ConfigTaskOrder.CiSystem)]
+    [Config(CiSystem = CiSystem.AzureDevOps, Order = ConfigTaskOrder.CiSystem)]
     public static void ConfigureTfsEnvironment(ICakeContext ctx, TaskConfig cfg)
     {
         IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
