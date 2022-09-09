@@ -25,7 +25,6 @@ namespace Cake.Tasks.Ci.Tfs;
 
 public static class CiTfsTasks
 {
-    //[AfterPipelineTask(PipelineTask.Test, CiSystem = "tfs", ContinueOnError = true)]
     [TeardownTask(CiSystem = "tfs", ContinueOnError = true)]
     public static void PublishTestResults(ICakeContext ctx, TaskConfig cfg)
     {
@@ -64,7 +63,6 @@ public static class CiTfsTasks
         });
     }
 
-    //[AfterPipelineTask(PipelineTask.Test, CiSystem = "tfs", Order = int.MaxValue)]
     [TeardownTask(CiSystem = "tfs", ContinueOnError = true)]
     public static void PublishArtifacts(ICakeContext ctx, TaskConfig cfg)
     {
