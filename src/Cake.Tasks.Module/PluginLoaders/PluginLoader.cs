@@ -68,6 +68,12 @@ public abstract class PluginLoader
 
                 Log.Verbose($"[Plugin Method] {taskPluginType.FullName}.{method.Name}");
 
+                string taskParent = method.DeclaringType.Name;
+                if (taskParent.EndsWith("Tasks"))
+                    taskParent = taskParent.Substring(0, taskParent.Length - "Tasks".Length);
+                else if (taskParent.EndsWith("Task"))
+                    taskParent = taskParent.Substring(0, taskParent.Length - "Task".Length);
+
                 // Go through each task attribute and create a RegisteredTask object
                 foreach (BaseTaskAttribute taskAttribute in taskAttributes)
                 {
@@ -78,13 +84,13 @@ public abstract class PluginLoader
                     {
                         PipelineTaskAttribute attr => new RegisteredPipelineTask
                         {
-                            Name = $"_{attr.PipelineTask}-{method.Name}{envSuffix}",
+                            Name = $"_{attr.PipelineTask}-{taskParent}-{method.Name}{envSuffix}",
                             Description = $"{attr.PipelineTask} task - {methodDetails}",
                             CoreTask = attr.PipelineTask,
                         },
                         BeforePipelineTaskAttribute attr => new RegisteredBeforeAfterPipelineTask
                         {
-                            Name = $"_Before{attr.PipelineTask}-{attr.Order}-{method.Name}{envSuffix}",
+                            Name = $"_Before{attr.PipelineTask}-{attr.Order}-{taskParent}-{method.Name}{envSuffix}",
                             Description = $"Before {attr.PipelineTask} task - {methodDetails}",
                             CoreTask = attr.PipelineTask,
                             EventType = TaskEventType.BeforeTask,
@@ -92,7 +98,7 @@ public abstract class PluginLoader
                         },
                         AfterPipelineTaskAttribute attr => new RegisteredBeforeAfterPipelineTask
                         {
-                            Name = $"_After{attr.PipelineTask}-{attr.Order}-{method.Name}{envSuffix}",
+                            Name = $"_After{attr.PipelineTask}-{attr.Order}-{taskParent}-{method.Name}{envSuffix}",
                             Description = $"After {attr.PipelineTask} task - {methodDetails}",
                             CoreTask = attr.PipelineTask,
                             EventType = TaskEventType.AfterTask,
@@ -100,13 +106,13 @@ public abstract class PluginLoader
                         },
                         TeardownTaskAttribute attr => new RegisteredTeardownTask
                         {
-                            Name = $"_Teardown-{attr.Order}-{method.Name}{envSuffix}",
+                            Name = $"_Teardown-{attr.Order}-{taskParent}-{method.Name}{envSuffix}",
                             Description = $"Teardown task - {methodDetails}",
                             Order = attr.Order,
                         },
                         ConfigAttribute attr => new RegisteredConfigTask
                         {
-                            Name = $"_Config-{attr.Order}-{method.Name}{envSuffix}",
+                            Name = $"_Config-{attr.Order}-{taskParent}-{method.Name}{envSuffix}",
                             Description = $"Config task - {methodDetails}",
                             Order = attr.Order,
                         },
