@@ -5,6 +5,8 @@
 
 using System.Collections.Generic;
 
+using Cake.Tasks.Core.Config;
+
 // ReSharper disable once CheckNamespace
 namespace Cake.Tasks.Config;
 
@@ -16,6 +18,8 @@ public sealed class EnvConfig : PluginConfig
     public EnvConfig(TaskConfig taskConfig)
         : base(taskConfig)
     {
+        Set(Keys.PipelineSummary, new PipelineSummary());
+
         Ci = new CiConfig(taskConfig);
         Directories = new DirectoryConfig(taskConfig);
         Repository = new RepositoryConfig(taskConfig);
@@ -51,6 +55,8 @@ public sealed class EnvConfig : PluginConfig
         get => Get(Keys.Publishers, new List<Publisher>());
         set => Set(Keys.Publishers, value);
     }
+
+    public PipelineSummary PipelineSummary => Get(Keys.PipelineSummary, new PipelineSummary());
 
     /// <summary>
     ///     Gets the configuration for the CI settings.
@@ -260,8 +266,8 @@ public sealed class EnvConfig : PluginConfig
         public const string Branch = Prefix + nameof(Branch);
         public const string Commit = Prefix + nameof(Commit);
 
-        public const string PublishProfiles = Prefix + nameof(PublishProfiles);
         public const string Publishers = Prefix + nameof(Publishers);
+        public const string PipelineSummary = Prefix + nameof(PipelineSummary);
 
         public const string CiArtifacts = Prefix + nameof(CiArtifacts);
         public const string CiTestArtifacts = Prefix + nameof(CiTestArtifacts);

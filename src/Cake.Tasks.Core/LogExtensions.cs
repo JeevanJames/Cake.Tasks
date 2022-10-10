@@ -32,6 +32,14 @@ public static class LogExtensions
         ctx.Log.Information($"{Highlight}{message}{Reset}");
     }
 
+    public static void LogBanner(this ICakeContext ctx, string message)
+    {
+        string border = new('*', message.Length + 2 + 2);
+        ctx.LogHighlight(border);
+        ctx.LogHighlight($"* {message} *");
+        ctx.LogHighlight(border);
+    }
+
     private const string Escape = "\u001b[";
 
     private const string Reset = Escape + "0m";

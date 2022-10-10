@@ -25,14 +25,18 @@ public sealed partial class TasksEngine
 
     private void InitializeCakeTasksSystem()
     {
-        InitializeConfiguration();
+        RegisterSetupTaskAndInitializeEnvConfig();
         DiscoverPluginTasks();
         RegisterPluginTasks();
         RegisterBuiltInTasks();
         RegisterPipelineTasks();
     }
 
-    private void InitializeConfiguration()
+    /// <summary>
+    ///     Registers the setup task. This involves initializing the <see cref="EnvConfig"/> configuration
+    ///     and logging the add-in directories for debugging purposes.
+    /// </summary>
+    private void RegisterSetupTaskAndInitializeEnvConfig()
     {
         // Setup action to initialize some really core stuff, including directories and version
         // details.
@@ -214,7 +218,7 @@ public sealed partial class TasksEngine
 
         // The ListConfigs task lists the final values of all configuration values. It depends on
         // the _Config task, as it needs to execute all the config tasks first, before it can get
-        // the final vakues.
+        // the final values.
         void RegisterListConfigsTask()
         {
             CakeTaskBuilder listConfigsTask = RegisterTask(TaskNames.ListConfigs)
@@ -264,6 +268,10 @@ public sealed partial class TasksEngine
     ///             <description>Executes the project's unit tests.</description>
     ///         </item>
     ///         <item>
+    ///             <term>Package</term>
+    ///             <description>Creates and publishes packages, like NuGet, NPM, Docker images, etc.</description>
+    ///         </item>
+    ///         <item>
     ///             <term>Deploy</term>
     ///             <description>Packages and deploys the project.</description>
     ///         </item>
@@ -275,9 +283,13 @@ public sealed partial class TasksEngine
     ///             <term>CI</term>
     ///             <description>Runs Build + Test</description>
     ///         </item>
+    ///             <term>CIPackage</term>
+    ///             <description>Runs CI + Package</description>
+    ///         <item>
+    ///         </item>
     ///         <item>
     ///             <term>CICD</term>
-    ///             <description>Runs CI + Deploy</description>
+    ///             <description>Runs CIPackage + Deploy</description>
     ///         </item>
     ///     </list>
     /// </summary>
@@ -286,11 +298,19 @@ public sealed partial class TasksEngine
         IReadOnlyList<RegisteredTask> envTasks = GetTasksForCiEnvironment();
 
         RegisterConfigTask(envTasks);
-        RegisterBuildTask(envTasks);
-        RegisterTestTask(envTasks);
-        RegisterCiTask();
-        RegisterCicdTask(envTasks);
-        RegisterIntegrationTestTask(envTasks);
+        RegisterPipelineItemTask(TaskNames.Build, "Builds the code.", PipelineTask.Build,
+            dependentOn: TaskNames.Config, envTasks);
+        RegisterPipelineItemTask(TaskNames.Test, "Runs unit tests or fast integration tests.", PipelineTask.Test,
+            dependentOn: TaskNames.Build, envTasks);
+        RegisterTask(TaskNames.Ci)
+            .Description("Performs CI (Build and test)")
+            .IsDependentOn(TaskNames.Test);
+        RegisterPipelineItemTask(TaskNames.CiPackage, "Performs CI & Packaging (Build, test and package)", PipelineTask.Package,
+            dependentOn: TaskNames.Ci, envTasks);
+        RegisterPipelineItemTask(TaskNames.CiCd, "Performs CI/CD (Build, test, package and deploy)", PipelineTask.Deploy,
+            dependentOn: TaskNames.CiPackage, envTasks);
+        RegisterPipelineItemTask(TaskNames.CiIntegrationTest, "Runs the full suite of integration tests.",
+            PipelineTask.IntegrationTest, dependentOn: TaskNames.Build, envTasks);
         RegisterTeardownTask(envTasks);
     }
 
@@ -356,185 +376,85 @@ public sealed partial class TasksEngine
             ctx.EnsureDirectoryExists(env.Directories.BinaryOutput);
             ctx.EnsureDirectoryExists(env.Directories.TestOutput);
         });
-    }
 
-    private static void LoadVariables(TaskConfig config, string directory)
-    {
-        string variableFilePath = Path.Combine(directory, "ci.vars");
-        if (!File.Exists(variableFilePath))
-            return;
-
-        StreamReader reader = File.OpenText(variableFilePath);
-        string line = reader.ReadLine();
-        while (line is not null)
+        static void LoadVariables(TaskConfig config, string directory)
         {
-            LoadVariable(config, line);
-            line = reader.ReadLine();
+            string variableFilePath = Path.Combine(directory, "ci.vars");
+            if (!File.Exists(variableFilePath))
+                return;
+
+            StreamReader reader = File.OpenText(variableFilePath);
+            string line = reader.ReadLine();
+            while (line is not null)
+            {
+                LoadVariable(config, line);
+                line = reader.ReadLine();
+            }
+        }
+
+        static void LoadVariable(TaskConfig config, string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+                return;
+
+            string trimmedLine = line.Trim();
+            if (trimmedLine.StartsWith("#"))
+                return;
+
+            string[] parts = trimmedLine.Split(new[] { '=' }, 2, StringSplitOptions.None);
+            if (parts.Length != 2)
+                return;
+
+            string key = parts[0].Trim();
+            string value = parts[1].Trim();
+            if (bool.TryParse(value, out bool boolValue))
+                AddOrUpdateConfig(config, key, boolValue);
+            else if (double.TryParse(value, out double doubleValue))
+                AddOrUpdateConfig(config, key, doubleValue);
+            else if (long.TryParse(value, out long longValue))
+                AddOrUpdateConfig(config, key, longValue);
+            else
+                AddOrUpdateConfig(config, key, value.Trim('"'));
+        }
+
+        static void AddOrUpdateConfig<T>(TaskConfig config, string key, T value)
+        {
+            if (config.Data.ContainsKey(key))
+                config.Data[key] = value;
+            else
+                config.Data.Add(key, value);
         }
     }
 
-    private static void LoadVariable(TaskConfig config, string line)
+    private void RegisterPipelineItemTask(string name, string description, PipelineTask coreTask, string dependentOn,
+        IReadOnlyList<RegisteredTask> envTasks)
     {
-        if (string.IsNullOrWhiteSpace(line))
-            return;
+        CakeTaskBuilder task = RegisterTask(name)
+            .Description(description)
+            .IsDependentOn(dependentOn);
 
-        string trimmedLine = line.Trim();
-        if (trimmedLine.StartsWith("#"))
-            return;
-
-        string[] parts = trimmedLine.Split(new[] { '=' }, 2, StringSplitOptions.None);
-        if (parts.Length != 2)
-            return;
-
-        string key = parts[0].Trim();
-        string value = parts[1].Trim();
-        if (bool.TryParse(value, out bool boolValue))
-            AddOrUpdateConfig(config, key, boolValue);
-        else if (double.TryParse(value, out double doubleValue))
-            AddOrUpdateConfig(config, key, doubleValue);
-        else if (long.TryParse(value, out long longValue))
-            AddOrUpdateConfig(config, key, longValue);
-        else
-            AddOrUpdateConfig(config, key, value.Trim('"'));
-    }
-
-    private static void AddOrUpdateConfig<T>(TaskConfig config, string key, T value)
-    {
-        if (config.Data.ContainsKey(key))
-            config.Data[key] = value;
-        else
-            config.Data.Add(key, value);
-    }
-
-    /// <summary>
-    ///     Registers a build task that depends on a sequence of pre-build tasks, build tasks and
-    ///     post-build tasks.
-    /// </summary>
-    /// <param name="envTasks">List of all plugin tasks for the current CI environment.</param>
-    private void RegisterBuildTask(IReadOnlyList<RegisteredTask> envTasks)
-    {
-        CakeTaskBuilder task = RegisterTask(TaskNames.Build)
-            .Description("Builds the solution.")
-            .IsDependentOn(TaskNames.Config);
-
-        // Add pre-build tasks.
-        IEnumerable<RegisteredTask> preBuildTasks = envTasks
+        // Add pre tasks.
+        IEnumerable<RegisteredTask> preTasks = envTasks
             .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Build && t.EventType == TaskEventType.BeforeTask)
+            .Where(t => t.CoreTask == coreTask && t.EventType == TaskEventType.BeforeTask)
             .OrderBy(t => t.Order);
-        foreach (RegisteredTask preBuildTask in preBuildTasks)
-            task.IsDependentOn(preBuildTask.Name);
+        foreach (RegisteredTask preTask in preTasks)
+            task.IsDependentOn(preTask.Name);
 
-        // Add build tasks.
-        IEnumerable<RegisteredTask> buildTasks = envTasks
+        // Add core tasks.
+        IEnumerable<RegisteredTask> mainTasks = envTasks
             .OfType<RegisteredPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Build);
-        foreach (RegisteredTask buildTask in buildTasks)
-            task.IsDependentOn(buildTask.Name);
+            .Where(t => t.CoreTask == coreTask);
+        foreach (RegisteredTask mainTask in mainTasks)
+            task.IsDependentOn(mainTask.Name);
 
-        // Add post-build tasks.
-        IEnumerable<RegisteredTask> postBuildTasks = envTasks
+        // Add post tasks.
+        IEnumerable<RegisteredTask> postTasks = envTasks
             .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Build && t.EventType == TaskEventType.AfterTask)
+            .Where(t => t.CoreTask == coreTask && t.EventType == TaskEventType.AfterTask)
             .OrderBy(t => t.Order);
-        foreach (RegisteredTask postBuildTask in postBuildTasks)
-            task.IsDependentOn(postBuildTask.Name);
-    }
-
-    /// <summary>
-    ///     Registers a test task that depends on a sequence of pre-test tasks, test tasks and
-    ///     post-test tasks.
-    /// </summary>
-    /// <param name="envTasks">List of all plugin tasks for the current CI environment.</param>
-    private void RegisterTestTask(IReadOnlyList<RegisteredTask> envTasks)
-    {
-        CakeTaskBuilder task = RegisterTask(TaskNames.Test)
-            .Description("Runs tests in the project.")
-            .IsDependentOn(TaskNames.Build);
-
-        IEnumerable<RegisteredTask> preTestTasks = envTasks
-            .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Test && t.EventType == TaskEventType.BeforeTask)
-            .OrderBy(t => t.Order);
-        foreach (RegisteredTask preTestTask in preTestTasks)
-            task.IsDependentOn(preTestTask.Name);
-
-        IEnumerable<RegisteredTask> testTasks = envTasks
-            .OfType<RegisteredPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Test);
-        foreach (RegisteredTask testTask in testTasks)
-            task.IsDependentOn(testTask.Name);
-
-        IEnumerable<RegisteredTask> postTestTasks = envTasks
-            .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Test && t.EventType == TaskEventType.AfterTask)
-            .OrderBy(t => t.Order);
-        foreach (RegisteredTask postTestTask in postTestTasks)
-            task.IsDependentOn(postTestTask.Name);
-    }
-
-    /// <summary>
-    ///     Registers the CI task that runs both the Build and Test tasks.
-    /// </summary>
-    private void RegisterCiTask()
-    {
-        RegisterTask(TaskNames.Ci)
-            .Description("Performs CI (Build and test)")
-            .IsDependentOn(TaskNames.Test);
-    }
-
-    private void RegisterCicdTask(IReadOnlyList<RegisteredTask> envTasks)
-    {
-        CakeTaskBuilder task = RegisterTask(TaskNames.CiCd)
-            .Description("Performs CI/CD (Build, test and deploy)")
-            .IsDependentOn("CI");
-
-        IEnumerable<RegisteredTask> preDeployTasks = envTasks
-            .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Deploy && t.EventType == TaskEventType.BeforeTask)
-            .OrderBy(t => t.Order);
-        foreach (RegisteredTask preDeployTask in preDeployTasks)
-            task.IsDependentOn(preDeployTask.Name);
-
-        IEnumerable<RegisteredTask> deployTasks = envTasks
-            .OfType<RegisteredPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Deploy);
-        foreach (RegisteredTask deployTask in deployTasks)
-            task.IsDependentOn(deployTask.Name);
-
-        IEnumerable<RegisteredTask> postDeployTasks = envTasks
-            .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.Deploy && t.EventType == TaskEventType.AfterTask)
-            .OrderBy(t => t.Order);
-        foreach (RegisteredTask postDeployTask in postDeployTasks)
-            task.IsDependentOn(postDeployTask.Name);
-    }
-
-    private void RegisterIntegrationTestTask(IReadOnlyList<RegisteredTask> envTasks)
-    {
-        CakeTaskBuilder task = RegisterTask(TaskNames.IntegrationTest)
-            .Description("Performs integration tests")
-            .IsDependentOn("Build");
-
-        IEnumerable<RegisteredTask> preIntegrationTestTasks = envTasks
-            .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.IntegrationTest && t.EventType == TaskEventType.BeforeTask)
-            .OrderBy(t => t.Order);
-        foreach (RegisteredTask preIntegrationTestTask in preIntegrationTestTasks)
-            task.IsDependentOn(preIntegrationTestTask.Name);
-
-        IEnumerable<RegisteredTask> integrationTestTasks = envTasks
-            .OfType<RegisteredPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.IntegrationTest);
-        foreach (RegisteredTask integrationTestTask in integrationTestTasks)
-            task.IsDependentOn(integrationTestTask.Name);
-
-        IEnumerable<RegisteredTask> postIntegrationTestTasks = envTasks
-            .OfType<RegisteredBeforeAfterPipelineTask>()
-            .Where(t => t.CoreTask == PipelineTask.IntegrationTest && t.EventType == TaskEventType.AfterTask)
-            .OrderBy(t => t.Order);
-        foreach (RegisteredTask postIntegrationTestTask in postIntegrationTestTasks)
-            task.IsDependentOn(postIntegrationTestTask.Name);
+        foreach (RegisteredTask postTask in postTasks)
+            task.IsDependentOn(postTask.Name);
     }
 
     private void RegisterTeardownTask(IReadOnlyList<RegisteredTask> envTasks)
@@ -573,7 +493,8 @@ public sealed partial class TasksEngine
         internal const string Build = nameof(Build);
         internal const string Test = nameof(Test);
         internal const string Ci = "CI";
+        internal const string CiPackage = "CIPackage";
         internal const string CiCd = "CICD";
-        internal const string IntegrationTest = nameof(IntegrationTest);
+        internal const string CiIntegrationTest = "CIIntegrationTest";
     }
 }

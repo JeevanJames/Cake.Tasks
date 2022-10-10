@@ -66,8 +66,7 @@ public static class CiTfsTasks
     [TeardownTask(CiSystem = CiSystem.AzureDevOps, ContinueOnError = true)]
     public static void PublishArtifacts(ICakeContext ctx, TaskConfig cfg)
     {
-        IAzurePipelinesProvider azurePipelines = ctx.AzurePipelines();
-        if (!azurePipelines.IsRunningOnAzurePipelines && !azurePipelines.IsRunningOnAzurePipelinesHosted)
+        if (!ctx.UsingAzureDevOps(out IAzurePipelinesProvider azurePipelines))
             return;
 
         EnvConfig env = cfg.Load<EnvConfig>();
@@ -93,6 +92,23 @@ public static class CiTfsTasks
         }
     }
 
+    [TeardownTask(CiSystem = CiSystem.AzureDevOps, ContinueOnError = true)]
+    public static void PublishSummary(ICakeContext ctx, TaskConfig cfg)
+    {
+        if (!ctx.UsingAzureDevOps(out IAzurePipelinesProvider azurePipelines))
+            return;
+
+        EnvConfig env = cfg.Load<EnvConfig>();
+
+        string summaryFilePath = IO.Path.Combine(env.Directories.Working, "__pipeline-summary__.md");
+        if (IO.File.Exists(summaryFilePath))
+            IO.File.Delete(summaryFilePath);
+
+        IO.File.WriteAllText(summaryFilePath, env.PipelineSummary.ToString());
+
+        azurePipelines.Commands.UploadTaskSummary(summaryFilePath);
+    }
+
     [Config(CiSystem = CiSystem.AzureDevOps, Order = ConfigTaskOrder.CiSystem)]
     public static void ConfigureTfsEnvironment(ICakeContext ctx, TaskConfig cfg)
     {
@@ -103,5 +119,11 @@ public static class CiTfsTasks
         EnvConfig env = cfg.Load<EnvConfig>();
         env.IsCi = true;
         env.Version.BuildNumber = azurePipelines.Environment.Build.Number;
+    }
+
+    private static bool UsingAzureDevOps(this ICakeContext ctx, out IAzurePipelinesProvider azurePipelines)
+    {
+        azurePipelines = ctx.AzurePipelines();
+        return azurePipelines.IsRunningOnAzurePipelines || azurePipelines.IsRunningOnAzurePipelinesHosted;
     }
 }

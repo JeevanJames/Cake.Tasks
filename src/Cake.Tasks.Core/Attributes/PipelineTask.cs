@@ -7,8 +7,28 @@ namespace Cake.Tasks.Core;
 
 public enum PipelineTask
 {
+    /// <summary>
+    ///     Code compilation, including code quality analysis.
+    /// </summary>
     Build,
+
+    /// <summary>
+    ///     Unit testing or fast integration tests.
+    /// </summary>
     Test,
+
+    /// <summary>
+    ///     Create and build packages, such as NuGet, NPM, Docker images, etc.
+    /// </summary>
+    Package,
+
+    /// <summary>
+    ///     Deploy application.
+    /// </summary>
     Deploy,
+
+    /// <summary>
+    ///     Full integration test suite; can take time.
+    /// </summary>
     IntegrationTest,
 }
