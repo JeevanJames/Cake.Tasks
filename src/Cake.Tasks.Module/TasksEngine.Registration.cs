@@ -467,7 +467,20 @@ public sealed partial class TasksEngine
 
             foreach (RegisteredTeardownTask teardownTask in teardownTasks)
             {
-                teardownTask.Method.Invoke(null, new object[] { ctx, cfg });
+                ctx.LogHighlight($"Executing teardown task {teardownTask.Name}");
+                try
+                {
+                    teardownTask.Method.Invoke(null, new object[] { ctx, cfg });
+                }
+                catch (Exception ex)
+                {
+                    ctx.LogInfo($"Error executing teardown task {teardownTask.Name}{Environment.NewLine}{ex}");
+                    throw;
+                }
+                finally
+                {
+                    ctx.LogHighlight($"Completed teardown task {teardownTask.Name}");
+                }
             }
         });
     }
